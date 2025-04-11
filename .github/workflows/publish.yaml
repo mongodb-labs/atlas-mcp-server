@@ -9,7 +9,6 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    environment: Production
     outputs:
       VERSION_EXISTS: ${{ steps.check-version.outputs.VERSION_EXISTS }}
       VERSION: ${{ steps.get-version.outputs.VERSION }}
