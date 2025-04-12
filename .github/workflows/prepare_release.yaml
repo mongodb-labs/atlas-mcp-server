@@ -41,3 +41,5 @@ jobs:
             Once merged, the new version will be published to npm.
           base: main
           branch: release/v${{ steps.bump-version.outputs.NEW_VERSION }}
+          author: "${{ steps.app-token.outputs.app-slug}}[bot] <${{ steps.app-token.outputs.app-email }}>"
+          committer: "${{ steps.app-token.outputs.app-slug}}[bot] <${{ steps.app-token.outputs.app-email }}>"
