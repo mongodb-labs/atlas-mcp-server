@@ -68,15 +68,28 @@ export async function runMongoDB(): Promise<runner.MongoCluster> {
     }
 }
 
-export function validateToolResponse(content: unknown): string {
+export function getResponseContent(content: unknown): string {
+    return getResponseElements(content)
+        .map((item) => item.text)
+        .join("\n");
+}
+
+export function getResponseElements(content: unknown): { type: string; text: string }[] {
     expect(Array.isArray(content)).toBe(true);
 
-    const response = content as Array<{ type: string; text: string }>;
+    const response = content as { type: string; text: string }[];
     for (const item of response) {
         expect(item).toHaveProperty("type");
         expect(item).toHaveProperty("text");
         expect(item.type).toBe("text");
     }
 
-    return response.map((item) => item.text).join("\n");
+    return response;
+}
+
+export async function connect(client: Client, cluster: runner.MongoCluster): Promise<void> {
+    await client.callTool({
+        name: "connect",
+        arguments: { connectionStringOrClusterName: cluster.connectionString },
+    });
 }

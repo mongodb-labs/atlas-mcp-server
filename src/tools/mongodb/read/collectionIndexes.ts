@@ -1,6 +1,6 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { DbOperationArgs, DbOperationType, MongoDBToolBase } from "./mongodbTool.js";
-import { ToolArgs } from "../tool.js";
+import { DbOperationArgs, DbOperationType, MongoDBToolBase } from "../mongodbTool.js";
+import { ToolArgs } from "../../tool.js";
 
 export class CollectionIndexesTool extends MongoDBToolBase {
     protected name = "collection-indexes";

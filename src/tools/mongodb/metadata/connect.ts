@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { DbOperationType, MongoDBToolBase } from "./mongodbTool.js";
-import { ToolArgs } from "../tool.js";
-import { ErrorCodes, MongoDBError } from "../../errors.js";
-import config from "../../config.js";
+import { DbOperationType, MongoDBToolBase } from "../mongodbTool.js";
+import { ToolArgs } from "../../tool.js";
+import { ErrorCodes, MongoDBError } from "../../../errors.js";
+import config from "../../../config.js";
 
 export class ConnectTool extends MongoDBToolBase {
     protected name = "connect";
