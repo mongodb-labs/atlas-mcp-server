@@ -4,6 +4,7 @@ import { DbOperationType, MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs } from "../../tool.js";
 import { ErrorCodes, MongoDBError } from "../../../errors.js";
 import config from "../../../config.js";
+import { MongoError as DriverError } from "mongodb";
 
 export class ConnectTool extends MongoDBToolBase {
     protected name = "connect";
@@ -57,10 +58,32 @@ export class ConnectTool extends MongoDBToolBase {
             throw new MongoDBError(ErrorCodes.InvalidParams, "Invalid connection options");
         }
 
-        await this.connectToMongoDB(connectionString);
+        try {
+            await this.connectToMongoDB(connectionString);
+            return {
+                content: [{ type: "text", text: `Successfully connected to ${connectionString}.` }],
+            };
+        } catch (error) {
+            // Sometimes the model will supply an incorrect connection string. If the user has configured
+            // a different one as environment variable or a cli argument, suggest using that one instead.
+            if (
+                config.connectionString &&
+                error instanceof DriverError &&
+                config.connectionString !== connectionString
+            ) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text:
+                                `Failed to connect to MongoDB at '${connectionString}' due to error: '${error.message}.` +
+                                `Your config lists a different connection string: '${config.connectionString}' - do you want to try connecting to it instead?`,
+                        },
+                    ],
+                };
+            }
 
-        return {
-            content: [{ type: "text", text: `Successfully connected to ${connectionString}.` }],
-        };
+            throw error;
+        }
     }
 }
