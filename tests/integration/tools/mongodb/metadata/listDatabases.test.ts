@@ -27,14 +27,14 @@ describe("listDatabases tool", () => {
     });
 
     it("should have correct metadata", async () => {
-        const tools = await client.listTools();
-        const listDatabases = tools.tools.find((tool) => tool.name === "list-databases");
+        const { tools } = await client.listTools();
+        const listDatabases = tools.find((tool) => tool.name === "list-databases")!;
         expect(listDatabases).toBeDefined();
-        expect(listDatabases!.description).toBe("List all databases for a MongoDB connection");
-        expect(listDatabases!.inputSchema.type).toBe("object");
-        expect(listDatabases!.inputSchema.properties).toBeDefined();
+        expect(listDatabases.description).toBe("List all databases for a MongoDB connection");
+        expect(listDatabases.inputSchema.type).toBe("object");
+        expect(listDatabases.inputSchema.properties).toBeDefined();
 
-        const propertyNames = Object.keys(listDatabases!.inputSchema.properties!);
+        const propertyNames = Object.keys(listDatabases.inputSchema.properties!);
         expect(propertyNames).toHaveLength(0);
     });
 

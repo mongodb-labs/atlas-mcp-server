@@ -27,18 +27,18 @@ describe("Connect tool", () => {
     });
 
     it("should have correct metadata", async () => {
-        const tools = await client.listTools();
-        const connectTool = tools.tools.find((tool) => tool.name === "connect");
+        const { tools } = await client.listTools();
+        const connectTool = tools.find((tool) => tool.name === "connect")!;
         expect(connectTool).toBeDefined();
-        expect(connectTool!.description).toBe("Connect to a MongoDB instance");
-        expect(connectTool!.inputSchema.type).toBe("object");
-        expect(connectTool!.inputSchema.properties).toBeDefined();
+        expect(connectTool.description).toBe("Connect to a MongoDB instance");
+        expect(connectTool.inputSchema.type).toBe("object");
+        expect(connectTool.inputSchema.properties).toBeDefined();
 
-        const propertyNames = Object.keys(connectTool!.inputSchema.properties!);
+        const propertyNames = Object.keys(connectTool.inputSchema.properties!);
         expect(propertyNames).toHaveLength(1);
         expect(propertyNames[0]).toBe("connectionStringOrClusterName");
 
-        const connectionStringOrClusterNameProp = connectTool!.inputSchema.properties![propertyNames[0]] as {
+        const connectionStringOrClusterNameProp = connectTool.inputSchema.properties![propertyNames[0]] as {
             type: string;
             description: string;
         };
