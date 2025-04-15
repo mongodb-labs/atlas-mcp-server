@@ -1,4 +1,4 @@
-import { getResponseElements, connect, jestTestCluster, jestTestMCPClient } from "../../../helpers.js";
+import { getResponseElements, connect, jestTestCluster, jestTestMCPClient, getParameters } from "../../../helpers.js";
 import { MongoClient } from "mongodb";
 import { toIncludeSameMembers } from "jest-extended";
 
@@ -11,11 +11,9 @@ describe("listDatabases tool", () => {
         const listDatabases = tools.find((tool) => tool.name === "list-databases")!;
         expect(listDatabases).toBeDefined();
         expect(listDatabases.description).toBe("List all databases for a MongoDB connection");
-        expect(listDatabases.inputSchema.type).toBe("object");
-        expect(listDatabases.inputSchema.properties).toBeDefined();
 
-        const propertyNames = Object.keys(listDatabases.inputSchema.properties!);
-        expect(propertyNames).toHaveLength(0);
+        const parameters = getParameters(listDatabases);
+        expect(parameters).toHaveLength(0);
     });
 
     describe("with no preexisting databases", () => {
@@ -30,10 +28,9 @@ describe("listDatabases tool", () => {
 
     describe("with preexisting databases", () => {
         it("returns their names and sizes", async () => {
-            const mongoClient = new MongoClient(cluster().connectionString);
+            const mongoClient = cluster().getClient();
             await mongoClient.db("foo").collection("bar").insertOne({ test: "test" });
             await mongoClient.db("baz").collection("qux").insertOne({ test: "test" });
-            await mongoClient.close();
 
             await connect(client(), cluster());
 

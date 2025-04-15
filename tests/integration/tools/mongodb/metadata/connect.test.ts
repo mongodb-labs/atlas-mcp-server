@@ -1,4 +1,4 @@
-import { getResponseContent, jestTestMCPClient, jestTestCluster } from "../../../helpers.js";
+import { getResponseContent, jestTestMCPClient, jestTestCluster, validateParameters } from "../../../helpers.js";
 
 import config from "../../../../../src/config.js";
 
@@ -11,20 +11,14 @@ describe("Connect tool", () => {
         const connectTool = tools.find((tool) => tool.name === "connect")!;
         expect(connectTool).toBeDefined();
         expect(connectTool.description).toBe("Connect to a MongoDB instance");
-        expect(connectTool.inputSchema.type).toBe("object");
-        expect(connectTool.inputSchema.properties).toBeDefined();
 
-        const propertyNames = Object.keys(connectTool.inputSchema.properties!);
-        expect(propertyNames).toHaveLength(1);
-        expect(propertyNames[0]).toBe("connectionStringOrClusterName");
-
-        const connectionStringOrClusterNameProp = connectTool.inputSchema.properties![propertyNames[0]] as {
-            type: string;
-            description: string;
-        };
-        expect(connectionStringOrClusterNameProp.type).toBe("string");
-        expect(connectionStringOrClusterNameProp.description).toContain("MongoDB connection string");
-        expect(connectionStringOrClusterNameProp.description).toContain("cluster name");
+        validateParameters(connectTool, [
+            {
+                name: "connectionStringOrClusterName",
+                description: "MongoDB connection string (in the mongodb:// or mongodb+srv:// format) or cluster name",
+                type: "string",
+            },
+        ]);
     });
 
     describe("with default config", () => {

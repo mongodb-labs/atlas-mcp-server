@@ -6,6 +6,15 @@ import path from "path";
 import fs from "fs/promises";
 import { Session } from "../../src/session.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { MongoClient } from "mongodb";
+
+interface ParameterInfo {
+    name: string;
+    type: string;
+    description: string;
+}
+
+type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 
 export function jestTestMCPClient(): () => Client {
     let client: Client | undefined;
@@ -59,8 +68,14 @@ export function jestTestMCPClient(): () => Client {
     };
 }
 
-export function jestTestCluster(): () => runner.MongoCluster {
+export function jestTestCluster(): () => { connectionString: string; getClient: () => MongoClient } {
     let cluster: runner.MongoCluster | undefined;
+    let client: MongoClient | undefined;
+
+    afterEach(async () => {
+        await client?.close();
+        client = undefined;
+    });
 
     beforeAll(async function () {
         // Downloading Windows executables in CI takes a long time because
@@ -108,7 +123,16 @@ export function jestTestCluster(): () => runner.MongoCluster {
             throw new Error("beforeAll() hook not ran yet");
         }
 
-        return cluster;
+        return {
+            connectionString: cluster.connectionString,
+            getClient: () => {
+                if (!client) {
+                    client = new MongoClient(cluster.connectionString);
+                }
+
+                return client;
+            },
+        };
     };
 }
 
@@ -136,4 +160,31 @@ export async function connect(client: Client, cluster: runner.MongoCluster): Pro
         name: "connect",
         arguments: { connectionStringOrClusterName: cluster.connectionString },
     });
+}
+
+export function getParameters(tool: ToolInfo): ParameterInfo[] {
+    expect(tool.inputSchema.type).toBe("object");
+    expect(tool.inputSchema.properties).toBeDefined();
+
+    return Object.entries(tool.inputSchema.properties!)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, value]) => {
+            expect(value).toHaveProperty("type");
+            expect(value).toHaveProperty("description");
+
+            const typedValue = value as { type: string; description: string };
+            expect(typeof typedValue.type).toBe("string");
+            expect(typeof typedValue.description).toBe("string");
+            return {
+                name: key,
+                type: typedValue.type,
+                description: typedValue.description,
+            };
+        });
+}
+
+export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]): void {
+    const toolParameters = getParameters(tool);
+    expect(toolParameters).toHaveLength(parameters.length);
+    expect(toolParameters).toIncludeAllMembers(parameters);
 }

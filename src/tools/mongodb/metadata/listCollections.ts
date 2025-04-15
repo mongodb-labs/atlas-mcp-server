@@ -15,10 +15,21 @@ export class ListCollectionsTool extends MongoDBToolBase {
         const provider = await this.ensureConnected();
         const collections = await provider.listCollections(database);
 
+        if (collections.length === 0) {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `No collections found for database "${database}". To create a collection, use the "create-collection" tool.`,
+                    },
+                ],
+            };
+        }
+
         return {
             content: collections.map((collection) => {
                 return {
-                    text: `Name: ${collection.name}`,
+                    text: `Name: "${collection.name}"`,
                     type: "text",
                 };
             }),
