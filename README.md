@@ -166,11 +166,32 @@ The MongoDB MCP Server can be configured using multiple methods, with the follow
 | `apiClientSecret`  | Atlas API client secret for authentication                                                                            |
 | `connectionString` | MongoDB connection string for direct database connections (optional users may choose to inform it on every tool call) |
 | `logPath`          | Folder to store logs                                                                                                  |
+| `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled.                            |
 
-**Default Log Path:**
-
+#### `logPath`
+Default log location is as follows:
 - Windows: `%LOCALAPPDATA%\mongodb\mongodb-mcp\.app-logs`
 - macOS/Linux: `~/.mongodb/mongodb-mcp/.app-logs`
+
+
+#### Disabled Tools
+You can disable specific tools or categories of tools by using the `disabledTools` option. This option accepts an array of strings,
+where each string can be a tool name, operation type, or category.
+
+The way the array is constructed depends on the type of configuration method you use:
+- For **environment variable** configuration, use a comma-separated string: `export MDB_MCP_DISABLED_TOOLS="create,update,delete,atlas,collectionSchema"`.
+- For **command-line argument** configuration, use a space-separated string: `--disabledTools create update delete atlas collectionSchema`.
+
+Categories of tools:
+- `atlas` - MongoDB Atlas tools, such as list clusters, create cluster, etc.
+- `mongodb` - MongoDB database tools, such as find, aggregate, etc.
+
+Operation types:
+- `create` - Tools that create resources, such as create cluster, insert document, etc.
+- `update` - Tools that update resources, such as update document, rename collection, etc.
+- `delete` - Tools that delete resources, such as delete document, drop collection, etc.
+- `read` - Tools that read resources, such as find, aggregate, list clusters, etc.
+- `metadata` - Tools that read metadata, such as list databases, list collections, collection schema, etc.
 
 ### Atlas API Access
 
