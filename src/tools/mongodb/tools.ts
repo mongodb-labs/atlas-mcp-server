@@ -1,8 +1,8 @@
-import { ConnectTool } from "./connect.js";
+import { ConnectTool } from "./metadata/connect.js";
 import { ListCollectionsTool } from "./metadata/listCollections.js";
-import { CollectionIndexesTool } from "./collectionIndexes.js";
+import { CollectionIndexesTool } from "./read/collectionIndexes.js";
 import { ListDatabasesTool } from "./metadata/listDatabases.js";
-import { CreateIndexTool } from "./createIndex.js";
+import { CreateIndexTool } from "./create/createIndex.js";
 import { CollectionSchemaTool } from "./metadata/collectionSchema.js";
 import { InsertOneTool } from "./create/insertOne.js";
 import { FindTool } from "./read/find.js";

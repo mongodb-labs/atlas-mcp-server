@@ -141,6 +141,41 @@ When adding new tools to the MCP server:
 4. Add proper documentation for the tool
 5. Include examples of how to use the tool
 
+## Release Process
+
+Our release process is automated using GitHub Actions workflows:
+
+### Version Bumping
+
+1. To create a new version, go to the GitHub repository Actions tab
+2. Select the "Version Bump" workflow
+3. Click "Run workflow" and choose one of the following options:
+   - `patch` (e.g., 1.0.0 → 1.0.1) for backward-compatible bug fixes
+   - `minor` (e.g., 1.0.0 → 1.1.0) for backward-compatible new features
+   - `major` (e.g., 1.0.0 → 2.0.0) for breaking changes
+   - A specific version number (e.g., `1.2.3`)
+4. This creates a pull request with the version change
+5. Once approved and merged, the version is updated
+
+### Automatic Publishing
+
+When a version bump is merged to the main branch:
+
+1. The "Publish" workflow automatically runs
+2. It checks if the version already exists as a git tag
+3. If the version is new, it:
+   - Builds the package
+   - Publishes to NPM
+   - Creates a git tag for the version
+   - Creates a GitHub release with auto-generated release notes
+
+### Code Quality
+
+All pull requests automatically run through the "Code Health" workflow, which:
+
+- Verifies code style and formatting
+- Runs tests on multiple platforms (Ubuntu, macOS, Windows)
+
 ## License
 
 By contributing to this project, you agree that your contributions will be licensed under the project's license.

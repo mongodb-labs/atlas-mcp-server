@@ -7,76 +7,124 @@ import fs from "fs/promises";
 import { Session } from "../../src/session.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-export async function setupIntegrationTest(): Promise<{
-    client: Client;
-    server: Server;
-    teardown: () => Promise<void>;
-}> {
-    const clientTransport = new InMemoryTransport();
-    const serverTransport = new InMemoryTransport();
+export function jestTestMCPClient(): () => Client {
+    let client: Client | undefined;
+    let server: Server | undefined;
 
-    await serverTransport.start();
-    await clientTransport.start();
+    beforeEach(async () => {
+        const clientTransport = new InMemoryTransport();
+        const serverTransport = new InMemoryTransport();
 
-    clientTransport.output.pipeTo(serverTransport.input);
-    serverTransport.output.pipeTo(clientTransport.input);
+        await serverTransport.start();
+        await clientTransport.start();
 
-    const client = new Client(
-        {
-            name: "test-client",
-            version: "1.2.3",
-        },
-        {
-            capabilities: {},
-        }
-    );
+        clientTransport.output.pipeTo(serverTransport.input);
+        serverTransport.output.pipeTo(clientTransport.input);
 
-    const server = new Server({
-        mcpServer: new McpServer({
-            name: "test-server",
-            version: "1.2.3",
-        }),
-        session: new Session(),
+        client = new Client(
+            {
+                name: "test-client",
+                version: "1.2.3",
+            },
+            {
+                capabilities: {},
+            }
+        );
+
+        server = new Server({
+            mcpServer: new McpServer({
+                name: "test-server",
+                version: "1.2.3",
+            }),
+            session: new Session(),
+        });
+        await server.connect(serverTransport);
+        await client.connect(clientTransport);
     });
-    await server.connect(serverTransport);
-    await client.connect(clientTransport);
 
-    return {
-        client,
-        server,
-        teardown: async () => {
-            await client.close();
-            await server.close();
-        },
+    afterEach(async () => {
+        await client?.close();
+        client = undefined;
+
+        await server?.close();
+        server = undefined;
+    });
+
+    return () => {
+        if (!client) {
+            throw new Error("beforeEach() hook not ran yet");
+        }
+
+        return client;
     };
 }
 
-export async function runMongoDB(): Promise<runner.MongoCluster> {
-    const tmpDir = path.join(__dirname, "..", "tmp");
-    await fs.mkdir(tmpDir, { recursive: true });
+export function jestTestCluster(): () => runner.MongoCluster {
+    let cluster: runner.MongoCluster | undefined;
 
-    try {
-        const cluster = await MongoCluster.start({
-            tmpDir: path.join(tmpDir, "mongodb-runner", "dbs"),
-            logDir: path.join(tmpDir, "mongodb-runner", "logs"),
-            topology: "standalone",
-        });
+    function runMongodb() {}
+
+    beforeAll(async function () {
+        // Downloading Windows executables in CI takes a long time because
+        // they include debug symbols...
+        const tmpDir = path.join(__dirname, "..", "tmp");
+        await fs.mkdir(tmpDir, { recursive: true });
+
+        // On Windows, we may have a situation where mongod.exe is not fully released by the OS
+        // before we attempt to run it again, so we add a retry.
+        const dbsDir = path.join(tmpDir, "mongodb-runner", `dbs`);
+        for (let i = 0; i < 10; i++) {
+            try {
+                cluster = await MongoCluster.start({
+                    tmpDir: dbsDir,
+                    logDir: path.join(tmpDir, "mongodb-runner", "logs"),
+                    topology: "standalone",
+                });
+
+                return;
+            } catch (err) {
+                console.error(`Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}`);
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+            }
+        }
+    }, 120_000);
+
+    afterAll(async function () {
+        await cluster?.close();
+        cluster = undefined;
+    });
+
+    return () => {
+        if (!cluster) {
+            throw new Error("beforeAll() hook not ran yet");
+        }
 
         return cluster;
-    } catch (err) {
-        throw err;
-    }
+    };
 }
 
-export function validateToolResponse(content: unknown): string {
+export function getResponseContent(content: unknown): string {
+    return getResponseElements(content)
+        .map((item) => item.text)
+        .join("\n");
+}
+
+export function getResponseElements(content: unknown): { type: string; text: string }[] {
     expect(Array.isArray(content)).toBe(true);
 
-    const response = content as Array<{ type: string; text: string }>;
+    const response = content as { type: string; text: string }[];
     for (const item of response) {
         expect(item).toHaveProperty("type");
         expect(item).toHaveProperty("text");
         expect(item.type).toBe("text");
     }
 
-    return response.map((item) => item.text).join("\n");
+    return response;
+}
+
+export async function connect(client: Client, cluster: runner.MongoCluster): Promise<void> {
+    await client.callTool({
+        name: "connect",
+        arguments: { connectionStringOrClusterName: cluster.connectionString },
+    });
 }
