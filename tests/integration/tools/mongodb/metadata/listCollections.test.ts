@@ -4,7 +4,6 @@ import {
     jestTestCluster,
     jestTestMCPClient,
     getResponseContent,
-    getParameters,
     validateParameters,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
@@ -20,7 +19,9 @@ describe("listCollections tool", () => {
         expect(listCollections).toBeDefined();
         expect(listCollections.description).toBe("List all collections for a given database");
 
-        validateParameters(listCollections, [{ name: "database", description: "Database name", type: "string" }]);
+        validateParameters(listCollections, [
+            { name: "database", description: "Database name", type: "string", required: true },
+        ]);
     });
 
     describe("with invalid arguments", () => {

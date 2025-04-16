@@ -4,6 +4,7 @@ import {
     jestTestMCPClient,
     getResponseContent,
     validateParameters,
+    dbOperationParameters,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
@@ -21,18 +22,7 @@ describe("createCollection tool", () => {
             "Creates a new collection in a database. If the database doesn't exist, it will be created automatically."
         );
 
-        validateParameters(listCollections, [
-            {
-                name: "database",
-                description: "Database name",
-                type: "string",
-            },
-            {
-                name: "collection",
-                description: "Collection name",
-                type: "string",
-            },
-        ]);
+        validateParameters(listCollections, dbOperationParameters);
     });
 
     describe("with invalid arguments", () => {

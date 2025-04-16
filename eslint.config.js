@@ -30,6 +30,6 @@ export default defineConfig([
         // TODO: Configure tests and scripts to work with this.
         ignores: ["eslint.config.js", "jest.config.js", "tests/**/*.ts", "scripts/**/*.ts"],
     }),
-    globalIgnores(["node_modules", "dist", "src/common/atlas/openapi.d.ts"]),
+    globalIgnores(["node_modules", "dist", "src/common/atlas/openapi.d.ts", "coverage"]),
     eslintConfigPrettier,
 ]);

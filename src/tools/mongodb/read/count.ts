@@ -30,7 +30,7 @@ export class CountTool extends MongoDBToolBase {
         return {
             content: [
                 {
-                    text: `Found ${count} documents in the collection \`${collection}\``,
+                    text: `Found ${count} documents in the collection "${collection}"`,
                     type: "text",
                 },
             ],

@@ -17,6 +17,7 @@ describe("Connect tool", () => {
                 name: "connectionStringOrClusterName",
                 description: "MongoDB connection string (in the mongodb:// or mongodb+srv:// format) or cluster name",
                 type: "string",
+                required: false,
             },
         ]);
     });

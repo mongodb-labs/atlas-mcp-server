@@ -13,6 +13,7 @@ interface ParameterInfo {
     name: string;
     type: string;
     description: string;
+    required: boolean;
 }
 
 type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
@@ -180,9 +181,15 @@ export function getParameters(tool: ToolInfo): ParameterInfo[] {
                 name: key,
                 type: typedValue.type,
                 description: typedValue.description,
+                required: (tool.inputSchema.required as string[])?.includes(key) ?? false,
             };
         });
 }
+
+export const dbOperationParameters: ParameterInfo[] = [
+    { name: "database", type: "string", description: "Database name", required: true },
+    { name: "collection", type: "string", description: "Collection name", required: true },
+];
 
 export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]): void {
     const toolParameters = getParameters(tool);
