@@ -7,6 +7,7 @@ import {
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { ObjectId } from "mongodb";
+import config from "../../../../../src/config.js";
 
 describe("count tool", () => {
     const integration = setupIntegrationTest();
@@ -111,5 +112,27 @@ describe("count tool", () => {
                 expect(content).toEqual(`Found ${testCase.expectedCount} documents in the collection "foo"`);
             });
         }
+    });
+
+    describe("when not connected", () => {
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
+
+            const response = await integration.mcpClient().callTool({
+                name: "count",
+                arguments: { database: randomDbName, collection: "coll1" },
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toEqual('Found 0 documents in the collection "coll1"');
+        });
+
+        it("throw an error if connection string is not configured", async () => {
+            const response = await integration.mcpClient().callTool({
+                name: "count",
+                arguments: { database: randomDbName, collection: "coll1" },
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+        });
     });
 });

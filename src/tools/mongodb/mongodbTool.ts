@@ -19,9 +19,10 @@ export abstract class MongoDBToolBase extends ToolBase {
     protected category: ToolCategory = "mongodb";
 
     protected async ensureConnected(): Promise<NodeDriverServiceProvider> {
-        const provider = this.session.serviceProvider;
+        let provider = this.session.serviceProvider;
         if (!provider && config.connectionString) {
             await this.connectToMongoDB(config.connectionString);
+            provider = this.session.serviceProvider;
         }
 
         if (!provider) {

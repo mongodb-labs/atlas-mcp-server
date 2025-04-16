@@ -7,14 +7,10 @@ import {
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { ObjectId } from "bson";
 import { IndexDirection } from "mongodb";
+import config from "../../../../../src/config.js";
 
 describe("createIndex tool", () => {
     const integration = setupIntegrationTest();
-
-    let dbName: string;
-    beforeEach(() => {
-        dbName = new ObjectId().toString();
-    });
 
     it("should have correct metadata", async () => {
         const { tools } = await integration.mcpClient().listTools();
@@ -66,10 +62,10 @@ describe("createIndex tool", () => {
 
     const validateIndex = async (collection: string, expected: { name: string; key: object }[]) => {
         const mongoClient = integration.mongoClient();
-        const collections = await mongoClient.db(dbName).listCollections().toArray();
+        const collections = await mongoClient.db(integration.randomDbName()).listCollections().toArray();
         expect(collections).toHaveLength(1);
         expect(collections[0].name).toEqual("coll1");
-        const indexes = await mongoClient.db(dbName).collection(collection).indexes();
+        const indexes = await mongoClient.db(integration.randomDbName()).collection(collection).indexes();
         expect(indexes).toHaveLength(expected.length + 1);
         expect(indexes[0].name).toEqual("_id_");
         for (const index of expected) {
@@ -83,11 +79,18 @@ describe("createIndex tool", () => {
         await integration.connectMcpClient();
         const response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop1: 1 }, name: "my-index" },
+            arguments: {
+                database: integration.randomDbName(),
+                collection: "coll1",
+                keys: { prop1: 1 },
+                name: "my-index",
+            },
         });
 
         const content = getResponseContent(response.content);
-        expect(content).toEqual(`Created the index "my-index" on collection "coll1" in database "${dbName}"`);
+        expect(content).toEqual(
+            `Created the index "my-index" on collection "coll1" in database "${integration.randomDbName()}"`
+        );
 
         await validateIndex("coll1", [{ name: "my-index", key: { prop1: 1 } }]);
     });
@@ -96,11 +99,13 @@ describe("createIndex tool", () => {
         await integration.connectMcpClient();
         const response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop1: 1 } },
+            arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop1: 1 } },
         });
 
         const content = getResponseContent(response.content);
-        expect(content).toEqual(`Created the index "prop1_1" on collection "coll1" in database "${dbName}"`);
+        expect(content).toEqual(
+            `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
+        );
         await validateIndex("coll1", [{ name: "prop1_1", key: { prop1: 1 } }]);
     });
 
@@ -108,20 +113,20 @@ describe("createIndex tool", () => {
         await integration.connectMcpClient();
         let response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop1: 1 } },
+            arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop1: 1 } },
         });
 
         expect(getResponseContent(response.content)).toEqual(
-            `Created the index "prop1_1" on collection "coll1" in database "${dbName}"`
+            `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
         );
 
         response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop2: -1 } },
+            arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop2: -1 } },
         });
 
         expect(getResponseContent(response.content)).toEqual(
-            `Created the index "prop2_-1" on collection "coll1" in database "${dbName}"`
+            `Created the index "prop2_-1" on collection "coll1" in database "${integration.randomDbName()}"`
         );
 
         await validateIndex("coll1", [
@@ -134,20 +139,20 @@ describe("createIndex tool", () => {
         await integration.connectMcpClient();
         let response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop1: 1 } },
+            arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop1: 1 } },
         });
 
         expect(getResponseContent(response.content)).toEqual(
-            `Created the index "prop1_1" on collection "coll1" in database "${dbName}"`
+            `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
         );
 
         response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop1: -1 } },
+            arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop1: -1 } },
         });
 
         expect(getResponseContent(response.content)).toEqual(
-            `Created the index "prop1_-1" on collection "coll1" in database "${dbName}"`
+            `Created the index "prop1_-1" on collection "coll1" in database "${integration.randomDbName()}"`
         );
 
         await validateIndex("coll1", [
@@ -160,20 +165,20 @@ describe("createIndex tool", () => {
         await integration.connectMcpClient();
         let response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop1: 1 } },
+            arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop1: 1 } },
         });
 
         expect(getResponseContent(response.content)).toEqual(
-            `Created the index "prop1_1" on collection "coll1" in database "${dbName}"`
+            `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
         );
 
         response = await integration.mcpClient().callTool({
             name: "create-index",
-            arguments: { database: dbName, collection: "coll1", keys: { prop1: 1 } },
+            arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop1: 1 } },
         });
 
         expect(getResponseContent(response.content)).toEqual(
-            `Created the index "prop1_1" on collection "coll1" in database "${dbName}"`
+            `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
         );
 
         await validateIndex("coll1", [{ name: "prop1_1", key: { prop1: 1 } }]);
@@ -193,11 +198,11 @@ describe("createIndex tool", () => {
             await integration.connectMcpClient();
             const response = await integration.mcpClient().callTool({
                 name: "create-index",
-                arguments: { database: dbName, collection: "coll1", keys: { prop1: direction } },
+                arguments: { database: integration.randomDbName(), collection: "coll1", keys: { prop1: direction } },
             });
 
             expect(getResponseContent(response.content)).toEqual(
-                `Created the index "prop1_${direction}" on collection "coll1" in database "${dbName}"`
+                `Created the index "prop1_${direction}" on collection "coll1" in database "${integration.randomDbName()}"`
             );
 
             let expectedKey: object = { prop1: direction };
@@ -210,4 +215,36 @@ describe("createIndex tool", () => {
             await validateIndex("coll1", [{ name: `prop1_${direction}`, key: expectedKey }]);
         });
     }
+
+    describe("when not connected", () => {
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
+
+            const response = await integration.mcpClient().callTool({
+                name: "create-index",
+                arguments: {
+                    database: integration.randomDbName(),
+                    collection: "coll1",
+                    keys: { prop1: 1 },
+                },
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toEqual(
+                `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
+            );
+        });
+
+        it("throw an error if connection string is not configured", async () => {
+            const response = await integration.mcpClient().callTool({
+                name: "create-index",
+                arguments: {
+                    database: integration.randomDbName(),
+                    collection: "coll1",
+                    keys: { prop1: 1 },
+                },
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+        });
+    });
 });
