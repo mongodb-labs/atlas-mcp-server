@@ -7,7 +7,9 @@ import fs from "fs/promises";
 import { Session } from "../../src/session.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { MongoClient } from "mongodb";
+import { ApiClient } from "../../src/common/atlas/apiClient.js";
 import { toIncludeAllMembers } from "jest-extended";
+import { Group } from "../../src/common/atlas/openapi.js";
 
 interface ParameterInfo {
     name: string;
@@ -21,6 +23,7 @@ type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 export function jestTestMCPClient(): () => Client {
     let client: Client | undefined;
     let server: Server | undefined;
+    let session: Session | undefined;
 
     beforeEach(async () => {
         const clientTransport = new InMemoryTransport();
@@ -42,13 +45,16 @@ export function jestTestMCPClient(): () => Client {
             }
         );
 
+        session = jestTestSession();
+
         server = new Server({
             mcpServer: new McpServer({
                 name: "test-server",
                 version: "1.2.3",
             }),
-            session: new Session(),
+            session,
         });
+
         await server.connect(serverTransport);
         await client.connect(clientTransport);
     });
@@ -59,13 +65,15 @@ export function jestTestMCPClient(): () => Client {
 
         await server?.close();
         server = undefined;
+
+        session = undefined;
+        jest.restoreAllMocks();
     });
 
     return () => {
         if (!client) {
             throw new Error("beforeEach() hook not ran yet");
         }
-
         return client;
     };
 }
@@ -195,4 +203,49 @@ export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]):
     const toolParameters = getParameters(tool);
     expect(toolParameters).toHaveLength(parameters.length);
     expect(toolParameters).toIncludeAllMembers(parameters);
+}
+
+const jestTestAtlasData = {
+    project: {
+        id: "test-project-id",
+        name: "test-project",
+        orgId: "test-org-id",
+        clusterCount: 0,
+        created: new Date().toISOString(),
+        regionUsageRestrictions: "COMMERCIAL_FEDRAMP_REGIONS_ONLY" as const,
+        withDefaultAlertsSettings: true,
+    } satisfies Group,
+    projects: {
+        results: [],
+        totalCount: 0,
+    },
+};
+
+function jestTestAtlasClient(): ApiClient {
+    const apiClient = new ApiClient({
+        baseUrl: "http://localhost:3000",
+        userAgent: "AtlasMCP-Test",
+        credentials: {
+            clientId: "test-client-id",
+            clientSecret: "test-client-secret",
+        },
+    });
+
+    jest.spyOn(apiClient, "createProject").mockResolvedValue(jestTestAtlasData.project);
+    jest.spyOn(apiClient, "listProjects").mockResolvedValue(jestTestAtlasData.projects);
+    jest.spyOn(apiClient, "getProject").mockResolvedValue(jestTestAtlasData.project);
+
+    return apiClient;
+}
+
+function jestTestSession(): Session {
+    const session = new Session();
+    const apiClient = jestTestAtlasClient();
+
+    Object.defineProperty(session, "apiClient", {
+        get: () => apiClient,
+        configurable: true,
+    });
+
+    return session;
 }
