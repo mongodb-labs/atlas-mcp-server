@@ -10,22 +10,29 @@ export class CreateIndexTool extends MongoDBToolBase {
     protected argsShape = {
         ...DbOperationArgs,
         keys: z.record(z.string(), z.custom<IndexDirection>()).describe("The index definition"),
+        name: z.string().optional().describe("The name of the index"),
     };
 
     protected operationType: OperationType = "create";
 
-    protected async execute({ database, collection, keys }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
+    protected async execute({
+        database,
+        collection,
+        keys,
+        name,
+    }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
         const indexes = await provider.createIndexes(database, collection, [
             {
                 key: keys,
+                name,
             },
         ]);
 
         return {
             content: [
                 {
-                    text: `Created the index \`${indexes[0]}\``,
+                    text: `Created the index "${indexes[0]}" on collection "${collection}" in database "${database}"`,
                     type: "text",
                 },
             ],
