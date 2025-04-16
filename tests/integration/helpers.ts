@@ -62,8 +62,6 @@ export function jestTestMCPClient(): () => Client {
 export function jestTestCluster(): () => runner.MongoCluster {
     let cluster: runner.MongoCluster | undefined;
 
-    function runMongodb() {}
-
     beforeAll(async function () {
         // Downloading Windows executables in CI takes a long time because
         // they include debug symbols...
@@ -72,7 +70,7 @@ export function jestTestCluster(): () => runner.MongoCluster {
 
         // On Windows, we may have a situation where mongod.exe is not fully released by the OS
         // before we attempt to run it again, so we add a retry.
-        const dbsDir = path.join(tmpDir, "mongodb-runner", `dbs`);
+        let dbsDir = path.join(tmpDir, "mongodb-runner", "dbs");
         for (let i = 0; i < 10; i++) {
             try {
                 cluster = await MongoCluster.start({
@@ -83,10 +81,21 @@ export function jestTestCluster(): () => runner.MongoCluster {
 
                 return;
             } catch (err) {
-                console.error(`Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}`);
-                await new Promise((resolve) => setTimeout(resolve, 1000));
+                if (i < 5) {
+                    // Just wait a little bit and retry
+                    console.error(`Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}`);
+                    await new Promise((resolve) => setTimeout(resolve, 1000));
+                } else {
+                    // If we still fail after 5 seconds, try another db dir
+                    console.error(
+                        `Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}. Retrying with a new db dir.`
+                    );
+                    dbsDir = path.join(tmpDir, "mongodb-runner", `dbs${i - 5}`);
+                }
             }
         }
+
+        throw new Error("Failed to start cluster after 10 attempts");
     }, 120_000);
 
     afterAll(async function () {
