@@ -1,7 +1,6 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { jestTestMCPClient, describeAtlas } from "../../helpers.js";
 
-
 describeAtlas("listProjects tool", () => {
     const client = jestTestMCPClient();
 
@@ -17,7 +16,7 @@ describeAtlas("listProjects tool", () => {
     });
 
     it("returns project names", async () => {
-        const response = await client().callTool({ name: "atlas-list-projects", arguments: {} }) as CallToolResult;
+        const response = (await client().callTool({ name: "atlas-list-projects", arguments: {} })) as CallToolResult;
         expect(response.content).toBeArray();
         expect(response.content).toHaveLength(1);
         expect(response.content[0].text).toContain("MCP Test");
