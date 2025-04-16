@@ -196,3 +196,13 @@ export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]):
     expect(toolParameters).toHaveLength(parameters.length);
     expect(toolParameters).toIncludeAllMembers(parameters);
 }
+
+
+export function describeAtlas (name: number | string | Function | jest.FunctionLike, fn: jest.EmptyFunction) {
+    if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
+        return describe.skip(name, fn);
+    }
+    return describe("atlas", () => {
+        describe(name, fn);
+    });
+}
