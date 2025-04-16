@@ -7,6 +7,7 @@ import fs from "fs/promises";
 import { Session } from "../../src/session.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { MongoClient } from "mongodb";
+import { toIncludeAllMembers } from "jest-extended";
 
 interface ParameterInfo {
     name: string;
