@@ -11,6 +11,7 @@ interface UserConfig {
     apiBaseUrl?: string;
     apiClientId?: string;
     apiClientSecret?: string;
+    telemetry?: 'enabled' | 'disabled';
     logPath: string;
     connectionString?: string;
     connectOptions: {
@@ -52,7 +53,8 @@ const config = {
     ...mergedUserConfig,
     ...machineMetadata,
     version: packageJson.version,
-    mcp_server_name: "MdbMcpServer"
+    mcpServerName: "MdbMcpServer",
+    isTelemetryEnabled: true
 };
 
 export default config;

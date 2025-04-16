@@ -3,13 +3,32 @@ import { ApiClient } from "./common/atlas/apiClient.js";
 import config from "./config.js";
 import logger from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
+import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 export class Session {
     sessionId?: string;
     serviceProvider?: NodeDriverServiceProvider;
     apiClient?: ApiClient;
-    clientName?: string;
-    clientVersion?: string;  
+    agentClientName?: string;
+    agentClientVersion?: string; 
+
+    constructor() {
+        // configure api client if credentials are set
+        if (config.apiClientId && config.apiClientSecret) {
+            this.apiClient = new ApiClient({
+                baseUrl: config.apiBaseUrl,
+                credentials: {
+                    clientId: config.apiClientId,
+                    clientSecret: config.apiClientSecret,
+                },
+            });
+        }
+    }
+    
+    setAgentClientData(agentClient: Implementation | undefined) {
+        this.agentClientName = agentClient?.name;
+        this.agentClientVersion = agentClient?.version;
+    }
 
     ensureAuthenticated(): asserts this is { apiClient: ApiClient } {
         if (!this.apiClient) {
@@ -38,13 +57,5 @@ export class Session {
             }
             this.serviceProvider = undefined;
         }
-    }
-
-    async emitTelemetry(todo: unknown): Promise<void> {
-        logger.info(
-            mongoLogId(1_000_001),
-            "telemetry",
-            `Telemetry event: ${JSON.stringify(todo)}`
-        );
     }
 }

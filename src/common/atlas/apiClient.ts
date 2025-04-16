@@ -4,6 +4,7 @@ import type { FetchOptions } from "openapi-fetch";
 import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
+import { BaseEvent } from "../../telemetry/types.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
 
@@ -63,10 +64,10 @@ export class ApiClient {
     constructor(options?: ApiClientOptions) {
         this.options = {
             ...options,
-            baseUrl: options?.baseUrl || "https://cloud.mongodb.com/",
+            baseUrl: options?.baseUrl || "https://cloud-dev.mongodb.com/",
             userAgent:
                 options?.userAgent ||
-                `${config.mcp_server_name}/${config.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
+                `${config.mcpServerName}/${config.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
         };
 
         this.client = createClient<paths>({
@@ -115,6 +116,32 @@ export class ApiClient {
         return (await response.json()) as Promise<{
             currentIpv4Address: string;
         }>;
+    }
+
+    async sendEvents(events: BaseEvent[]): Promise<void> {
+        let endpoint = "api/private/unauth/telemetry/events";
+        const headers: Record<string, string> = {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": this.options.userAgent,
+        };
+
+        const accessToken = await this.getAccessToken();
+        if (accessToken) {
+            endpoint = "api/private/v1.0/telemetry/events";
+            headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+
+        const url = new URL(endpoint, this.options.baseUrl);
+        const response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(events),
+        });
+
+        if (!response.ok) {
+            throw await ApiClientError.fromResponse(response);
+        }
     }
 
     // DO NOT EDIT. This is auto-generated code.
