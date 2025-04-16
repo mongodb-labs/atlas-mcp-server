@@ -13,10 +13,7 @@ export class CreateProjectTool extends AtlasToolBase {
         organizationId: z.string().describe("Organization ID for the new project"),
     };
 
-    protected async execute({
-      projectName,
-      organizationId,
-    }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
+    protected async execute({ projectName, organizationId }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         this.session.ensureAuthenticated();
 
         const input = {
