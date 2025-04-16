@@ -1,13 +1,12 @@
-import { getResponseContent, jestTestMCPClient, jestTestCluster, validateParameters } from "../../../helpers.js";
+import { getResponseContent, validateParameters, setupIntegrationTest } from "../../../helpers.js";
 
 import config from "../../../../../src/config.js";
 
 describe("Connect tool", () => {
-    const client = jestTestMCPClient();
-    const cluster = jestTestCluster();
+    const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await client().listTools();
+        const { tools } = await integration.mcpClient().listTools();
         const connectTool = tools.find((tool) => tool.name === "connect")!;
         expect(connectTool).toBeDefined();
         expect(connectTool.description).toBe("Connect to a MongoDB instance");
@@ -25,7 +24,7 @@ describe("Connect tool", () => {
     describe("with default config", () => {
         describe("without connection string", () => {
             it("prompts for connection string", async () => {
-                const response = await client().callTool({ name: "connect", arguments: {} });
+                const response = await integration.mcpClient().callTool({ name: "connect", arguments: {} });
                 const content = getResponseContent(response.content);
                 expect(content).toContain("No connection details provided");
                 expect(content).toContain("mongodb://localhost:27017");
@@ -34,19 +33,19 @@ describe("Connect tool", () => {
 
         describe("with connection string", () => {
             it("connects to the database", async () => {
-                const response = await client().callTool({
+                const response = await integration.mcpClient().callTool({
                     name: "connect",
-                    arguments: { connectionStringOrClusterName: cluster().connectionString },
+                    arguments: { connectionStringOrClusterName: integration.connectionString() },
                 });
                 const content = getResponseContent(response.content);
                 expect(content).toContain("Successfully connected");
-                expect(content).toContain(cluster().connectionString);
+                expect(content).toContain(integration.connectionString());
             });
         });
 
         describe("with invalid connection string", () => {
             it("returns error message", async () => {
-                const response = await client().callTool({
+                const response = await integration.mcpClient().callTool({
                     name: "connect",
                     arguments: { connectionStringOrClusterName: "mongodb://localhost:12345" },
                 });
@@ -61,19 +60,19 @@ describe("Connect tool", () => {
 
     describe("with connection string in config", () => {
         beforeEach(async () => {
-            config.connectionString = cluster().connectionString;
+            config.connectionString = integration.connectionString();
         });
 
         it("uses the connection string from config", async () => {
-            const response = await client().callTool({ name: "connect", arguments: {} });
+            const response = await integration.mcpClient().callTool({ name: "connect", arguments: {} });
             const content = getResponseContent(response.content);
             expect(content).toContain("Successfully connected");
-            expect(content).toContain(cluster().connectionString);
+            expect(content).toContain(integration.connectionString());
         });
 
         it("prefers connection string from arguments", async () => {
-            const newConnectionString = `${cluster().connectionString}?appName=foo-bar`;
-            const response = await client().callTool({
+            const newConnectionString = `${integration.connectionString()}?appName=foo-bar`;
+            const response = await integration.mcpClient().callTool({
                 name: "connect",
                 arguments: { connectionStringOrClusterName: newConnectionString },
             });
@@ -84,7 +83,7 @@ describe("Connect tool", () => {
 
         describe("when the arugment connection string is invalid", () => {
             it("suggests the config connection string if set", async () => {
-                const response = await client().callTool({
+                const response = await integration.mcpClient().callTool({
                     name: "connect",
                     arguments: { connectionStringOrClusterName: "mongodb://localhost:12345" },
                 });
@@ -97,7 +96,7 @@ describe("Connect tool", () => {
 
             it("returns error message if the config connection string matches the argument", async () => {
                 config.connectionString = "mongodb://localhost:12345";
-                const response = await client().callTool({
+                const response = await integration.mcpClient().callTool({
                     name: "connect",
                     arguments: { connectionStringOrClusterName: "mongodb://localhost:12345" },
                 });
