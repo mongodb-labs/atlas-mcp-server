@@ -128,7 +128,7 @@ export function jestTestCluster(): () => { connectionString: string; getClient: 
             connectionString: cluster.connectionString,
             getClient: () => {
                 if (!client) {
-                    client = new MongoClient(cluster.connectionString);
+                    client = new MongoClient(cluster!.connectionString);
                 }
 
                 return client;
