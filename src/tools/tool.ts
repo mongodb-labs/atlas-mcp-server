@@ -22,6 +22,8 @@ export abstract class ToolBase {
 
     protected abstract argsShape: ZodRawShape;
 
+    protected abstract category: string;
+
     protected abstract execute(...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<CallToolResult>;
 
     protected constructor(protected session: Session) {}
@@ -33,7 +35,6 @@ export abstract class ToolBase {
 
         const callback: ToolCallback<typeof this.argsShape> = async (...args) => {
             try {
-                // TODO: add telemetry here
                 logger.debug(
                     mongoLogId(1_000_006),
                     "tool",

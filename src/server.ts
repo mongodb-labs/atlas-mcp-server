@@ -5,7 +5,7 @@ import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
-import { getOsInfo } from '@mongodb-js/get-os-info';
+
 
 export class Server {
     public readonly session: Session;
@@ -18,19 +18,19 @@ export class Server {
 
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
-
-
-        // log telemetry
-        const osInfo = await getOsInfo();
-        logger.info(mongoLogId(1_000_005), "server", `Server started with osInfo ${JSON.stringify(osInfo)}`);
-
         this.registerTools();
 
         await initializeLogger(this.mcpServer);
 
         await this.mcpServer.connect(transport);
 
-        logger.info(mongoLogId(1_000_004), "server", `Server started with transport ${transport.constructor.name}`);
+        this.mcpServer.server.oninitialized = () =>  {
+            const client = this.mcpServer.server.getClientVersion();
+            this.session.clientName = client?.name;
+            this.session.clientVersion = client?.version;
+
+            logger.info(mongoLogId(1_000_004), "server", `Server started with transport ${transport.constructor.name}`);        
+        };
     }
 
     async close(): Promise<void> {

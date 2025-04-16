@@ -1,10 +1,15 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ApiClient } from "./common/atlas/apiClient.js";
 import config from "./config.js";
+import logger from "./logger.js";
+import { mongoLogId } from "mongodb-log-writer";
 
 export class Session {
+    sessionId?: string;
     serviceProvider?: NodeDriverServiceProvider;
     apiClient?: ApiClient;
+    clientName?: string;
+    clientVersion?: string;  
 
     ensureAuthenticated(): asserts this is { apiClient: ApiClient } {
         if (!this.apiClient) {
@@ -33,5 +38,13 @@ export class Session {
             }
             this.serviceProvider = undefined;
         }
+    }
+
+    async emitTelemetry(todo: unknown): Promise<void> {
+        logger.info(
+            mongoLogId(1_000_001),
+            "telemetry",
+            `Telemetry event: ${JSON.stringify(todo)}`
+        );
     }
 }
