@@ -28,7 +28,7 @@
     "check:format": "prettier -c .",
     "reformat": "prettier --write .",
     "generate": "./scripts/generate.sh",
-    "test": "jest"
+    "test": "jest --coverage"
   },
   "license": "Apache-2.0",
   "devDependencies": {

@@ -10,3 +10,4 @@ node_modules
 state.json
 
 tests/tmp
+coverage
