@@ -5,6 +5,7 @@ import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
+import { getOsInfo } from '@mongodb-js/get-os-info';
 
 export class Server {
     public readonly session: Session;
@@ -17,6 +18,11 @@ export class Server {
 
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
+
+
+        // log telemetry
+        const osInfo = await getOsInfo();
+        logger.info(mongoLogId(1_000_005), "server", `Server started with osInfo ${JSON.stringify(osInfo)}`);
 
         this.registerTools();
 

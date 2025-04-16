@@ -58,6 +58,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.8.0",
     "@mongodb-js/devtools-connect": "^3.7.2",
+    "@mongodb-js/get-os-info": "^0.4.1",
     "@mongosh/service-provider-node-driver": "^3.6.0",
     "bson": "^6.10.3",
     "mongodb": "^6.15.0",
