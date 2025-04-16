@@ -200,7 +200,9 @@ export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]):
 
 export function describeAtlas (name: number | string | Function | jest.FunctionLike, fn: jest.EmptyFunction) {
     if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
-        return describe.skip(name, fn);
+        return describe.skip("atlas", () => {
+            describe(name, fn);
+        });
     }
     return describe("atlas", () => {
         describe(name, fn);
