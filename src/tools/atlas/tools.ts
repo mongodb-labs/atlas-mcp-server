@@ -6,6 +6,7 @@ import { CreateAccessListTool } from "./createAccessList.js";
 import { InspectAccessListTool } from "./inspectAccessList.js";
 import { ListDBUsersTool } from "./listDBUsers.js";
 import { CreateDBUserTool } from "./createDBUser.js";
+import { CreateProjectTool } from "./createProject.js";
 
 export const AtlasTools = [
     ListClustersTool,
@@ -16,4 +17,5 @@ export const AtlasTools = [
     InspectAccessListTool,
     ListDBUsersTool,
     CreateDBUserTool,
+    CreateProjectTool,
 ];
