@@ -31,7 +31,6 @@ export function setupIntegrationTest(): {
 
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
-    let session: Session | undefined;
 
     beforeEach(async () => {
         const clientTransport = new InMemoryTransport();
@@ -53,13 +52,12 @@ export function setupIntegrationTest(): {
             }
         );
 
-        session = jestTestSession();
         mcpServer = new Server({
             mcpServer: new McpServer({
                 name: "test-server",
                 version: "1.2.3",
             }),
-            session,
+            session: new Session(),
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
@@ -208,49 +206,4 @@ export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]):
     const toolParameters = getParameters(tool);
     expect(toolParameters).toHaveLength(parameters.length);
     expect(toolParameters).toIncludeAllMembers(parameters);
-}
-
-const jestTestAtlasData = {
-    project: {
-        id: "test-project-id",
-        name: "test-project",
-        orgId: "test-org-id",
-        clusterCount: 0,
-        created: new Date().toISOString(),
-        regionUsageRestrictions: "COMMERCIAL_FEDRAMP_REGIONS_ONLY" as const,
-        withDefaultAlertsSettings: true,
-    } satisfies Group,
-    projects: {
-        results: [],
-        totalCount: 0,
-    },
-};
-
-function jestTestAtlasClient(): ApiClient {
-    const apiClient = new ApiClient({
-        baseUrl: "http://localhost:3000",
-        userAgent: "AtlasMCP-Test",
-        credentials: {
-            clientId: "test-client-id",
-            clientSecret: "test-client-secret",
-        },
-    });
-
-    jest.spyOn(apiClient, "createProject").mockResolvedValue(jestTestAtlasData.project);
-    jest.spyOn(apiClient, "listProjects").mockResolvedValue(jestTestAtlasData.projects);
-    jest.spyOn(apiClient, "getProject").mockResolvedValue(jestTestAtlasData.project);
-
-    return apiClient;
-}
-
-function jestTestSession(): Session {
-    const session = new Session();
-    const apiClient = jestTestAtlasClient();
-
-    Object.defineProperty(session, "apiClient", {
-        get: () => apiClient,
-        configurable: true,
-    });
-
-    return session;
 }
