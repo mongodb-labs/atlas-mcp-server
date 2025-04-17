@@ -1,20 +1,12 @@
-import {
-    getResponseElements,
-    connect,
-    jestTestCluster,
-    jestTestMCPClient,
-    getResponseContent,
-    validateParameters,
-} from "../../../helpers.js";
+import { getResponseElements, getResponseContent, validateParameters, setupIntegrationTest } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 
 describe("listCollections tool", () => {
-    const client = jestTestMCPClient();
-    const cluster = jestTestCluster();
+    const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await client().listTools();
+        const { tools } = await integration.mcpClient().listTools();
         const listCollections = tools.find((tool) => tool.name === "list-collections")!;
         expect(listCollections).toBeDefined();
         expect(listCollections.description).toBe("List all collections for a given database");
@@ -28,9 +20,9 @@ describe("listCollections tool", () => {
         const args = [{}, { database: 123 }, { foo: "bar", database: "test" }, { database: [] }];
         for (const arg of args) {
             it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await connect(client(), cluster());
+                await integration.connectMcpClient();
                 try {
-                    await client().callTool({ name: "list-collections", arguments: arg });
+                    await integration.mcpClient().callTool({ name: "list-collections", arguments: arg });
                     expect.fail("Expected an error to be thrown");
                 } catch (error) {
                     expect(error).toBeInstanceOf(McpError);
@@ -45,8 +37,8 @@ describe("listCollections tool", () => {
 
     describe("with non-existent database", () => {
         it("returns no collections", async () => {
-            await connect(client(), cluster());
-            const response = await client().callTool({
+            await integration.connectMcpClient();
+            const response = await integration.mcpClient().callTool({
                 name: "list-collections",
                 arguments: { database: "non-existent" },
             });
@@ -59,11 +51,11 @@ describe("listCollections tool", () => {
 
     describe("with existing database", () => {
         it("returns collections", async () => {
-            const mongoClient = cluster().getClient();
+            const mongoClient = integration.mongoClient();
             await mongoClient.db("my-db").createCollection("collection-1");
 
-            await connect(client(), cluster());
-            const response = await client().callTool({
+            await integration.connectMcpClient();
+            const response = await integration.mcpClient().callTool({
                 name: "list-collections",
                 arguments: { database: "my-db" },
             });
@@ -73,7 +65,7 @@ describe("listCollections tool", () => {
 
             await mongoClient.db("my-db").createCollection("collection-2");
 
-            const response2 = await client().callTool({
+            const response2 = await integration.mcpClient().callTool({
                 name: "list-collections",
                 arguments: { database: "my-db" },
             });

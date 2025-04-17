@@ -1,18 +1,15 @@
 import {
-    connect,
-    jestTestCluster,
-    jestTestMCPClient,
     getResponseContent,
     validateParameters,
     dbOperationParameters,
+    setupIntegrationTest,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { ObjectId } from "mongodb";
 
 describe("count tool", () => {
-    const client = jestTestMCPClient();
-    const cluster = jestTestCluster();
+    const integration = setupIntegrationTest();
 
     let randomDbName: string;
     beforeEach(() => {
@@ -20,7 +17,7 @@ describe("count tool", () => {
     });
 
     it("should have correct metadata", async () => {
-        const { tools } = await client().listTools();
+        const { tools } = await integration.mcpClient().listTools();
         const listCollections = tools.find((tool) => tool.name === "count")!;
         expect(listCollections).toBeDefined();
         expect(listCollections.description).toBe("Gets the number of documents in a MongoDB collection");
@@ -47,9 +44,9 @@ describe("count tool", () => {
         ];
         for (const arg of args) {
             it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await connect(client(), cluster());
+                await integration.connectMcpClient();
                 try {
-                    await client().callTool({ name: "count", arguments: arg });
+                    await integration.mcpClient().callTool({ name: "count", arguments: arg });
                     expect.fail("Expected an error to be thrown");
                 } catch (error) {
                     expect(error).toBeInstanceOf(McpError);
@@ -62,8 +59,8 @@ describe("count tool", () => {
     });
 
     it("returns 0 when database doesn't exist", async () => {
-        await connect(client(), cluster());
-        const response = await client().callTool({
+        await integration.connectMcpClient();
+        const response = await integration.mcpClient().callTool({
             name: "count",
             arguments: { database: "non-existent", collection: "foos" },
         });
@@ -72,10 +69,10 @@ describe("count tool", () => {
     });
 
     it("returns 0 when collection doesn't exist", async () => {
-        await connect(client(), cluster());
-        const mongoClient = cluster().getClient();
+        await integration.connectMcpClient();
+        const mongoClient = integration.mongoClient();
         await mongoClient.db(randomDbName).collection("bar").insertOne({});
-        const response = await client().callTool({
+        const response = await integration.mcpClient().callTool({
             name: "count",
             arguments: { database: randomDbName, collection: "non-existent" },
         });
@@ -85,7 +82,7 @@ describe("count tool", () => {
 
     describe("with existing database", () => {
         beforeEach(async () => {
-            const mongoClient = cluster().getClient();
+            const mongoClient = integration.mongoClient();
             await mongoClient
                 .db(randomDbName)
                 .collection("foo")
@@ -104,8 +101,8 @@ describe("count tool", () => {
         ];
         for (const testCase of testCases) {
             it(`returns ${testCase.expectedCount} documents for filter ${JSON.stringify(testCase.filter)}`, async () => {
-                await connect(client(), cluster());
-                const response = await client().callTool({
+                await integration.connectMcpClient();
+                const response = await integration.mcpClient().callTool({
                     name: "count",
                     arguments: { database: randomDbName, collection: "foo", query: testCase.filter },
                 });
