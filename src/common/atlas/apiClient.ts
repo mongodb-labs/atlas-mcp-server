@@ -147,6 +147,10 @@ export class ApiClient {
         return data;
     }
 
+    async deleteProjectIpAccessList(options: FetchOptions<operations["deleteProjectIpAccessList"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/accessList/{entryValue}", options);
+    }
+
     async listClusters(options: FetchOptions<operations["listClusters"]>) {
         const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters", options);
         return data;
@@ -174,6 +178,10 @@ export class ApiClient {
     async createDatabaseUser(options: FetchOptions<operations["createDatabaseUser"]>) {
         const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/databaseUsers", options);
         return data;
+    }
+
+    async deleteDatabaseUser(options: FetchOptions<operations["deleteDatabaseUser"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/databaseUsers/{databaseName}/{username}", options);
     }
 
     // DO NOT EDIT. This is auto-generated code.

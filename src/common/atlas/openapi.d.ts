@@ -92,6 +92,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/atlas/v2/groups/{groupId}/accessList/{entryValue}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove One Entry from One Project IP Access List
+         * @description Removes one access list entry from the specified project's IP access list. Each entry in the project's IP access list contains one IP address, one CIDR-notated block of IP addresses, or one AWS Security Group ID. MongoDB Cloud only allows client connections to the cluster from entries in the project's IP access list. To use this resource, the requesting Service Account or API Key must have the Project Owner role. This resource replaces the whitelist resource. MongoDB Cloud removed whitelists in July 2021. Update your applications to use this new resource. The `/groups/{GROUP-ID}/accessList` endpoint manages the database IP access list. This endpoint is distinct from the `orgs/{ORG-ID}/apiKeys/{API-KEY-ID}/accesslist` endpoint, which manages the access list for MongoDB Cloud organizations.
+         */
+        delete: operations["deleteProjectIpAccessList"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/atlas/v2/groups/{groupId}/clusters": {
         parameters: {
             query?: never;
@@ -167,6 +187,26 @@ export interface paths {
          */
         post: operations["createDatabaseUser"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/atlas/v2/groups/{groupId}/databaseUsers/{databaseName}/{username}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove One Database User from One Project
+         * @description Removes one database user from the specified project. To use this resource, the requesting Service Account or API Key must have the Project Owner role, the Project Stream Processing Owner role, or the Project Database Access Admin role.
+         */
+        delete: operations["deleteDatabaseUser"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5280,6 +5320,45 @@ export interface operations {
             500: components["responses"]["internalServerError"];
         };
     };
+    deleteProjectIpAccessList: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+                /** @description Access list entry that you want to remove from the project's IP access list. This value can use one of the following: one AWS security group ID, one IP address, or one CIDR block of addresses. For CIDR blocks that use a subnet mask, replace the forward slash (`/`) with its URL-encoded value (`%2F`). When you remove an entry from the IP access list, existing connections from the removed address or addresses may remain open for a variable amount of time. The amount of time it takes MongoDB Cloud to close the connection depends upon several factors, including:
+                 *
+                 *     - how your application established the connection,
+                 *     - how MongoDB Cloud or the driver using the address behaves, and
+                 *     - which protocol (like TCP or UDP) the connection uses. */
+                entryValue: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description This endpoint does not return a response body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2023-01-01+json": unknown;
+                };
+            };
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
     listClusters: {
         parameters: {
             query?: {
@@ -5512,6 +5591,57 @@ export interface operations {
             403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             409: components["responses"]["conflict"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    deleteDatabaseUser: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+                /** @description The database against which the database user authenticates. Database users must provide both a username and authentication database to log into MongoDB. If the user authenticates with AWS IAM, x.509, LDAP, or OIDC Workload this value should be `$external`. If the user authenticates with SCRAM-SHA or OIDC Workforce, this value should be `admin`. */
+                databaseName: string;
+                /** @description Human-readable label that represents the user that authenticates to MongoDB. The format of this label depends on the method of authentication:
+                 *
+                 *     | Authentication Method | Parameter Needed | Parameter Value | username Format |
+                 *     |---|---|---|---|
+                 *     | AWS IAM | awsIAMType | ROLE | <abbr title="Amazon Resource Name">ARN</abbr> |
+                 *     | AWS IAM | awsIAMType | USER | <abbr title="Amazon Resource Name">ARN</abbr> |
+                 *     | x.509 | x509Type | CUSTOMER | [RFC 2253](https://tools.ietf.org/html/2253) Distinguished Name |
+                 *     | x.509 | x509Type | MANAGED | [RFC 2253](https://tools.ietf.org/html/2253) Distinguished Name |
+                 *     | LDAP | ldapAuthType | USER | [RFC 2253](https://tools.ietf.org/html/2253) Distinguished Name |
+                 *     | LDAP | ldapAuthType | GROUP | [RFC 2253](https://tools.ietf.org/html/2253) Distinguished Name |
+                 *     | OIDC Workforce | oidcAuthType | IDP_GROUP | Atlas OIDC IdP ID (found in federation settings), followed by a '/', followed by the IdP group name |
+                 *     | OIDC Workload | oidcAuthType | USER | Atlas OIDC IdP ID (found in federation settings), followed by a '/', followed by the IdP user name |
+                 *     | SCRAM-SHA | awsIAMType, x509Type, ldapAuthType, oidcAuthType | NONE | Alphanumeric string |
+                 *      */
+                username: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description This endpoint does not return a response body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2023-01-01+json": unknown;
+                };
+            };
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
     };
