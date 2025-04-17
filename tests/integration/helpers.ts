@@ -7,9 +7,7 @@ import fs from "fs/promises";
 import { Session } from "../../src/session.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { MongoClient } from "mongodb";
-import { ApiClient } from "../../src/common/atlas/apiClient.js";
 import { toIncludeAllMembers } from "jest-extended";
-import { Group } from "../../src/common/atlas/openapi.js";
 
 interface ParameterInfo {
     name: string;
