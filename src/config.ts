@@ -11,6 +11,7 @@ interface UserConfig {
     apiBaseUrl?: string;
     apiClientId?: string;
     apiClientSecret?: string;
+    telemetry?: 'enabled' | 'disabled';
     logPath: string;
     connectionString?: string;
     connectOptions: {
@@ -39,9 +40,21 @@ const mergedUserConfig = {
     ...getCliConfig(),
 };
 
+
+const machineMetadata = {
+    device_id: "id", // TODO: use @mongodb-js/machine-id
+    platform: process.platform,
+    arch: process.arch,
+    os_type: process.platform,
+    os_version: process.version,
+}
+
 const config = {
     ...mergedUserConfig,
+    ...machineMetadata,
     version: packageJson.version,
+    mcpServerName: "MdbMcpServer",
+    isTelemetryEnabled: true
 };
 
 export default config;

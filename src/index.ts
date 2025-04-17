@@ -8,7 +8,8 @@ import config from "./config.js";
 import { Session } from "./session.js";
 import { Server } from "./server.js";
 
-try {
+
+async function main() {
     const session = new Session();
     const mcpServer = new McpServer({
         name: "MongoDB Atlas",
@@ -23,8 +24,16 @@ try {
     const transport = new StdioServerTransport();
 
     await server.connect(transport);
-} catch (error: unknown) {
-    logger.emergency(mongoLogId(1_000_004), "server", `Fatal error running server: ${error as string}`);
+}
 
+// Start the server
+try {
+    await main();
+} catch (error: unknown) {
+    logger.emergency(
+        mongoLogId(1_000_004),
+        "server",
+        `Fatal error running server: ${error as string}`
+    );
     process.exit(1);
 }
