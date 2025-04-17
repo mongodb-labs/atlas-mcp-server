@@ -2,7 +2,6 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { ErrorCodes, MongoDBError } from "../../../errors.js";
 import config from "../../../config.js";
 import { MongoError as DriverError } from "mongodb";
 
@@ -37,25 +36,21 @@ export class ConnectTool extends MongoDBToolBase {
 
         let connectionString: string;
 
-        if (typeof connectionStringOrClusterName === "string") {
-            if (
-                connectionStringOrClusterName.startsWith("mongodb://") ||
-                connectionStringOrClusterName.startsWith("mongodb+srv://")
-            ) {
-                connectionString = connectionStringOrClusterName;
-            } else {
-                // TODO:
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: `Connecting via cluster name not supported yet. Please provide a connection string.`,
-                        },
-                    ],
-                };
-            }
+        if (
+            connectionStringOrClusterName.startsWith("mongodb://") ||
+            connectionStringOrClusterName.startsWith("mongodb+srv://")
+        ) {
+            connectionString = connectionStringOrClusterName;
         } else {
-            throw new MongoDBError(ErrorCodes.InvalidParams, "Invalid connection options");
+            // TODO:
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Connecting via cluster name not supported yet. Please provide a connection string.`,
+                    },
+                ],
+            };
         }
 
         try {

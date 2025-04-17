@@ -1,6 +1,8 @@
 import { getResponseElements, getResponseContent, validateParameters, setupIntegrationTest } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
+import config from "../../../../../src/config.js";
+import { ObjectId } from "bson";
 
 describe("listCollections tool", () => {
     const integration = setupIntegrationTest();
@@ -52,22 +54,22 @@ describe("listCollections tool", () => {
     describe("with existing database", () => {
         it("returns collections", async () => {
             const mongoClient = integration.mongoClient();
-            await mongoClient.db("my-db").createCollection("collection-1");
+            await mongoClient.db(integration.randomDbName()).createCollection("collection-1");
 
             await integration.connectMcpClient();
             const response = await integration.mcpClient().callTool({
                 name: "list-collections",
-                arguments: { database: "my-db" },
+                arguments: { database: integration.randomDbName() },
             });
             const items = getResponseElements(response.content);
             expect(items).toHaveLength(1);
             expect(items[0].text).toContain('Name: "collection-1"');
 
-            await mongoClient.db("my-db").createCollection("collection-2");
+            await mongoClient.db(integration.randomDbName()).createCollection("collection-2");
 
             const response2 = await integration.mcpClient().callTool({
                 name: "list-collections",
-                arguments: { database: "my-db" },
+                arguments: { database: integration.randomDbName() },
             });
             const items2 = getResponseElements(response2.content);
             expect(items2).toHaveLength(2);
@@ -75,6 +77,28 @@ describe("listCollections tool", () => {
                 'Name: "collection-1"',
                 'Name: "collection-2"',
             ]);
+        });
+    });
+
+    describe("when not connected", () => {
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
+
+            const response = await integration
+                .mcpClient()
+                .callTool({ name: "list-collections", arguments: { database: integration.randomDbName() } });
+            const content = getResponseContent(response.content);
+            expect(content).toEqual(
+                `No collections found for database "${integration.randomDbName()}". To create a collection, use the "create-collection" tool.`
+            );
+        });
+
+        it("throw an error if connection string is not configured", async () => {
+            const response = await integration
+                .mcpClient()
+                .callTool({ name: "list-collections", arguments: { database: integration.randomDbName() } });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
         });
     });
 });

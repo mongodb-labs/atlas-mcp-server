@@ -7,6 +7,7 @@ import {
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { ObjectId } from "bson";
+import config from "../../../../../src/config.js";
 
 describe("createCollection tool", () => {
     const integration = setupIntegrationTest();
@@ -48,69 +49,90 @@ describe("createCollection tool", () => {
     describe("with non-existent database", () => {
         it("creates a new collection", async () => {
             const mongoClient = integration.mongoClient();
-            let collections = await mongoClient.db("foo").listCollections().toArray();
+            let collections = await mongoClient.db(integration.randomDbName()).listCollections().toArray();
             expect(collections).toHaveLength(0);
 
             await integration.connectMcpClient();
             const response = await integration.mcpClient().callTool({
                 name: "create-collection",
-                arguments: { database: "foo", collection: "bar" },
+                arguments: { database: integration.randomDbName(), collection: "bar" },
             });
             const content = getResponseContent(response.content);
-            expect(content).toEqual('Collection "bar" created in database "foo".');
+            expect(content).toEqual(`Collection "bar" created in database "${integration.randomDbName()}".`);
 
-            collections = await mongoClient.db("foo").listCollections().toArray();
+            collections = await mongoClient.db(integration.randomDbName()).listCollections().toArray();
             expect(collections).toHaveLength(1);
             expect(collections[0].name).toEqual("bar");
         });
     });
 
     describe("with existing database", () => {
-        let dbName: string;
-        beforeEach(() => {
-            dbName = new ObjectId().toString();
-        });
-
         it("creates new collection", async () => {
             const mongoClient = integration.mongoClient();
-            await mongoClient.db(dbName).createCollection("collection1");
-            let collections = await mongoClient.db(dbName).listCollections().toArray();
+            await mongoClient.db(integration.randomDbName()).createCollection("collection1");
+            let collections = await mongoClient.db(integration.randomDbName()).listCollections().toArray();
             expect(collections).toHaveLength(1);
 
             await integration.connectMcpClient();
             const response = await integration.mcpClient().callTool({
                 name: "create-collection",
-                arguments: { database: dbName, collection: "collection2" },
+                arguments: { database: integration.randomDbName(), collection: "collection2" },
             });
             const content = getResponseContent(response.content);
-            expect(content).toEqual(`Collection "collection2" created in database "${dbName}".`);
-            collections = await mongoClient.db(dbName).listCollections().toArray();
+            expect(content).toEqual(`Collection "collection2" created in database "${integration.randomDbName()}".`);
+            collections = await mongoClient.db(integration.randomDbName()).listCollections().toArray();
             expect(collections).toHaveLength(2);
             expect(collections.map((c) => c.name)).toIncludeSameMembers(["collection1", "collection2"]);
         });
 
         it("does nothing if collection already exists", async () => {
             const mongoClient = integration.mongoClient();
-            await mongoClient.db(dbName).collection("collection1").insertOne({});
-            let collections = await mongoClient.db(dbName).listCollections().toArray();
+            await mongoClient.db(integration.randomDbName()).collection("collection1").insertOne({});
+            let collections = await mongoClient.db(integration.randomDbName()).listCollections().toArray();
             expect(collections).toHaveLength(1);
-            let documents = await mongoClient.db(dbName).collection("collection1").find({}).toArray();
+            let documents = await mongoClient
+                .db(integration.randomDbName())
+                .collection("collection1")
+                .find({})
+                .toArray();
             expect(documents).toHaveLength(1);
 
             await integration.connectMcpClient();
             const response = await integration.mcpClient().callTool({
                 name: "create-collection",
-                arguments: { database: dbName, collection: "collection1" },
+                arguments: { database: integration.randomDbName(), collection: "collection1" },
             });
             const content = getResponseContent(response.content);
-            expect(content).toEqual(`Collection "collection1" created in database "${dbName}".`);
-            collections = await mongoClient.db(dbName).listCollections().toArray();
+            expect(content).toEqual(`Collection "collection1" created in database "${integration.randomDbName()}".`);
+            collections = await mongoClient.db(integration.randomDbName()).listCollections().toArray();
             expect(collections).toHaveLength(1);
             expect(collections[0].name).toEqual("collection1");
 
             // Make sure we didn't drop the existing collection
-            documents = await mongoClient.db(dbName).collection("collection1").find({}).toArray();
+            documents = await mongoClient.db(integration.randomDbName()).collection("collection1").find({}).toArray();
             expect(documents).toHaveLength(1);
+        });
+    });
+
+    describe("when not connected", () => {
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
+
+            const response = await integration.mcpClient().callTool({
+                name: "create-collection",
+                arguments: { database: integration.randomDbName(), collection: "new-collection" },
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toEqual(`Collection "new-collection" created in database "${integration.randomDbName()}".`);
+        });
+
+        it("throw an error if connection string is not configured", async () => {
+            const response = await integration.mcpClient().callTool({
+                name: "create-collection",
+                arguments: { database: integration.randomDbName(), collection: "new-collection" },
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
         });
     });
 });
