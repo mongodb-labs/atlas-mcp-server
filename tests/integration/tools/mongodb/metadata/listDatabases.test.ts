@@ -25,7 +25,7 @@ describe("listDatabases tool", () => {
             expect(dbNames).toIncludeSameMembers(["admin", "config", "local"]);
         });
 
-        it("throw an error if connection string is not configured", async () => {
+        it("throws an error if connection string is not configured", async () => {
             const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
             const content = getResponseContent(response.content);
             expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");

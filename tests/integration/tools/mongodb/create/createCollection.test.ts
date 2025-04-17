@@ -126,7 +126,7 @@ describe("createCollection tool", () => {
             expect(content).toEqual(`Collection "new-collection" created in database "${integration.randomDbName()}".`);
         });
 
-        it("throw an error if connection string is not configured", async () => {
+        it("throws an error if connection string is not configured", async () => {
             const response = await integration.mcpClient().callTool({
                 name: "create-collection",
                 arguments: { database: integration.randomDbName(), collection: "new-collection" },
