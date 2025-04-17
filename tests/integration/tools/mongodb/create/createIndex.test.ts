@@ -5,7 +5,6 @@ import {
     setupIntegrationTest,
 } from "../../../helpers.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ObjectId } from "bson";
 import { IndexDirection } from "mongodb";
 import config from "../../../../../src/config.js";
 
@@ -14,11 +13,11 @@ describe("createIndex tool", () => {
 
     it("should have correct metadata", async () => {
         const { tools } = await integration.mcpClient().listTools();
-        const listCollections = tools.find((tool) => tool.name === "create-index")!;
-        expect(listCollections).toBeDefined();
-        expect(listCollections.description).toBe("Create an index for a collection");
+        const createIndex = tools.find((tool) => tool.name === "create-index")!;
+        expect(createIndex).toBeDefined();
+        expect(createIndex.description).toBe("Create an index for a collection");
 
-        validateParameters(listCollections, [
+        validateParameters(createIndex, [
             ...dbOperationParameters,
             {
                 name: "keys",
