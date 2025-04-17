@@ -4,7 +4,6 @@ import { CollectionIndexesTool } from "./read/collectionIndexes.js";
 import { ListDatabasesTool } from "./metadata/listDatabases.js";
 import { CreateIndexTool } from "./create/createIndex.js";
 import { CollectionSchemaTool } from "./metadata/collectionSchema.js";
-import { InsertOneTool } from "./create/insertOne.js";
 import { FindTool } from "./read/find.js";
 import { InsertManyTool } from "./create/insertMany.js";
 import { DeleteManyTool } from "./delete/deleteMany.js";
@@ -28,7 +27,6 @@ export const MongoDbTools = [
     CollectionIndexesTool,
     CreateIndexTool,
     CollectionSchemaTool,
-    InsertOneTool,
     FindTool,
     InsertManyTool,
     DeleteManyTool,
