@@ -5,35 +5,86 @@ import config from '../config.js';
 import logger from '../logger.js';
 import { mongoLogId } from 'mongodb-log-writer';
 import { ApiClient } from '../common/atlas/apiClient.js';
-import { ApiClientError } from '../common/atlas/apiClientError.js';
 import fs from 'fs/promises';
 import path from 'path';
 
-const isTelemetryEnabled = config.telemetry === 'enabled';
+const TELEMETRY_ENABLED = config.telemetry !== 'disabled';
 const CACHE_FILE = path.join(process.cwd(), '.telemetry-cache.json');
 
-export class Telemetry {
-    constructor(private readonly session: Session) {}
+interface TelemetryError extends Error {
+    code?: string;
+}
 
-    private readonly commonProperties = {
+type EventResult = {
+    success: boolean;
+    error?: Error;
+};
+
+type CommonProperties = {
+    device_id: string;
+    mcp_server_version: string;
+    mcp_server_name: string;
+    mcp_client_version?: string;
+    mcp_client_name?: string;
+    platform: string;
+    arch: string;
+    os_type: string;
+    os_version?: string;
+    session_id?: string;
+};
+
+export class Telemetry {
+    private readonly commonProperties: CommonProperties;
+
+    constructor(private readonly session: Session) {
+        // Ensure all required properties are present
+        this.commonProperties = Object.freeze({
+            device_id: config.device_id,
             mcp_server_version: pkg.version,
             mcp_server_name: config.mcpServerName,
             mcp_client_version: this.session.agentClientVersion,
             mcp_client_name: this.session.agentClientName,
-            session_id: this.session.sessionId,
-            device_id: config.device_id,
             platform: config.platform,
             arch: config.arch,
             os_type: config.os_type,
             os_version: config.os_version,
-        };
+        });
+    }
 
-    async emitToolEvent(command: string, category: string, startTime: number, result: 'success' | 'failure', error?: Error): Promise<void> {
-        if (!isTelemetryEnabled) {
-            logger.debug(mongoLogId(1_000_000), "telemetry", `Telemetry is disabled, skipping event.`);
+    /**
+     * Emits a tool event with timing and error information
+     * @param command - The command being executed
+     * @param category - Category of the command
+     * @param startTime - Start time in milliseconds
+     * @param result - Whether the command succeeded or failed
+     * @param error - Optional error if the command failed
+     */
+    public async emitToolEvent(
+        command: string,
+        category: string,
+        startTime: number,
+        result: 'success' | 'failure',
+        error?: Error
+    ): Promise<void> {
+        if (!TELEMETRY_ENABLED) {
+            logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping event.");
             return;
         }
 
+        const event = this.createToolEvent(command, category, startTime, result, error);
+        await this.emit([event]);
+    }
+
+    /**
+     * Creates a tool event with common properties and timing information
+     */
+    private createToolEvent(
+        command: string,
+        category: string,
+        startTime: number,
+        result: 'success' | 'failure',
+        error?: Error
+    ): ToolEvent {
         const duration = Date.now() - startTime;
 
         const event: ToolEvent = {
@@ -41,83 +92,119 @@ export class Telemetry {
             source: 'mdbmcp',
             properties: {
                 ...this.commonProperties,
-                command: command,
-                category: category,
+                command,
+                category,
                 duration_ms: duration,
-                result: result
+                session_id: this.session.sessionId,
+                result,
+                ...(error && {
+                    error_type: error.name,
+                    error_code: error.message
+                })
             }
         };
 
-        if (result === 'failure') {
-            event.properties.error_type = error?.name;
-            event.properties.error_code = error?.message;
-        }
-
-        await this.emit([event]);
+        return event;
     }
 
+    /**
+     * Attempts to emit events through authenticated and unauthenticated clients
+     * Falls back to caching if both attempts fail
+     */
     private async emit(events: BaseEvent[]): Promise<void> {
-        // First try to read any cached events
         const cachedEvents = await this.readCache();
         const allEvents = [...cachedEvents, ...events];
 
-        logger.debug(mongoLogId(1_000_000), "telemetry", `Attempting to send ${allEvents.length} events (${cachedEvents.length} cached)`);
+        logger.debug(
+            mongoLogId(1_000_000),
+            "telemetry",
+            `Attempting to send ${allEvents.length} events (${cachedEvents.length} cached)`
+        );
 
-        try {
-            if (this.session.apiClient) {
-                await this.session.apiClient.sendEvents(allEvents);
-                // If successful, clear the cache
-                await this.clearCache();
-                return;
-            }
-        } catch (error) {
-            logger.warning(mongoLogId(1_000_000), "telemetry", `Error sending event to authenticated client: ${error}`);
-            // Cache the events that failed to send
-            await this.cacheEvents(allEvents);
+        const result = await this.sendEvents(this.session.apiClient, allEvents);
+        if (result.success) {
+            await this.clearCache();
+            return;
         }
 
-        // Try unauthenticated client as fallback
+        logger.warning(
+            mongoLogId(1_000_000),
+            "telemetry",
+            `Error sending event to client: ${result.error}`
+        );
+        await this.cacheEvents(allEvents);
+    }
+
+    /**
+     * Attempts to send events through the provided API client
+     */
+    private async sendEvents(client: ApiClient, events: BaseEvent[]): Promise<EventResult> {
         try {
-            const tempApiClient = new ApiClient({
-                baseUrl: config.apiBaseUrl,
-            });
-            await tempApiClient.sendEvents(allEvents);
-            // If successful, clear the cache
-            await this.clearCache();
+            await client.sendEvents(events);
+            return { success: true };
         } catch (error) {
-            logger.warning(mongoLogId(1_000_000), "telemetry", `Error sending event to unauthenticated client: ${error}`);
-            // Cache the events that failed to send
-            await this.cacheEvents(allEvents);
+            return {
+                success: false,
+                error: error instanceof Error ? error : new Error(String(error))
+            };
         }
     }
 
+    /**
+     * Reads cached events from disk
+     * Returns empty array if no cache exists or on read error
+     */
     private async readCache(): Promise<BaseEvent[]> {
         try {
             const data = await fs.readFile(CACHE_FILE, 'utf-8');
-            return JSON.parse(data);
+            return JSON.parse(data) as BaseEvent[];
         } catch (error) {
-            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-                logger.warning(mongoLogId(1_000_000), "telemetry", `Error reading telemetry cache: ${error}`);
+            const typedError = error as TelemetryError;
+            if (typedError.code !== 'ENOENT') {
+                logger.warning(
+                    mongoLogId(1_000_000),
+                    "telemetry",
+                    `Error reading telemetry cache: ${typedError.message}`
+                );
             }
             return [];
         }
     }
 
+    /**
+     * Caches events to disk for later sending
+     */
     private async cacheEvents(events: BaseEvent[]): Promise<void> {
         try {
             await fs.writeFile(CACHE_FILE, JSON.stringify(events, null, 2));
-            logger.debug(mongoLogId(1_000_000), "telemetry", `Cached ${events.length} events for later sending`);
+            logger.debug(
+                mongoLogId(1_000_000),
+                "telemetry",
+                `Cached ${events.length} events for later sending`
+            );
         } catch (error) {
-            logger.warning(mongoLogId(1_000_000), "telemetry", `Failed to cache telemetry events: ${error}`);
+            logger.warning(
+                mongoLogId(1_000_000),
+                "telemetry",
+                `Failed to cache telemetry events: ${error instanceof Error ? error.message : String(error)}`
+            );
         }
     }
 
+    /**
+     * Clears the event cache after successful sending
+     */
     private async clearCache(): Promise<void> {
         try {
             await fs.unlink(CACHE_FILE);
         } catch (error) {
-            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-                logger.warning(mongoLogId(1_000_000), "telemetry", `Error clearing telemetry cache: ${error}`);
+            const typedError = error as TelemetryError;
+            if (typedError.code !== 'ENOENT') {
+                logger.warning(
+                    mongoLogId(1_000_000),
+                    "telemetry",
+                    `Error clearing telemetry cache: ${typedError.message}`
+                );
             }
         }
     }

@@ -5,6 +5,8 @@ import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
 import { BaseEvent } from "../../telemetry/types.js";
+import { mongoLogId } from "mongodb-log-writer";
+import logger from "../../logger.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
 
@@ -91,6 +93,12 @@ export class ApiClient {
             this.client.use(this.authMiddleware);
         }
         this.client.use(this.errorMiddleware);
+        logger.info(mongoLogId(1_000_000), "api-client", `Initialized API client with credentials: ${this.hasCredentials()}`);
+    }
+
+    public hasCredentials(): boolean {
+        logger.info(mongoLogId(1_000_000), "api-client", `Checking if API client has credentials: ${!!(this.oauth2Client && this.accessToken)}`);
+        return !!(this.oauth2Client && this.accessToken);
     }
 
     public async getIpInfo(): Promise<{
