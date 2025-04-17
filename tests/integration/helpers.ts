@@ -18,9 +18,17 @@ interface ParameterInfo {
 
 type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 
-export function jestTestMCPClient(): () => Client {
-    let client: Client | undefined;
-    let server: Server | undefined;
+export function setupIntegrationTest(): {
+    mcpClient: () => Client;
+    mongoClient: () => MongoClient;
+    connectionString: () => string;
+    connectMcpClient: () => Promise<void>;
+} {
+    let mongoCluster: runner.MongoCluster | undefined;
+    let mongoClient: MongoClient | undefined;
+
+    let mcpClient: Client | undefined;
+    let mcpServer: Server | undefined;
 
     beforeEach(async () => {
         const clientTransport = new InMemoryTransport();
@@ -32,7 +40,7 @@ export function jestTestMCPClient(): () => Client {
         clientTransport.output.pipeTo(serverTransport.input);
         serverTransport.output.pipeTo(clientTransport.input);
 
-        client = new Client(
+        mcpClient = new Client(
             {
                 name: "test-client",
                 version: "1.2.3",
@@ -42,41 +50,26 @@ export function jestTestMCPClient(): () => Client {
             }
         );
 
-        server = new Server({
+        mcpServer = new Server({
             mcpServer: new McpServer({
                 name: "test-server",
                 version: "1.2.3",
             }),
             session: new Session(),
         });
-        await server.connect(serverTransport);
-        await client.connect(clientTransport);
+        await mcpServer.connect(serverTransport);
+        await mcpClient.connect(clientTransport);
     });
 
     afterEach(async () => {
-        await client?.close();
-        client = undefined;
+        await mcpClient?.close();
+        mcpClient = undefined;
 
-        await server?.close();
-        server = undefined;
-    });
+        await mcpServer?.close();
+        mcpServer = undefined;
 
-    return () => {
-        if (!client) {
-            throw new Error("beforeEach() hook not ran yet");
-        }
-
-        return client;
-    };
-}
-
-export function jestTestCluster(): () => { connectionString: string; getClient: () => MongoClient } {
-    let cluster: runner.MongoCluster | undefined;
-    let client: MongoClient | undefined;
-
-    afterEach(async () => {
-        await client?.close();
-        client = undefined;
+        await mongoClient?.close();
+        mongoClient = undefined;
     });
 
     beforeAll(async function () {
@@ -90,7 +83,7 @@ export function jestTestCluster(): () => { connectionString: string; getClient: 
         let dbsDir = path.join(tmpDir, "mongodb-runner", "dbs");
         for (let i = 0; i < 10; i++) {
             try {
-                cluster = await MongoCluster.start({
+                mongoCluster = await MongoCluster.start({
                     tmpDir: dbsDir,
                     logDir: path.join(tmpDir, "mongodb-runner", "logs"),
                     topology: "standalone",
@@ -116,25 +109,41 @@ export function jestTestCluster(): () => { connectionString: string; getClient: 
     }, 120_000);
 
     afterAll(async function () {
-        await cluster?.close();
-        cluster = undefined;
+        await mongoCluster?.close();
+        mongoCluster = undefined;
     });
 
-    return () => {
-        if (!cluster) {
+    const getMcpClient = () => {
+        if (!mcpClient) {
+            throw new Error("beforeEach() hook not ran yet");
+        }
+
+        return mcpClient;
+    };
+
+    const getConnectionString = () => {
+        if (!mongoCluster) {
             throw new Error("beforeAll() hook not ran yet");
         }
 
-        return {
-            connectionString: cluster.connectionString,
-            getClient: () => {
-                if (!client) {
-                    client = new MongoClient(cluster!.connectionString);
-                }
+        return mongoCluster.connectionString;
+    };
 
-                return client;
-            },
-        };
+    return {
+        mcpClient: getMcpClient,
+        mongoClient: () => {
+            if (!mongoClient) {
+                mongoClient = new MongoClient(getConnectionString());
+            }
+            return mongoClient;
+        },
+        connectionString: getConnectionString,
+        connectMcpClient: async () => {
+            await getMcpClient().callTool({
+                name: "connect",
+                arguments: { connectionStringOrClusterName: getConnectionString() },
+            });
+        },
     };
 }
 
@@ -157,10 +166,10 @@ export function getResponseElements(content: unknown): { type: string; text: str
     return response;
 }
 
-export async function connect(client: Client, cluster: runner.MongoCluster): Promise<void> {
+export async function connect(client: Client, connectionString: string): Promise<void> {
     await client.callTool({
         name: "connect",
-        arguments: { connectionStringOrClusterName: cluster.connectionString },
+        arguments: { connectionStringOrClusterName: connectionString },
     });
 }
 

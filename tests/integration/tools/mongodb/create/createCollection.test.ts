@@ -1,21 +1,18 @@
 import {
-    connect,
-    jestTestCluster,
-    jestTestMCPClient,
     getResponseContent,
     validateParameters,
     dbOperationParameters,
+    setupIntegrationTest,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { ObjectId } from "bson";
 
 describe("createCollection tool", () => {
-    const client = jestTestMCPClient();
-    const cluster = jestTestCluster();
+    const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await client().listTools();
+        const { tools } = await integration.mcpClient().listTools();
         const listCollections = tools.find((tool) => tool.name === "create-collection")!;
         expect(listCollections).toBeDefined();
         expect(listCollections.description).toBe(
@@ -34,9 +31,9 @@ describe("createCollection tool", () => {
         ];
         for (const arg of args) {
             it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await connect(client(), cluster());
+                await integration.connectMcpClient();
                 try {
-                    await client().callTool({ name: "create-collection", arguments: arg });
+                    await integration.mcpClient().callTool({ name: "create-collection", arguments: arg });
                     expect.fail("Expected an error to be thrown");
                 } catch (error) {
                     expect(error).toBeInstanceOf(McpError);
@@ -50,12 +47,12 @@ describe("createCollection tool", () => {
 
     describe("with non-existent database", () => {
         it("creates a new collection", async () => {
-            const mongoClient = cluster().getClient();
+            const mongoClient = integration.mongoClient();
             let collections = await mongoClient.db("foo").listCollections().toArray();
             expect(collections).toHaveLength(0);
 
-            await connect(client(), cluster());
-            const response = await client().callTool({
+            await integration.connectMcpClient();
+            const response = await integration.mcpClient().callTool({
                 name: "create-collection",
                 arguments: { database: "foo", collection: "bar" },
             });
@@ -75,13 +72,13 @@ describe("createCollection tool", () => {
         });
 
         it("creates new collection", async () => {
-            const mongoClient = cluster().getClient();
+            const mongoClient = integration.mongoClient();
             await mongoClient.db(dbName).createCollection("collection1");
             let collections = await mongoClient.db(dbName).listCollections().toArray();
             expect(collections).toHaveLength(1);
 
-            await connect(client(), cluster());
-            const response = await client().callTool({
+            await integration.connectMcpClient();
+            const response = await integration.mcpClient().callTool({
                 name: "create-collection",
                 arguments: { database: dbName, collection: "collection2" },
             });
@@ -93,15 +90,15 @@ describe("createCollection tool", () => {
         });
 
         it("does nothing if collection already exists", async () => {
-            const mongoClient = cluster().getClient();
+            const mongoClient = integration.mongoClient();
             await mongoClient.db(dbName).collection("collection1").insertOne({});
             let collections = await mongoClient.db(dbName).listCollections().toArray();
             expect(collections).toHaveLength(1);
             let documents = await mongoClient.db(dbName).collection("collection1").find({}).toArray();
             expect(documents).toHaveLength(1);
 
-            await connect(client(), cluster());
-            const response = await client().callTool({
+            await integration.connectMcpClient();
+            const response = await integration.mcpClient().callTool({
                 name: "create-collection",
                 arguments: { database: dbName, collection: "collection1" },
             });
