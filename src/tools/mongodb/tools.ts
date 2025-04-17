@@ -11,7 +11,6 @@ import { CollectionStorageSizeTool } from "./metadata/collectionStorageSize.js";
 import { CountTool } from "./read/count.js";
 import { DbStatsTool } from "./metadata/dbStats.js";
 import { AggregateTool } from "./read/aggregate.js";
-import { UpdateOneTool } from "./update/updateOne.js";
 import { UpdateManyTool } from "./update/updateMany.js";
 import { RenameCollectionTool } from "./update/renameCollection.js";
 import { DropDatabaseTool } from "./delete/dropDatabase.js";
@@ -33,7 +32,6 @@ export const MongoDbTools = [
     CountTool,
     DbStatsTool,
     AggregateTool,
-    UpdateOneTool,
     UpdateManyTool,
     RenameCollectionTool,
     DropDatabaseTool,
