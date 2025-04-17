@@ -7,7 +7,6 @@ import { CollectionSchemaTool } from "./metadata/collectionSchema.js";
 import { FindTool } from "./read/find.js";
 import { InsertManyTool } from "./create/insertMany.js";
 import { DeleteManyTool } from "./delete/deleteMany.js";
-import { DeleteOneTool } from "./delete/deleteOne.js";
 import { CollectionStorageSizeTool } from "./metadata/collectionStorageSize.js";
 import { CountTool } from "./read/count.js";
 import { DbStatsTool } from "./metadata/dbStats.js";
@@ -30,7 +29,6 @@ export const MongoDbTools = [
     FindTool,
     InsertManyTool,
     DeleteManyTool,
-    DeleteOneTool,
     CollectionStorageSizeTool,
     CountTool,
     DbStatsTool,

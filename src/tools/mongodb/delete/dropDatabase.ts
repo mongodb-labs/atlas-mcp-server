@@ -17,7 +17,7 @@ export class DropDatabaseTool extends MongoDBToolBase {
         return {
             content: [
                 {
-                    text: `${result.ok ? "Successfully dropped" : "Failed to drop"} database \`${database}\``,
+                    text: `${result.ok ? "Successfully dropped" : "Failed to drop"} database "${database}"`,
                     type: "text",
                 },
             ],

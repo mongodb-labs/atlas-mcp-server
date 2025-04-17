@@ -126,7 +126,7 @@ describe("count tool", () => {
             expect(content).toEqual('Found 0 documents in the collection "coll1"');
         });
 
-        it("throw an error if connection string is not configured", async () => {
+        it("throws an error if connection string is not configured", async () => {
             const response = await integration.mcpClient().callTool({
                 name: "count",
                 arguments: { database: randomDbName, collection: "coll1" },
