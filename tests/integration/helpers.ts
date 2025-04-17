@@ -20,6 +20,7 @@ type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 
 export function setupIntegrationTest(): {
     mcpClient: () => Client;
+    mcpServer: () => Server;
     mongoClient: () => MongoClient;
     connectionString: () => string;
     connectMcpClient: () => Promise<void>;
@@ -30,7 +31,7 @@ export function setupIntegrationTest(): {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
 
@@ -61,7 +62,7 @@ export function setupIntegrationTest(): {
         await mcpClient.connect(clientTransport);
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await mcpClient?.close();
         mcpClient = undefined;
 
@@ -121,6 +122,14 @@ export function setupIntegrationTest(): {
         return mcpClient;
     };
 
+    const getMcpServer = () => {
+        if (!mcpServer) {
+            throw new Error("beforeEach() hook not ran yet");
+        }
+
+        return mcpServer;
+    };
+
     const getConnectionString = () => {
         if (!mongoCluster) {
             throw new Error("beforeAll() hook not ran yet");
@@ -131,6 +140,7 @@ export function setupIntegrationTest(): {
 
     return {
         mcpClient: getMcpClient,
+        mcpServer: getMcpServer,
         mongoClient: () => {
             if (!mongoClient) {
                 mongoClient = new MongoClient(getConnectionString());

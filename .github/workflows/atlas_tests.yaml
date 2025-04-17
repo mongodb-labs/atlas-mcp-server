@@ -1,9 +1,6 @@
 ---
-name: Code Health
+name: Atlas Tests
 on:
-  push:
-    branches:
-      - main
   pull_request:
 jobs:
   run-tests-daily:

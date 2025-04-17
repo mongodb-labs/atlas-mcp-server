@@ -157,6 +157,10 @@ export class ApiClient {
         return data;
     }
 
+    async deleteCluster(options: FetchOptions<operations["deleteCluster"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
+    }
+
     async getCluster(options: FetchOptions<operations["getCluster"]>) {
         const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
         return data;
@@ -171,5 +175,6 @@ export class ApiClient {
         const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/databaseUsers", options);
         return data;
     }
+
     // DO NOT EDIT. This is auto-generated code.
 }
