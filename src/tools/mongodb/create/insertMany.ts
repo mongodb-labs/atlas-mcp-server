@@ -27,7 +27,7 @@ export class InsertManyTool extends MongoDBToolBase {
         return {
             content: [
                 {
-                    text: `Inserted \`${result.insertedCount}\` documents into collection \`${collection}\``,
+                    text: `Inserted \`${result.insertedCount}\` document(s) into collection "${collection}"`,
                     type: "text",
                 },
                 {
