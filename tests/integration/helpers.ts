@@ -19,14 +19,16 @@ interface ParameterInfo {
 
 type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 
-export function setupIntegrationTest(): {
+export interface IntegrationTest {
     mcpClient: () => Client;
     mcpServer: () => Server;
     mongoClient: () => MongoClient;
     connectionString: () => string;
     connectMcpClient: () => Promise<void>;
     randomDbName: () => string;
-} {
+};
+
+export function setupIntegrationTest(): IntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
 
