@@ -6,8 +6,9 @@ import path from "path";
 import fs from "fs/promises";
 import { Session } from "../../src/session.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import { toIncludeAllMembers } from "jest-extended";
+import config from "../../src/config.js";
 
 interface ParameterInfo {
     name: string;
@@ -23,12 +24,15 @@ export function setupIntegrationTest(): {
     mongoClient: () => MongoClient;
     connectionString: () => string;
     connectMcpClient: () => Promise<void>;
+    randomDbName: () => string;
 } {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
 
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
+
+    let randomDbName: string;
 
     beforeEach(async () => {
         const clientTransport = new InMemoryTransport();
@@ -59,6 +63,7 @@ export function setupIntegrationTest(): {
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
+        randomDbName = new ObjectId().toString();
     });
 
     afterEach(async () => {
@@ -70,6 +75,8 @@ export function setupIntegrationTest(): {
 
         await mongoClient?.close();
         mongoClient = undefined;
+
+        config.connectionString = undefined;
     });
 
     beforeAll(async function () {
@@ -144,6 +151,7 @@ export function setupIntegrationTest(): {
                 arguments: { connectionStringOrClusterName: getConnectionString() },
             });
         },
+        randomDbName: () => randomDbName,
     };
 }
 
