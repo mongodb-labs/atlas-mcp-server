@@ -40,7 +40,8 @@ const mergedUserConfig = {
     ...getCliConfig(),
 };
 
-const machineMetadata = {
+// Machine-specific metadata that isn't configurable
+export const machineMetadata = {
     device_id: "id", // TODO: use @mongodb-js/machine-id
     platform: process.platform,
     arch: process.arch,
@@ -50,7 +51,6 @@ const machineMetadata = {
 
 const config = {
     ...mergedUserConfig,
-    ...machineMetadata,
     version: packageJson.version,
     mcpServerName: "MdbMcpServer",
     isTelemetryEnabled: true,

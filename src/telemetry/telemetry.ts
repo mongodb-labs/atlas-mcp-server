@@ -1,14 +1,13 @@
 import { Session } from "../session.js";
 import { BaseEvent, type ToolEvent } from "./types.js";
-import pkg from "../../package.json" with { type: "json" };
 import config from "../config.js";
 import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import { ApiClient } from "../common/atlas/apiClient.js";
 import fs from "fs/promises";
 import path from "path";
+import { MACHINE_METADATA } from "./constants.js";
 
-const TELEMETRY_ENABLED = config.telemetry !== "disabled";
 const CACHE_FILE = path.join(process.cwd(), ".telemetry-cache.json");
 
 interface TelemetryError extends Error {
@@ -39,16 +38,18 @@ export class Telemetry {
     constructor(private readonly session: Session) {
         // Ensure all required properties are present
         this.commonProperties = Object.freeze({
-            device_id: config.device_id,
-            mcp_server_version: pkg.version,
-            mcp_server_name: config.mcpServerName,
+            ...MACHINE_METADATA,
             mcp_client_version: this.session.agentRunner?.version,
             mcp_client_name: this.session.agentRunner?.name,
-            platform: config.platform,
-            arch: config.arch,
-            os_type: config.os_type,
-            os_version: config.os_version,
         });
+    }
+
+    /**
+     * Checks if telemetry is currently enabled
+     * This is a method rather than a constant to capture runtime config changes
+     */
+    private static isTelemetryEnabled(): boolean {
+        return config.telemetry !== "disabled";
     }
 
     /**
@@ -56,7 +57,7 @@ export class Telemetry {
      * @param events - The events to emit
      */
     public async emitEvents(events: BaseEvent[]): Promise<void> {
-        if (!TELEMETRY_ENABLED) {
+        if (!Telemetry.isTelemetryEnabled()) {
             logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping events.");
             return;
         }
