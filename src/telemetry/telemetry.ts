@@ -47,9 +47,27 @@ export class Telemetry {
     /**
      * Checks if telemetry is currently enabled
      * This is a method rather than a constant to capture runtime config changes
+     *
+     * Follows the Console Do Not Track standard (https://consoledonottrack.com/)
+     * by respecting the DO_NOT_TRACK environment variable
      */
     private static isTelemetryEnabled(): boolean {
-        return config.telemetry !== "disabled";
+        // Check if telemetry is explicitly disabled in config
+        if (config.telemetry === "disabled") {
+            return false;
+        }
+
+        // Check for DO_NOT_TRACK environment variable as per https://consoledonottrack.com/
+        const doNotTrack = process.env.DO_NOT_TRACK;
+        if (doNotTrack) {
+            const value = doNotTrack.toLowerCase();
+            // Telemetry should be disabled if DO_NOT_TRACK is "1", "true", or "yes"
+            if (value === "1" || value === "true" || value === "yes") {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
