@@ -233,7 +233,7 @@ describe("createIndex tool", () => {
             );
         });
 
-        it("throw an error if connection string is not configured", async () => {
+        it("throws an error if connection string is not configured", async () => {
             const response = await integration.mcpClient().callTool({
                 name: "create-index",
                 arguments: {

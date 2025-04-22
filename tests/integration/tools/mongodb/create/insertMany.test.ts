@@ -125,7 +125,7 @@ describe("insertMany tool", () => {
             expect(content).toContain('Inserted `1` document(s) into collection "coll1"');
         });
 
-        it("throw an error if connection string is not configured", async () => {
+        it("throws an error if connection string is not configured", async () => {
             const response = await integration.mcpClient().callTool({
                 name: "insert-many",
                 arguments: {
