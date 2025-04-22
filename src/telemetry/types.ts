@@ -3,7 +3,7 @@
  */
 export interface Event {
     timestamp: string;
-    source: 'mdbmcp';
+    source: "mdbmcp";
     properties: Record<string, unknown>;
 }
 
@@ -19,7 +19,7 @@ export interface BaseEvent extends Event {
         os_type: string;
         os_version?: string;
         session_id?: string;
-    } & Event['properties'];
+    } & Event["properties"];
 }
 
 /**
@@ -30,12 +30,12 @@ export interface ToolEvent extends BaseEvent {
         command: string;
         category: string;
         duration_ms: number;
-        result: 'success' | 'failure';
+        result: "success" | "failure";
         error_code?: string;
         error_type?: string;
         project_id?: string;
         org_id?: string;
         cluster_name?: string;
         is_atlas?: boolean;
-    } & BaseEvent['properties'];
+    } & BaseEvent["properties"];
 }

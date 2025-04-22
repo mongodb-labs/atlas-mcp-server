@@ -6,7 +6,6 @@ import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 
-
 export class Server {
     public readonly session: Session;
     private readonly mcpServer: McpServer;
@@ -24,7 +23,7 @@ export class Server {
 
         await this.mcpServer.connect(transport);
 
-        this.mcpServer.server.oninitialized = () =>  {
+        this.mcpServer.server.oninitialized = () => {
             this.session.setAgentClientData(this.mcpServer.server.getClientVersion());
             logger.info(mongoLogId(1_000_004), "server", `Server started with transport ${transport.constructor.name}`);
         };

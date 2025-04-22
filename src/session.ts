@@ -8,7 +8,7 @@ export class Session {
     serviceProvider?: NodeDriverServiceProvider;
     apiClient: ApiClient;
     agentClientName?: string;
-    agentClientVersion?: string; 
+    agentClientVersion?: string;
 
     constructor() {
         // Initialize API client with credentials if available
@@ -26,14 +26,14 @@ export class Session {
         // Initialize API client without credentials
         this.apiClient = new ApiClient({ baseUrl: config.apiBaseUrl });
     }
-    
+
     setAgentClientData(agentClient: Implementation | undefined) {
         this.agentClientName = agentClient?.name;
         this.agentClientVersion = agentClient?.version;
     }
 
     ensureAuthenticated(): asserts this is { apiClient: ApiClient } {
-        if (!this.apiClient || !(this.apiClient.hasCredentials())) {
+        if (!this.apiClient || !this.apiClient.hasCredentials()) {
             if (!config.apiClientId || !config.apiClientSecret) {
                 throw new Error(
                     "Not authenticated make sure to configure MCP server with MDB_MCP_API_CLIENT_ID and MDB_MCP_API_CLIENT_SECRET environment variables."
