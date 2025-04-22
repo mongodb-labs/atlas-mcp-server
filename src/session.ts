@@ -1,6 +1,6 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ApiClient } from "./common/atlas/apiClient.js";
-import config from "./config.js";
+import defaultConfig from "./config.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 export class Session {
@@ -13,15 +13,17 @@ export class Session {
     };
     private credentials?: { clientId: string; clientSecret: string };
     private baseUrl: string;
+    private readonly config: any;
 
-    constructor() {
-        this.baseUrl = config.apiBaseUrl ?? "https://cloud.mongodb.com/";
+    constructor(config = defaultConfig) {
+        this.config = config;
+        this.baseUrl = this.config.apiBaseUrl ?? "https://cloud.mongodb.com/";
 
         // Store credentials if available
-        if (config.apiClientId && config.apiClientSecret) {
+        if (this.config.apiClientId && this.config.apiClientSecret) {
             this.credentials = {
-                clientId: config.apiClientId,
-                clientSecret: config.apiClientSecret,
+                clientId: this.config.apiClientId,
+                clientSecret: this.config.apiClientSecret,
             };
 
             // Initialize API client with credentials
