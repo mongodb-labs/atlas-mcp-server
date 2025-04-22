@@ -9,22 +9,29 @@ export class Session {
     apiClient: ApiClient;
     agentClientName?: string;
     agentClientVersion?: string;
+    private credentials?: { clientId: string; clientSecret: string };
+    private baseUrl: string;
 
     constructor() {
-        // Initialize API client with credentials if available
+        this.baseUrl = config.apiBaseUrl ?? "https://cloud.mongodb.com/";
+        
+        // Store credentials if available
         if (config.apiClientId && config.apiClientSecret) {
+            this.credentials = {
+                clientId: config.apiClientId,
+                clientSecret: config.apiClientSecret,
+            };
+            
+            // Initialize API client with credentials
             this.apiClient = new ApiClient({
-                baseUrl: config.apiBaseUrl,
-                credentials: {
-                    clientId: config.apiClientId,
-                    clientSecret: config.apiClientSecret,
-                },
+                baseUrl: this.baseUrl,
+                credentials: this.credentials,
             });
             return;
         }
 
         // Initialize API client without credentials
-        this.apiClient = new ApiClient({ baseUrl: config.apiBaseUrl });
+        this.apiClient = new ApiClient({ baseUrl: this.baseUrl });
     }
 
     setAgentClientData(agentClient: Implementation | undefined) {
@@ -33,20 +40,18 @@ export class Session {
     }
 
     ensureAuthenticated(): asserts this is { apiClient: ApiClient } {
-        if (!this.apiClient || !this.apiClient.hasCredentials()) {
-            if (!config.apiClientId || !config.apiClientSecret) {
+        if (!this.apiClient.hasCredentials()) {
+            if (!this.credentials) {
                 throw new Error(
                     "Not authenticated make sure to configure MCP server with MDB_MCP_API_CLIENT_ID and MDB_MCP_API_CLIENT_SECRET environment variables."
                 );
             }
 
-            // Initialize or reinitialize API client with credentials
+            // Reinitialize API client with the stored credentials
+            // This can happen if the server was configured without credentials but the env variables are later set
             this.apiClient = new ApiClient({
-                baseUrl: config.apiBaseUrl,
-                credentials: {
-                    clientId: config.apiClientId,
-                    clientSecret: config.apiClientSecret,
-                },
+                baseUrl: this.baseUrl,
+                credentials: this.credentials,
             });
         }
     }
