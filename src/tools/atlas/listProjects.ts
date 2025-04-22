@@ -18,7 +18,9 @@ export class ListProjectsTool extends AtlasToolBase {
         const data = orgId
             ? await this.session.apiClient.listOrganizationProjects({
                   params: {
-                      orgId,
+                      path: {
+                          orgId,
+                      },
                   },
               })
             : await this.session.apiClient.listProjects();
