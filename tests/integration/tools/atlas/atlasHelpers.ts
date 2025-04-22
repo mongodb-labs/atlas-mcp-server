@@ -6,28 +6,22 @@ import { Session } from "../../../../src/session.js";
 
 export type IntegrationTestFunction = (integration: IntegrationTest) => void;
 
-export function describeTest(name: number | string | Function | jest.FunctionLike, fn: IntegrationTestFunction) {
-    return describe("test", () => {
-        const integration = setupIntegrationTest();
-        describe(name, () => {
-            fn(integration);
-        });
-    });
-}
-
 export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function describeAtlas(name: number | string | Function | jest.FunctionLike, fn: IntegrationTestFunction) {
-    if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
-        return describe.skip("atlas", () => {
-            describeTest(name, fn);
+    const testDefinition = () => {
+        const integration = setupIntegrationTest();
+        describe(name, () => {
+            fn(integration);
         });
+    };
+
+    if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
+        return describe.skip("atlas", testDefinition);
     }
-    return describe("atlas", () => {
-        describeTest(name, fn);
-    });
+    return describe("atlas", testDefinition);
 }
 
 interface ProjectTestArgs {

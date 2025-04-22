@@ -37,7 +37,7 @@ export function setupIntegrationTest(): IntegrationTest {
 
     let randomDbName: string;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
 
