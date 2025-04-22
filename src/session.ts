@@ -1,8 +1,6 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ApiClient } from "./common/atlas/apiClient.js";
 import config from "./config.js";
-import logger from "./logger.js";
-import { mongoLogId } from "mongodb-log-writer";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
 export class Session {

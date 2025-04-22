@@ -93,7 +93,6 @@ export class ApiClient {
             this.client.use(this.authMiddleware);
         }
         this.client.use(this.errorMiddleware);
-        logger.info(mongoLogId(1_000_000), "api-client", `Initialized API client with credentials: ${this.hasCredentials()}`);
     }
 
     public hasCredentials(): boolean {
