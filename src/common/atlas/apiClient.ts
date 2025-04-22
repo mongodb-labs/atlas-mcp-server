@@ -153,8 +153,8 @@ export class ApiClient {
     }
 
     // DO NOT EDIT. This is auto-generated code.
-    async listClustersForAllProjects(options?: FetchOptions<operations["listClustersForAllProjects"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/clusters", options);
+    async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/orgs", options);
         return data;
     }
 
@@ -168,18 +168,13 @@ export class ApiClient {
         return data;
     }
 
+    async listClustersForAllProjects(options?: FetchOptions<operations["listClustersForAllProjects"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/clusters", options);
+        return data;
+    }
+
     async getProject(options: FetchOptions<operations["getProject"]>) {
         const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}", options);
-        return data;
-    }
-
-    async listProjectIpAccessLists(options: FetchOptions<operations["listProjectIpAccessLists"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/accessList", options);
-        return data;
-    }
-
-    async createProjectIpAccessList(options: FetchOptions<operations["createProjectIpAccessList"]>) {
-        const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/accessList", options);
         return data;
     }
 
@@ -193,8 +188,13 @@ export class ApiClient {
         return data;
     }
 
-    async getCluster(options: FetchOptions<operations["getCluster"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
+    async listProjectIpAccessLists(options: FetchOptions<operations["listProjectIpAccessLists"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/accessList", options);
+        return data;
+    }
+
+    async createProjectIpAccessList(options: FetchOptions<operations["createProjectIpAccessList"]>) {
+        const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/accessList", options);
         return data;
     }
 
@@ -205,6 +205,11 @@ export class ApiClient {
 
     async createDatabaseUser(options: FetchOptions<operations["createDatabaseUser"]>) {
         const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/databaseUsers", options);
+        return data;
+    }
+
+    async getCluster(options: FetchOptions<operations["getCluster"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
         return data;
     }
     // DO NOT EDIT. This is auto-generated code.
