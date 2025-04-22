@@ -184,5 +184,10 @@ export class ApiClient {
         await this.client.DELETE("/api/atlas/v2/groups/{groupId}/databaseUsers/{databaseName}/{username}", options);
     }
 
+    async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/orgs", options);
+        return data;
+    }
+
     // DO NOT EDIT. This is auto-generated code.
 }

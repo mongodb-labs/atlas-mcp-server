@@ -19,6 +19,7 @@ async function readStdin() {
 function filterOpenapi(openapi: OpenAPIV3_1.Document): OpenAPIV3_1.Document {
     const allowedOperations = [
         "listProjects",
+        "listOrganizations",
         "getProject",
         "createProject",
         "listClusters",

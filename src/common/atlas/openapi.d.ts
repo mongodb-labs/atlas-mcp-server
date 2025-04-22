@@ -212,6 +212,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/atlas/v2/orgs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Return All Organizations
+         * @description Returns all organizations to which the requesting Service Account or API Key has access. To use this resource, the requesting Service Account or API Key must have the Organization Member role.
+         */
+        get: operations["listOrganizations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -597,6 +617,25 @@ export interface components {
             readonly parameters?: Record<string, never>[];
             /** @description Application error message returned with this error. */
             readonly reason?: string;
+        };
+        /** @description Details that describe the organization. */
+        AtlasOrganization: {
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the organization.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id?: string;
+            /** @description Flag that indicates whether this organization has been deleted. */
+            readonly isDeleted?: boolean;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /** @description Human-readable label that identifies the organization. */
+            name: string;
+            /**
+             * @description Disables automatic alert creation. When set to true, no organization level alerts will be created automatically.
+             * @default false
+             */
+            skipDefaultAlertsSettings: boolean;
         };
         /** Atlas Search Analyzer */
         AtlasSearchAnalyzer: {
@@ -3331,6 +3370,17 @@ export interface components {
              */
             readonly totalCount?: number;
         };
+        PaginatedOrganizationView: {
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /** @description List of returned documents that MongoDB Cloud provides when completing this request. */
+            readonly results?: components["schemas"]["AtlasOrganization"][];
+            /**
+             * Format: int32
+             * @description Total number of documents available. MongoDB Cloud omits this value if `includeCount` is set to `false`. The total number is an estimate and may not be exact.
+             */
+            readonly totalCount?: number;
+        };
         /**
          * Periodic Cloud Provider Snapshot Source
          * @description Scheduled Cloud Provider Snapshot as Source for a Data Lake Pipeline.
@@ -4876,6 +4926,7 @@ export type ApiAtlasClusterAdvancedConfigurationView = components['schemas']['Ap
 export type ApiAtlasFtsAnalyzersViewManual = components['schemas']['ApiAtlasFTSAnalyzersViewManual'];
 export type ApiAtlasFtsMappingsViewManual = components['schemas']['ApiAtlasFTSMappingsViewManual'];
 export type ApiError = components['schemas']['ApiError'];
+export type AtlasOrganization = components['schemas']['AtlasOrganization'];
 export type AtlasSearchAnalyzer = components['schemas']['AtlasSearchAnalyzer'];
 export type AzureCloudProviderContainer = components['schemas']['AzureCloudProviderContainer'];
 export type AzureCloudProviderSettings = components['schemas']['AzureCloudProviderSettings'];
@@ -5003,6 +5054,7 @@ export type PaginatedAtlasGroupView = components['schemas']['PaginatedAtlasGroup
 export type PaginatedClusterDescription20240805 = components['schemas']['PaginatedClusterDescription20240805'];
 export type PaginatedNetworkAccessView = components['schemas']['PaginatedNetworkAccessView'];
 export type PaginatedOrgGroupView = components['schemas']['PaginatedOrgGroupView'];
+export type PaginatedOrganizationView = components['schemas']['PaginatedOrganizationView'];
 export type PeriodicCpsSnapshotSource = components['schemas']['PeriodicCpsSnapshotSource'];
 export type ReplicationSpec20240805 = components['schemas']['ReplicationSpec20240805'];
 export type ResourceTag = components['schemas']['ResourceTag'];
@@ -5642,6 +5694,44 @@ export interface operations {
             401: components["responses"]["unauthorized"];
             403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    listOrganizations: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response returns the total number of items (**totalCount**) in the response. */
+                includeCount?: components["parameters"]["includeCount"];
+                /** @description Number of items that the response returns per page. */
+                itemsPerPage?: components["parameters"]["itemsPerPage"];
+                /** @description Number of the page that displays the current set of the total objects that the response returns. */
+                pageNum?: components["parameters"]["pageNum"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+                /** @description Human-readable label of the organization to use to filter the returned list. Performs a case-insensitive search for an organization that starts with the specified name. */
+                name?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2023-01-01+json": components["schemas"]["PaginatedOrganizationView"];
+                };
+            };
+            400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            404: components["responses"]["notFound"];
+            409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
         };
     };
