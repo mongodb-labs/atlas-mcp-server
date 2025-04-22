@@ -19,16 +19,15 @@ export abstract class MongoDBToolBase extends ToolBase {
     protected category: ToolCategory = "mongodb";
 
     protected async ensureConnected(): Promise<NodeDriverServiceProvider> {
-        const provider = this.session.serviceProvider;
-        if (!provider && config.connectionString) {
+        if (!this.session.serviceProvider && config.connectionString) {
             await this.connectToMongoDB(config.connectionString);
         }
 
-        if (!provider) {
+        if (!this.session.serviceProvider) {
             throw new MongoDBError(ErrorCodes.NotConnectedToMongoDB, "Not connected to MongoDB");
         }
 
-        return provider;
+        return this.session.serviceProvider;
     }
 
     protected handleError(error: unknown): Promise<CallToolResult> | CallToolResult {

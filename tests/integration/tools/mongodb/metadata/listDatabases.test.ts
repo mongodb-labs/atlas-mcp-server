@@ -1,4 +1,5 @@
-import { getResponseElements, getParameters, setupIntegrationTest } from "../../../helpers.js";
+import config from "../../../../../src/config.js";
+import { getResponseElements, getParameters, setupIntegrationTest, getResponseContent } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 
 describe("listDatabases tool", () => {
@@ -12,6 +13,23 @@ describe("listDatabases tool", () => {
 
         const parameters = getParameters(listDatabases);
         expect(parameters).toHaveLength(0);
+    });
+
+    describe("when not connected", () => {
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
+
+            const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
+            const dbNames = getDbNames(response.content);
+
+            expect(dbNames).toIncludeSameMembers(["admin", "config", "local"]);
+        });
+
+        it("throw an error if connection string is not configured", async () => {
+            const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+        });
     });
 
     describe("with no preexisting databases", () => {
