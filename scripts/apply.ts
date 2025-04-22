@@ -50,7 +50,7 @@ async function main() {
 
             let requiredParams = !!operation.requestBody;
             let hasResponseBody = false;
-            for(const code in operation.responses) {
+            for (const code in operation.responses) {
                 try {
                     const httpCode = parseInt(code, 10);
                     if (httpCode >= 200 && httpCode < 300) {
@@ -91,8 +91,12 @@ async function main() {
             const { operationId, method, path, requiredParams, hasResponseBody } = operation;
             return `async ${operationId}(options${requiredParams ? "" : "?"}: FetchOptions<operations["${operationId}"]>) {
     ${hasResponseBody ? `const { data } = ` : ``}await this.client.${method}("${path}", options);
-    ${hasResponseBody ? `return data;
-` : ``}}
+    ${
+        hasResponseBody
+            ? `return data;
+`
+            : ``
+    }}
 `;
         })
         .join("\n");
@@ -101,7 +105,7 @@ async function main() {
     const templateLines = templateFile.split("\n");
     let outputLines: string[] = [];
     let addLines = true;
-    for(const line of templateLines) {
+    for (const line of templateLines) {
         if (line.includes("DO NOT EDIT. This is auto-generated code.")) {
             addLines = !addLines;
             outputLines.push(line);

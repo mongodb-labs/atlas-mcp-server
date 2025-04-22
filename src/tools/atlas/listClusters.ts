@@ -58,7 +58,8 @@ export class ListClustersTool extends AtlasToolBase {
         if (!formattedClusters.length) {
             throw new Error("No clusters found.");
         }
-        const rows = formattedClusters.map((cluster) => {
+        const rows = formattedClusters
+            .map((cluster) => {
                 return `${cluster.groupName} (${cluster.groupId}) | ${cluster.name}`;
             })
             .join("\n");

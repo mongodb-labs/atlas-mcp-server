@@ -23,7 +23,9 @@ describeAtlas("tools", () => {
             });
 
             it("returns project names", async () => {
-                const response = (await integration.mcpClient().callTool({ name: "atlas-list-projects", arguments: {} })) as CallToolResult;
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({ name: "atlas-list-projects", arguments: {} })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
                 expect(response.content[0].text).toContain("MCP Test");
@@ -45,8 +47,8 @@ describeAtlas("tools", () => {
                         groupId: projectId,
                         username: "testuser-" + randomId,
                         databaseName: "admin",
-                    }
-                }
+                    },
+                },
             });
         });
 
@@ -76,7 +78,7 @@ describeAtlas("tools", () => {
                                 databaseName: "admin",
                             },
                         ],
-                    }
+                    },
                 })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
@@ -93,7 +95,9 @@ describeAtlas("tools", () => {
                 expect(listDbUsers.inputSchema.properties).toHaveProperty("projectId");
             });
             it("returns database users by project", async () => {
-                const response = (await integration.mcpClient().callTool({ name: "atlas-list-db-users", arguments: { projectId } })) as CallToolResult;
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({ name: "atlas-list-db-users", arguments: { projectId } })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
                 expect(response.content[0].text).toContain("testuser-" + randomId);
@@ -113,8 +117,8 @@ describeAtlas("tools", () => {
                     path: {
                         groupId: projectId,
                         entryValue: ipInfo.currentIpv4Address,
-                    }
-                }
+                    },
+                },
             });
 
             await session.apiClient.deleteProjectIpAccessList({
@@ -122,8 +126,8 @@ describeAtlas("tools", () => {
                     path: {
                         groupId: projectId,
                         entryValue: "8.8.8.8",
-                    }
-                }
+                    },
+                },
             });
 
             await session.apiClient.deleteProjectIpAccessList({
@@ -131,8 +135,8 @@ describeAtlas("tools", () => {
                     path: {
                         groupId: projectId,
                         entryValue: "9.9.9.9/24",
-                    }
-                }
+                    },
+                },
             });
         });
 
@@ -157,8 +161,8 @@ describeAtlas("tools", () => {
                         projectId,
                         ipAddresses: ["8.8.8.8"],
                         cidrBlocks: ["9.9.9.9/24"],
-                        currentIpAddress: true
-                    }
+                        currentIpAddress: true,
+                    },
                 })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
@@ -181,7 +185,9 @@ describeAtlas("tools", () => {
                 session.ensureAuthenticated();
                 const ipInfo = await session.apiClient.getIpInfo();
 
-                const response = (await integration.mcpClient().callTool({ name: "atlas-inspect-access-list", arguments: { projectId } })) as CallToolResult;
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({ name: "atlas-inspect-access-list", arguments: { projectId } })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
                 expect(response.content[0].text).toContain("8.8.8.8");
@@ -200,9 +206,9 @@ describeAtlas("tools", () => {
                     path: {
                         groupId: projectId,
                         clusterName: "ClusterTest-" + randomId,
-                    }
+                    },
                 },
-            })
+            });
         });
 
         describe("atlas-create-free-cluster", () => {
@@ -220,11 +226,12 @@ describeAtlas("tools", () => {
 
             it("should create a free cluster", async () => {
                 const response = (await integration.mcpClient().callTool({
-                    name: "atlas-create-free-cluster", arguments: {
+                    name: "atlas-create-free-cluster",
+                    arguments: {
                         projectId,
                         name: "ClusterTest-" + randomId,
                         region: "US_EAST_1",
-                    }
+                    },
                 })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
@@ -235,17 +242,22 @@ describeAtlas("tools", () => {
         describe("atlas-inspect-cluster", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                    const inspectCluster = tools.find((tool) => tool.name === "atlas-inspect-cluster")!;
+                const inspectCluster = tools.find((tool) => tool.name === "atlas-inspect-cluster")!;
 
-                    expect(inspectCluster).toBeDefined();
-                    expect(inspectCluster.inputSchema.type).toBe("object");
-                    expect(inspectCluster.inputSchema.properties).toBeDefined();
-                    expect(inspectCluster.inputSchema.properties).toHaveProperty("projectId");
-                    expect(inspectCluster.inputSchema.properties).toHaveProperty("clusterName");
+                expect(inspectCluster).toBeDefined();
+                expect(inspectCluster.inputSchema.type).toBe("object");
+                expect(inspectCluster.inputSchema.properties).toBeDefined();
+                expect(inspectCluster.inputSchema.properties).toHaveProperty("projectId");
+                expect(inspectCluster.inputSchema.properties).toHaveProperty("clusterName");
             });
 
             it("returns cluster data", async () => {
-                const response = (await integration.mcpClient().callTool({ name: "atlas-inspect-cluster", arguments: { projectId, clusterName: "ClusterTest-" + randomId } })) as CallToolResult;
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({
+                        name: "atlas-inspect-cluster",
+                        arguments: { projectId, clusterName: "ClusterTest-" + randomId },
+                    })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
                 expect(response.content[0].text).toContain(`ClusterTest-${randomId} | `);
@@ -263,14 +275,18 @@ describeAtlas("tools", () => {
             });
 
             it("returns clusters by project", async () => {
-                const response = (await integration.mcpClient().callTool({ name: "atlas-list-clusters", arguments: { projectId } })) as CallToolResult;
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({ name: "atlas-list-clusters", arguments: { projectId } })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(2);
                 expect(response.content[1].text).toContain(`ClusterTest-${randomId} | `);
             });
 
             it("returns clusters for all projects", async () => {
-                const response = (await integration.mcpClient().callTool({ name: "atlas-list-clusters", arguments: { } })) as CallToolResult;
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({ name: "atlas-list-clusters", arguments: {} })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
                 expect(response.content[0].text).toContain(` | ClusterTest-${randomId}`);
