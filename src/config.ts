@@ -40,15 +40,6 @@ const mergedUserConfig = {
     ...getCliConfig(),
 };
 
-// Machine-specific metadata that isn't configurable
-export const machineMetadata = {
-    device_id: "id", // TODO: use @mongodb-js/machine-id
-    platform: process.platform,
-    arch: process.arch,
-    os_type: process.platform,
-    os_version: process.version,
-};
-
 const config = {
     ...mergedUserConfig,
     version: packageJson.version,

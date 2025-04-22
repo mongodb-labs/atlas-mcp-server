@@ -1,6 +1,6 @@
 import pkg from "../../package.json" with { type: "json" };
 import config from "../config.js";
-import { getMachineIdSync } from 'native-machine-id';
+import { getMachineIdSync } from "native-machine-id";
 
 /**
  * Machine-specific metadata formatted for telemetry
