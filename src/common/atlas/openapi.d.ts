@@ -62,7 +62,11 @@ export interface paths {
         get: operations["getProject"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Remove One Project
+         * @description Removes the specified project. Projects group clusters into logical collections that support an application environment, workload, or both. Each project can have its own users, teams, security, tags, and alert settings. You can delete a project only if there are no Online Archives for the clusters in the project. To use this resource, the requesting Service Account or API Key must have the Project Owner role.
+         */
+        delete: operations["deleteProject"];
         options?: never;
         head?: never;
         patch?: never;
@@ -224,6 +228,33 @@ export interface paths {
          * @description Returns all organizations to which the requesting Service Account or API Key has access. To use this resource, the requesting Service Account or API Key must have the Organization Member role.
          */
         get: operations["listOrganizations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/atlas/v2/orgs/{orgId}/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Return One or More Projects in One Organization
+         * @description Returns multiple projects in the specified organization. Each organization can have multiple projects. Use projects to:
+         *
+         *     - Isolate different environments, such as development, test, or production environments, from each other.
+         *     - Associate different MongoDB Cloud users or teams with different environments, or give different permission to MongoDB Cloud users in different environments.
+         *     - Maintain separate cluster security configurations.
+         *     - Create different alert settings.
+         *
+         *     To use this resource, the requesting Service Account or API Key must have the Organization Member role.
+         */
+        get: operations["listOrganizationProjects"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4901,6 +4932,8 @@ export interface components {
         includeCount: boolean;
         /** @description Number of items that the response returns per page. */
         itemsPerPage: number;
+        /** @description Unique 24-hexadecimal digit string that identifies the organization that contains your projects. Use the [/orgs](#tag/Organizations/operation/listOrganizations) endpoint to retrieve all organizations to which the authenticated user has access. */
+        orgId: string;
         /** @description Number of the page that displays the current set of the total objects that the response returns. */
         pageNum: number;
         /** @description Flag that indicates whether the response body should be in the prettyprint format. */
@@ -5147,6 +5180,7 @@ export type ParameterEnvelope = components['parameters']['envelope'];
 export type ParameterGroupId = components['parameters']['groupId'];
 export type ParameterIncludeCount = components['parameters']['includeCount'];
 export type ParameterItemsPerPage = components['parameters']['itemsPerPage'];
+export type ParameterOrgId = components['parameters']['orgId'];
 export type ParameterPageNum = components['parameters']['pageNum'];
 export type ParameterPretty = components['parameters']['pretty'];
 export type $defs = Record<string, never>;
@@ -5286,6 +5320,40 @@ export interface operations {
             };
             400: components["responses"]["badRequest"];
             404: components["responses"]["notFound"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    deleteProject: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description This endpoint does not return a response body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2023-01-01+json": unknown;
+                };
+            };
+            400: components["responses"]["badRequest"];
+            404: components["responses"]["notFound"];
+            409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
         };
     };
@@ -5732,6 +5800,46 @@ export interface operations {
             401: components["responses"]["unauthorized"];
             404: components["responses"]["notFound"];
             409: components["responses"]["conflict"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    listOrganizationProjects: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response returns the total number of items (**totalCount**) in the response. */
+                includeCount?: components["parameters"]["includeCount"];
+                /** @description Number of items that the response returns per page. */
+                itemsPerPage?: components["parameters"]["itemsPerPage"];
+                /** @description Number of the page that displays the current set of the total objects that the response returns. */
+                pageNum?: components["parameters"]["pageNum"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+                /** @description Human-readable label of the project to use to filter the returned list. Performs a case-insensitive search for a project within the organization which is prefixed by the specified name. */
+                name?: string;
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies the organization that contains your projects. Use the [/orgs](#tag/Organizations/operation/listOrganizations) endpoint to retrieve all organizations to which the authenticated user has access. */
+                orgId: components["parameters"]["orgId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2023-01-01+json": components["schemas"]["PaginatedAtlasGroupView"];
+                };
+            };
+            400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
     };

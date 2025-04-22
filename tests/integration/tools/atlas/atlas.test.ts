@@ -5,11 +5,96 @@ import { ObjectId } from "mongodb";
 
 const randomId = new ObjectId().toString();
 
+function parseTable(text: string): Record<string, string>[] {
+    const data = text
+        .split("\n")
+        .filter((line) => line.trim() !== "")
+        .map((line) => line.split("|").map((cell) => cell.trim()));
+
+    const headers = data[0];
+    return data
+        .filter((_, index) => index >= 2)
+        .map((cells) => {
+            const row = {};
+            cells.forEach((cell, index) => {
+                row[headers[index]] = cell;
+            });
+            return row;
+        });
+}
+
 describeAtlas("tools", () => {
     const integration = setupIntegrationTest();
     let projectId = "";
 
+    describe("orgs", () => {
+        describe("atlas-list-orgs", () => {
+            it("should have correct metadata", async () => {
+                const { tools } = await integration.mcpClient().listTools();
+                const listOrgs = tools.find((tool) => tool.name === "atlas-list-orgs");
+                expect(listOrgs).toBeDefined();
+            });
+
+            it("returns org names", async () => {
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({ name: "atlas-list-orgs", arguments: {} })) as CallToolResult;
+                expect(response.content).toBeArray();
+                expect(response.content).toHaveLength(1);
+                const data = parseTable(response.content[0].text as string);
+                expect(data).toHaveLength(1);
+                expect(data[0]["Organization Name"]).toEqual("MongoDB MCP Test");
+            });
+        });
+    });
+
     describe("projects", () => {
+        const projName = "testProj-" + randomId;
+        afterAll(async () => {
+            const session: Session = integration.mcpServer().session;
+            session.ensureAuthenticated();
+
+            const response = (await integration
+                .mcpClient()
+                .callTool({ name: "atlas-list-projects", arguments: {} })) as CallToolResult;
+            expect(response.content).toBeArray();
+            expect(response.content).toHaveLength(1);
+            const data = parseTable(response.content[0].text as string);
+            for (const project of data) {
+                if (project["Project Name"] === projName) {
+                    await session.apiClient.deleteProject({
+                        params: {
+                            path:{
+                                groupId: project["Project ID"],
+                            }
+                        },
+                    });
+                    break;
+                }
+            }
+        });
+        describe("atlas-create-project", () => {
+            it("should have correct metadata", async () => {
+                const { tools } = await integration.mcpClient().listTools();
+                const createProject = tools.find((tool) => tool.name === "atlas-create-project")!;
+                expect(createProject).toBeDefined();
+                expect(createProject.inputSchema.type).toBe("object");
+                expect(createProject.inputSchema.properties).toBeDefined();
+                expect(createProject.inputSchema.properties).toHaveProperty("projectName");
+                expect(createProject.inputSchema.properties).toHaveProperty("organizationId");
+            });
+            it("should create a project", async () => {
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({
+                        name: "atlas-create-project",
+                        arguments: { projectName: projName },
+                    })) as CallToolResult;
+                expect(response.content).toBeArray();
+                expect(response.content).toHaveLength(1);
+                expect(response.content[0].text).toContain(projName);
+            });
+        });
         describe("atlas-list-projects", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
@@ -17,9 +102,7 @@ describeAtlas("tools", () => {
                 expect(listProjects).toBeDefined();
                 expect(listProjects.inputSchema.type).toBe("object");
                 expect(listProjects.inputSchema.properties).toBeDefined();
-
-                const propertyNames = Object.keys(listProjects.inputSchema.properties!);
-                expect(propertyNames).toHaveLength(0);
+                expect(listProjects.inputSchema.properties).toHaveProperty("orgId");
             });
 
             it("returns project names", async () => {
@@ -29,15 +112,22 @@ describeAtlas("tools", () => {
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
                 expect(response.content[0].text).toContain("MCP Test");
-                const data = (response.content[0].text as string).split("\n").map((line) => line.split(" | "));
-                expect(data).toHaveLength(3);
-                expect(data[2]).toHaveLength(3);
-                projectId = data[2][1];
+                const data = parseTable(response.content[0].text as string);
+                expect(data).toBeArray();
+                expect(data.length).toBeGreaterThan(1);
+                for (const project of data) {
+                    if (project["Project Name"] === "MCP Test") {
+                        projectId = data[0]["Project ID"];
+                        break;
+                    }
+                }
             });
         });
     });
 
     describe("db users", () => {
+        const userName = "testuser-" + randomId;
+
         afterAll(async () => {
             const session: Session = integration.mcpServer().session;
             session.ensureAuthenticated();
@@ -45,7 +135,7 @@ describeAtlas("tools", () => {
                 params: {
                     path: {
                         groupId: projectId,
-                        username: "testuser-" + randomId,
+                        username: userName,
                         databaseName: "admin",
                     },
                 },
@@ -70,7 +160,7 @@ describeAtlas("tools", () => {
                     name: "atlas-create-db-user",
                     arguments: {
                         projectId,
-                        username: "testuser-" + randomId,
+                        username: userName,
                         password: "testpassword",
                         roles: [
                             {
@@ -100,7 +190,7 @@ describeAtlas("tools", () => {
                     .callTool({ name: "atlas-list-db-users", arguments: { projectId } })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
-                expect(response.content[0].text).toContain("testuser-" + randomId);
+                expect(response.content[0].text).toContain(userName);
             });
         });
     });
@@ -198,6 +288,8 @@ describeAtlas("tools", () => {
     });
 
     describe("clusters", () => {
+        const clusterName = "ClusterTest-" + randomId;
+
         afterAll(async () => {
             const session: Session = integration.mcpServer().session;
             session.ensureAuthenticated();
@@ -205,7 +297,7 @@ describeAtlas("tools", () => {
                 params: {
                     path: {
                         groupId: projectId,
-                        clusterName: "ClusterTest-" + randomId,
+                        clusterName: clusterName,
                     },
                 },
             });
@@ -229,7 +321,7 @@ describeAtlas("tools", () => {
                     name: "atlas-create-free-cluster",
                     arguments: {
                         projectId,
-                        name: "ClusterTest-" + randomId,
+                        name: clusterName,
                         region: "US_EAST_1",
                     },
                 })) as CallToolResult;
@@ -252,15 +344,13 @@ describeAtlas("tools", () => {
             });
 
             it("returns cluster data", async () => {
-                const response = (await integration
-                    .mcpClient()
-                    .callTool({
-                        name: "atlas-inspect-cluster",
-                        arguments: { projectId, clusterName: "ClusterTest-" + randomId },
-                    })) as CallToolResult;
+                const response = (await integration.mcpClient().callTool({
+                    name: "atlas-inspect-cluster",
+                    arguments: { projectId, clusterName: clusterName },
+                })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
-                expect(response.content[0].text).toContain(`ClusterTest-${randomId} | `);
+                expect(response.content[0].text).toContain(`${clusterName} | `);
             });
         });
 
@@ -280,7 +370,7 @@ describeAtlas("tools", () => {
                     .callTool({ name: "atlas-list-clusters", arguments: { projectId } })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(2);
-                expect(response.content[1].text).toContain(`ClusterTest-${randomId} | `);
+                expect(response.content[1].text).toContain(`${clusterName} | `);
             });
 
             it("returns clusters for all projects", async () => {
@@ -289,7 +379,7 @@ describeAtlas("tools", () => {
                     .callTool({ name: "atlas-list-clusters", arguments: {} })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
-                expect(response.content[0].text).toContain(` | ClusterTest-${randomId}`);
+                expect(response.content[0].text).toContain(` | ${clusterName}`);
             });
         });
     });

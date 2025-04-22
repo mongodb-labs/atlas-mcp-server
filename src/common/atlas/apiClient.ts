@@ -132,6 +132,10 @@ export class ApiClient {
         return data;
     }
 
+    async deleteProject(options: FetchOptions<operations["deleteProject"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}", options);
+    }
+
     async getProject(options: FetchOptions<operations["getProject"]>) {
         const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}", options);
         return data;
@@ -186,6 +190,11 @@ export class ApiClient {
 
     async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {
         const { data } = await this.client.GET("/api/atlas/v2/orgs", options);
+        return data;
+    }
+
+    async listOrganizationProjects(options: FetchOptions<operations["listOrganizationProjects"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/orgs/{orgId}/groups", options);
         return data;
     }
 
