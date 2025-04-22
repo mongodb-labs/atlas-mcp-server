@@ -148,7 +148,7 @@ export function setupIntegrationTest(): {
         connectMcpClient: async () => {
             await getMcpClient().callTool({
                 name: "connect",
-                arguments: { connectionStringOrClusterName: getConnectionString() },
+                arguments: { options: [{ connectionString: getConnectionString() }] },
             });
         },
         randomDbName: () => randomDbName,

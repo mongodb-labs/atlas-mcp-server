@@ -34,22 +34,18 @@ export class ConnectTool extends MongoDBToolBase {
 
     protected async execute({ options: optionsArr }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         const options = optionsArr?.[0];
+        let connectionString: string;
         if (!options && !config.connectionString) {
             return {
                 content: [
                     { type: "text", text: "No connection details provided." },
                     { type: "text", text: "Please provide either a connection string or a cluster name" },
-                    {
-                        type: "text",
-                        text: "Alternatively, you can use the default deployment at mongodb://localhost:27017",
-                    },
                 ],
             };
         }
 
-        let connectionString: string;
-
         if (!options) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             connectionString = config.connectionString!;
         } else if ("connectionString" in options) {
             connectionString = options.connectionString;
