@@ -71,22 +71,7 @@ export class Telemetry {
             return;
         }
 
-        const event = this.createToolEvent(command, category, startTime, result, error);
-        await this.emit([event]);
-    }
-
-    /**
-     * Creates a tool event with common properties and timing information
-     */
-    private createToolEvent(
-        command: string,
-        category: string,
-        startTime: number,
-        result: "success" | "failure",
-        error?: Error
-    ): ToolEvent {
         const duration = Date.now() - startTime;
-
         const event: ToolEvent = {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
@@ -104,7 +89,7 @@ export class Telemetry {
             },
         };
 
-        return event;
+        await this.emit([event]);
     }
 
     /**

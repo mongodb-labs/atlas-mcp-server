@@ -14,14 +14,14 @@ export class Session {
 
     constructor() {
         this.baseUrl = config.apiBaseUrl ?? "https://cloud.mongodb.com/";
-        
+
         // Store credentials if available
         if (config.apiClientId && config.apiClientSecret) {
             this.credentials = {
                 clientId: config.apiClientId,
                 clientSecret: config.apiClientSecret,
             };
-            
+
             // Initialize API client with credentials
             this.apiClient = new ApiClient({
                 baseUrl: this.baseUrl,
