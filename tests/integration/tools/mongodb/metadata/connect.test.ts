@@ -1,4 +1,4 @@
-import { getResponseContent, validateParameters, setupIntegrationTest } from "../../../helpers.js";
+import { getResponseContent, setupIntegrationTest, validateToolMetadata } from "../../../helpers.js";
 
 import config from "../../../../../src/config.js";
 
@@ -6,12 +6,7 @@ describe("Connect tool", () => {
     const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const connectTool = tools.find((tool) => tool.name === "connect")!;
-        expect(connectTool).toBeDefined();
-        expect(connectTool.description).toBe("Connect to a MongoDB instance");
-
-        validateParameters(connectTool, [
+        validateToolMetadata(integration.mcpClient(), "connect", "Connect to a MongoDB instance", [
             {
                 name: "options",
                 description:

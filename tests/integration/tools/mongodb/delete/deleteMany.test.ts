@@ -1,8 +1,9 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
 } from "../../../helpers.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import config from "../../../../../src/config.js";
@@ -11,21 +12,21 @@ describe("deleteMany tool", () => {
     const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const deleteMany = tools.find((tool) => tool.name === "delete-many")!;
-        expect(deleteMany).toBeDefined();
-        expect(deleteMany.description).toBe("Removes all documents that match the filter from a MongoDB collection");
-
-        validateParameters(deleteMany, [
-            ...dbOperationParameters,
-            {
-                name: "filter",
-                type: "object",
-                description:
-                    "The query filter, specifying the deletion criteria. Matches the syntax of the filter argument of db.collection.deleteMany()",
-                required: false,
-            },
-        ]);
+        await validateToolMetadata(
+            integration.mcpClient(),
+            "delete-many",
+            "Removes all documents that match the filter from a MongoDB collection",
+            [
+                ...dbOperationParameters,
+                {
+                    name: "filter",
+                    type: "object",
+                    description:
+                        "The query filter, specifying the deletion criteria. Matches the syntax of the filter argument of db.collection.deleteMany()",
+                    required: false,
+                },
+            ]
+        );
     });
 
     describe("with invalid arguments", () => {
@@ -160,32 +161,15 @@ describe("deleteMany tool", () => {
     });
 
     describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "delete-many",
-                arguments: {
+        validateAutoConnectBehavior(integration, "delete-many", () => {
+            return {
+                args: {
                     database: integration.randomDbName(),
                     collection: "coll1",
                     filter: {},
                 },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain('Deleted `0` document(s) from collection "coll1"');
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "delete-many",
-                arguments: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    filter: {},
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+                expectedResponse: 'Deleted `0` document(s) from collection "coll1"',
+            };
         });
     });
 });

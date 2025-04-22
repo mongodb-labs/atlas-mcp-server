@@ -1,8 +1,9 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
 } from "../../../helpers.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import config from "../../../../../src/config.js";
@@ -11,12 +12,12 @@ describe("dropDatabase tool", () => {
     const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const dropDatabase = tools.find((tool) => tool.name === "drop-database")!;
-        expect(dropDatabase).toBeDefined();
-        expect(dropDatabase.description).toBe("Removes the specified database, deleting the associated data files");
-
-        validateParameters(dropDatabase, [dbOperationParameters.find((d) => d.name === "database")!]);
+        await validateToolMetadata(
+            integration.mcpClient(),
+            "drop-database",
+            "Removes the specified database, deleting the associated data files",
+            [dbOperationParameters.find((d) => d.name === "database")!]
+        );
     });
 
     describe("with invalid arguments", () => {
@@ -84,31 +85,15 @@ describe("dropDatabase tool", () => {
     });
 
     describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            await integration.connectMcpClient();
+        beforeEach(async () => {
             await integration.mongoClient().db(integration.randomDbName()).createCollection("coll1");
-
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "drop-database",
-                arguments: {
-                    database: integration.randomDbName(),
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain(`Successfully dropped database "${integration.randomDbName()}"`);
         });
 
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "drop-database",
-                arguments: {
-                    database: integration.randomDbName(),
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+        validateAutoConnectBehavior(integration, "drop-database", () => {
+            return {
+                args: { database: integration.randomDbName() },
+                expectedResponse: `Successfully dropped database "${integration.randomDbName()}"`,
+            };
         });
     });
 });

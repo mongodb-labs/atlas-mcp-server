@@ -1,26 +1,23 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ObjectId } from "bson";
-import config from "../../../../../src/config.js";
 
 describe("createCollection tool", () => {
     const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const listCollections = tools.find((tool) => tool.name === "create-collection")!;
-        expect(listCollections).toBeDefined();
-        expect(listCollections.description).toBe(
-            "Creates a new collection in a database. If the database doesn't exist, it will be created automatically."
+        await validateToolMetadata(
+            integration.mcpClient(),
+            "create-collection",
+            "Creates a new collection in a database. If the database doesn't exist, it will be created automatically.",
+            dbOperationParameters
         );
-
-        validateParameters(listCollections, dbOperationParameters);
     });
 
     describe("with invalid arguments", () => {
@@ -115,24 +112,11 @@ describe("createCollection tool", () => {
     });
 
     describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "create-collection",
-                arguments: { database: integration.randomDbName(), collection: "new-collection" },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toEqual(`Collection "new-collection" created in database "${integration.randomDbName()}".`);
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "create-collection",
-                arguments: { database: integration.randomDbName(), collection: "new-collection" },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+        validateAutoConnectBehavior(integration, "create-collection", () => {
+            return {
+                args: { database: integration.randomDbName(), collection: "new-collection" },
+                expectedResponse: `Collection "new-collection" created in database "${integration.randomDbName()}".`,
+            };
         });
     });
 });

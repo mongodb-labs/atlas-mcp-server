@@ -1,21 +1,24 @@
-import { getResponseElements, getResponseContent, validateParameters, setupIntegrationTest } from "../../../helpers.js";
+import {
+    getResponseElements,
+    getResponseContent,
+    setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
+} from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import config from "../../../../../src/config.js";
-import { ObjectId } from "bson";
 
 describe("listCollections tool", () => {
     const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const listCollections = tools.find((tool) => tool.name === "list-collections")!;
-        expect(listCollections).toBeDefined();
-        expect(listCollections.description).toBe("List all collections for a given database");
-
-        validateParameters(listCollections, [
-            { name: "database", description: "Database name", type: "string", required: true },
-        ]);
+        await validateToolMetadata(
+            integration.mcpClient(),
+            "list-collections",
+            "List all collections for a given database",
+            [{ name: "database", description: "Database name", type: "string", required: true }]
+        );
     });
 
     describe("with invalid arguments", () => {
@@ -46,7 +49,7 @@ describe("listCollections tool", () => {
             });
             const content = getResponseContent(response.content);
             expect(content).toEqual(
-                `No collections found for database "non-existent". To create a collection, use the "create-collection" tool.`
+                'No collections found for database "non-existent". To create a collection, use the "create-collection" tool.'
             );
         });
     });
@@ -81,24 +84,16 @@ describe("listCollections tool", () => {
     });
 
     describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
+        validateAutoConnectBehavior(
+            integration,
+            "list-collections",
 
-            const response = await integration
-                .mcpClient()
-                .callTool({ name: "list-collections", arguments: { database: integration.randomDbName() } });
-            const content = getResponseContent(response.content);
-            expect(content).toEqual(
-                `No collections found for database "${integration.randomDbName()}". To create a collection, use the "create-collection" tool.`
-            );
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration
-                .mcpClient()
-                .callTool({ name: "list-collections", arguments: { database: integration.randomDbName() } });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
-        });
+            () => {
+                return {
+                    args: { database: integration.randomDbName() },
+                    expectedResponse: `No collections found for database "${integration.randomDbName()}". To create a collection, use the "create-collection" tool.`,
+                };
+            }
+        );
     });
 });

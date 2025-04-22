@@ -19,13 +19,15 @@ interface ParameterInfo {
 
 type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 
-export function setupIntegrationTest(): {
+interface IntegrationTestSetup {
     mcpClient: () => Client;
     mongoClient: () => MongoClient;
     connectionString: () => string;
     connectMcpClient: () => Promise<void>;
     randomDbName: () => string;
-} {
+}
+
+export function setupIntegrationTest(): IntegrationTestSetup {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
 
@@ -208,8 +210,57 @@ export const dbOperationParameters: ParameterInfo[] = [
     { name: "collection", type: "string", description: "Collection name", required: true },
 ];
 
-export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]): void {
+export async function validateToolMetadata(
+    mcpClient: Client,
+    name: string,
+    description: string,
+    parameters: ParameterInfo[]
+): Promise<void> {
+    const { tools } = await mcpClient.listTools();
+    const tool = tools.find((tool) => tool.name === name)!;
+    expect(tool).toBeDefined();
+    expect(tool.description).toBe(description);
+
     const toolParameters = getParameters(tool);
     expect(toolParameters).toHaveLength(parameters.length);
     expect(toolParameters).toIncludeAllMembers(parameters);
+}
+
+export function validateAutoConnectBehavior(
+    integration: IntegrationTestSetup,
+    name: string,
+    validation: () => {
+        args: { [x: string]: unknown };
+        expectedResponse?: string;
+        validate?: (content: unknown) => void;
+    }
+): void {
+    it("connects automatically if connection string is configured", async () => {
+        config.connectionString = integration.connectionString();
+
+        const validationInfo = validation();
+
+        const response = await integration.mcpClient().callTool({
+            name,
+            arguments: validationInfo.args,
+        });
+
+        if (validationInfo.expectedResponse) {
+            const content = getResponseContent(response.content);
+            expect(content).toContain(validationInfo.expectedResponse);
+        }
+
+        if (validationInfo.validate) {
+            validationInfo.validate(response.content);
+        }
+    });
+
+    it("throws an error if connection string is not configured", async () => {
+        const response = await integration.mcpClient().callTool({
+            name,
+            arguments: validation().args,
+        });
+        const content = getResponseContent(response.content);
+        expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+    });
 }

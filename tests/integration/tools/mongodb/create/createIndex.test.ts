@@ -1,8 +1,9 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
 } from "../../../helpers.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { IndexDirection } from "mongodb";
@@ -12,12 +13,7 @@ describe("createIndex tool", () => {
     const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const createIndex = tools.find((tool) => tool.name === "create-index")!;
-        expect(createIndex).toBeDefined();
-        expect(createIndex.description).toBe("Create an index for a collection");
-
-        validateParameters(createIndex, [
+        await validateToolMetadata(integration.mcpClient(), "create-index", "Create an index for a collection", [
             ...dbOperationParameters,
             {
                 name: "keys",
@@ -216,34 +212,15 @@ describe("createIndex tool", () => {
     }
 
     describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "create-index",
-                arguments: {
+        validateAutoConnectBehavior(integration, "create-index", () => {
+            return {
+                args: {
                     database: integration.randomDbName(),
                     collection: "coll1",
                     keys: { prop1: 1 },
                 },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toEqual(
-                `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
-            );
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "create-index",
-                arguments: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    keys: { prop1: 1 },
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+                expectedResponse: `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`,
+            };
         });
     });
 });

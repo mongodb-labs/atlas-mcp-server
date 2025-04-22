@@ -1,8 +1,9 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
 } from "../../../helpers.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import config from "../../../../../src/config.js";
@@ -11,21 +12,21 @@ describe("insertMany tool", () => {
     const integration = setupIntegrationTest();
 
     it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const insertMany = tools.find((tool) => tool.name === "insert-many")!;
-        expect(insertMany).toBeDefined();
-        expect(insertMany.description).toBe("Insert an array of documents into a MongoDB collection");
-
-        validateParameters(insertMany, [
-            ...dbOperationParameters,
-            {
-                name: "documents",
-                type: "array",
-                description:
-                    "The array of documents to insert, matching the syntax of the document argument of db.collection.insertMany()",
-                required: true,
-            },
-        ]);
+        validateToolMetadata(
+            integration.mcpClient(),
+            "insert-many",
+            "Insert an array of documents into a MongoDB collection",
+            [
+                ...dbOperationParameters,
+                {
+                    name: "documents",
+                    type: "array",
+                    description:
+                        "The array of documents to insert, matching the syntax of the document argument of db.collection.insertMany()",
+                    required: true,
+                },
+            ]
+        );
     });
 
     describe("with invalid arguments", () => {
@@ -110,32 +111,15 @@ describe("insertMany tool", () => {
     });
 
     describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "insert-many",
-                arguments: {
+        validateAutoConnectBehavior(integration, "insert-many", () => {
+            return {
+                args: {
                     database: integration.randomDbName(),
                     collection: "coll1",
                     documents: [{ prop1: "value1" }],
                 },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain('Inserted `1` document(s) into collection "coll1"');
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "insert-many",
-                arguments: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    documents: [{ prop1: "value1" }],
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+                expectedResponse: 'Inserted `1` document(s) into collection "coll1"',
+            };
         });
     });
 });
