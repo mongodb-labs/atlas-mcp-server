@@ -1,8 +1,6 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "./atlasTool.js";
 import { OperationType } from "../tool.js";
-import { mongoLogId } from "mongodb-log-writer";
-import logger from "../../logger.js";
 
 export class ListProjectsTool extends AtlasToolBase {
     protected name = "atlas-list-projects";
@@ -12,7 +10,6 @@ export class ListProjectsTool extends AtlasToolBase {
 
     protected async execute(): Promise<CallToolResult> {
         this.session.ensureAuthenticated();
-        logger.info(mongoLogId(1_000_000), "session", `Called ensureAuthenticated! `);
 
         const data = await this.session.apiClient.listProjects();
 
