@@ -26,8 +26,7 @@ export function describeAtlas(name: number | string | Function | jest.FunctionLi
 
 interface ProjectTestArgs {
     getProjectId: () => string;
-};
-
+}
 
 type ProjectTestFunction = (args: ProjectTestArgs) => void;
 
@@ -53,8 +52,8 @@ export function withProject(integration: IntegrationTest, fn: ProjectTestFunctio
                 params: {
                     path: {
                         groupId: projectId,
-                    }
-                }
+                    },
+                },
             });
         });
 

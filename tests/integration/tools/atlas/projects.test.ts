@@ -20,7 +20,7 @@ describeAtlas("projects", (integration) => {
                     params: {
                         path: {
                             groupId: project.id || "",
-                        }
+                        },
                     },
                 });
                 break;
@@ -39,12 +39,10 @@ describeAtlas("projects", (integration) => {
             expect(createProject.inputSchema.properties).toHaveProperty("organizationId");
         });
         it("should create a project", async () => {
-            const response = (await integration
-                .mcpClient()
-                .callTool({
-                    name: "atlas-create-project",
-                    arguments: { projectName: projName },
-                })) as CallToolResult;
+            const response = (await integration.mcpClient().callTool({
+                name: "atlas-create-project",
+                arguments: { projectName: projName },
+            })) as CallToolResult;
             expect(response.content).toBeArray();
             expect(response.content).toHaveLength(1);
             expect(response.content[0].text).toContain(projName);

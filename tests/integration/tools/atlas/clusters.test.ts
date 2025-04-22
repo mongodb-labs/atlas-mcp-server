@@ -86,7 +86,7 @@ describeAtlas("clusters", (integration) => {
 
             it("returns cluster data", async () => {
                 const projectId = getProjectId();
-                
+
                 const response = (await integration.mcpClient().callTool({
                     name: "atlas-inspect-cluster",
                     arguments: { projectId, clusterName: clusterName },
@@ -120,4 +120,3 @@ describeAtlas("clusters", (integration) => {
         });
     });
 });
-

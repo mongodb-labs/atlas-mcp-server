@@ -19,5 +19,5 @@ export const AtlasTools = [
     ListDBUsersTool,
     CreateDBUserTool,
     CreateProjectTool,
-    ListOrganizationsTool
+    ListOrganizationsTool,
 ];

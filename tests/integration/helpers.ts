@@ -26,7 +26,7 @@ export interface IntegrationTest {
     connectionString: () => string;
     connectMcpClient: () => Promise<void>;
     randomDbName: () => string;
-};
+}
 
 export function setupIntegrationTest(): IntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;

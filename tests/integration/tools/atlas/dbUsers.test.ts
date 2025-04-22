@@ -2,7 +2,6 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../../../../src/session.js";
 import { describeAtlas, withProject, randomId } from "./atlasHelpers.js";
 
-
 describeAtlas("db users", (integration) => {
     const userName = "testuser-" + randomId;
     withProject(integration, ({ getProjectId }) => {
