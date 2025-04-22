@@ -7,8 +7,10 @@ export class Session {
     sessionId?: string;
     serviceProvider?: NodeDriverServiceProvider;
     apiClient: ApiClient;
-    agentClientName?: string;
-    agentClientVersion?: string;
+    agentRunner?: {
+        name: string;
+        version: string;
+    };
     private credentials?: { clientId: string; clientSecret: string };
     private baseUrl: string;
 
@@ -35,8 +37,12 @@ export class Session {
     }
 
     setAgentClientData(agentClient: Implementation | undefined) {
-        this.agentClientName = agentClient?.name;
-        this.agentClientVersion = agentClient?.version;
+        if (agentClient?.name && agentClient?.version) {
+            this.agentRunner = {
+                name: agentClient.name,
+                version: agentClient.version,
+            };
+        }
     }
 
     ensureAuthenticated(): asserts this is { apiClient: ApiClient } {
