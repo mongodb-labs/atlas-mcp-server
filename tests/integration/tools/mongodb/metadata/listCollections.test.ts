@@ -4,6 +4,8 @@ import {
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
+    dbOperationInvalidArgTests,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
@@ -22,22 +24,7 @@ describe("listCollections tool", () => {
     });
 
     describe("with invalid arguments", () => {
-        const args = [{}, { database: 123 }, { foo: "bar", database: "test" }, { database: [] }];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "list-collections", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool list-collections");
-                    expect(mcpError.message).toContain('"expected": "string"');
-                }
-            });
-        }
+        validateThrowsForInvalidArguments(integration, "list-collections", dbOperationInvalidArgTests);
     });
 
     describe("with non-existent database", () => {

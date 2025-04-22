@@ -44,7 +44,7 @@ export abstract class ToolBase {
             } catch (error: unknown) {
                 logger.error(mongoLogId(1_000_000), "tool", `Error executing ${this.name}: ${error as string}`);
 
-                return await this.handleError(error);
+                return await this.handleError(error, args[0] as ToolArgs<typeof this.argsShape>);
             }
         };
 
@@ -76,7 +76,11 @@ export abstract class ToolBase {
     }
 
     // This method is intended to be overridden by subclasses to handle errors
-    protected handleError(error: unknown): Promise<CallToolResult> | CallToolResult {
+    protected handleError(
+        error: unknown,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        args: ToolArgs<typeof this.argsShape>
+    ): Promise<CallToolResult> | CallToolResult {
         return {
             content: [
                 {

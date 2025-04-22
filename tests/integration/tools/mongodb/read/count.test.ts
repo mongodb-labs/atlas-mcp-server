@@ -4,6 +4,7 @@ import {
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
@@ -37,27 +38,13 @@ describe("count tool", () => {
     });
 
     describe("with invalid arguments", () => {
-        const args = [
+        validateThrowsForInvalidArguments(integration, "count", [
             {},
             { database: 123, collection: "bar" },
             { foo: "bar", database: "test", collection: "bar" },
             { collection: [], database: "test" },
             { collection: "bar", database: "test", query: "{ $gt: { foo: 5 } }" },
-        ];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "count", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool count");
-                }
-            });
-        }
+        ]);
     });
 
     it("returns 0 when database doesn't exist", async () => {

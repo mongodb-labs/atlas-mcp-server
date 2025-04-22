@@ -4,6 +4,7 @@ import {
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { IndexDirection } from "mongodb";
@@ -31,28 +32,14 @@ describe("createIndex tool", () => {
     });
 
     describe("with invalid arguments", () => {
-        const args = [
+        validateThrowsForInvalidArguments(integration, "create-index", [
             {},
             { collection: "bar", database: 123, keys: { foo: 1 } },
             { collection: "bar", database: "test", keys: { foo: 5 } },
             { collection: [], database: "test", keys: { foo: 1 } },
             { collection: "bar", database: "test", keys: { foo: 1 }, name: 123 },
             { collection: "bar", database: "test", keys: "foo", name: "my-index" },
-        ];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "create-index", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool create-index");
-                }
-            });
-        }
+        ]);
     });
 
     const validateIndex = async (collection: string, expected: { name: string; key: object }[]) => {

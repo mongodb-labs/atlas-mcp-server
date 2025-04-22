@@ -5,10 +5,11 @@ import {
     dbOperationParameters,
     validateToolMetadata,
     validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
+    dbOperationInvalidArgTests,
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import config from "../../../../../src/config.js";
 import { Document } from "bson";
 import { OptionalId } from "mongodb";
 import { SimplifiedSchema } from "mongodb-schema";
@@ -26,21 +27,7 @@ describe("collectionSchema tool", () => {
     });
 
     describe("with invalid arguments", () => {
-        const args = [{}, { database: 123 }, { foo: "bar", database: "test" }, { database: [] }];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "collection-schema", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool collection-schema");
-                }
-            });
-        }
+        validateThrowsForInvalidArguments(integration, "collection-schema", dbOperationInvalidArgTests);
     });
 
     describe("with non-existent database", () => {

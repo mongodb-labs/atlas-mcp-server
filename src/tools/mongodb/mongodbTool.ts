@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ToolBase, ToolCategory } from "../tool.js";
+import { ToolArgs, ToolBase, ToolCategory } from "../tool.js";
 import { Session } from "../../session.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
@@ -30,7 +30,10 @@ export abstract class MongoDBToolBase extends ToolBase {
         return this.session.serviceProvider;
     }
 
-    protected handleError(error: unknown): Promise<CallToolResult> | CallToolResult {
+    protected handleError(
+        error: unknown,
+        args: ToolArgs<typeof this.argsShape>
+    ): Promise<CallToolResult> | CallToolResult {
         if (error instanceof MongoDBError && error.code === ErrorCodes.NotConnectedToMongoDB) {
             return {
                 content: [
@@ -47,7 +50,7 @@ export abstract class MongoDBToolBase extends ToolBase {
             };
         }
 
-        return super.handleError(error);
+        return super.handleError(error, args);
     }
 
     protected async connectToMongoDB(connectionString: string): Promise<void> {

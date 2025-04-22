@@ -9,6 +9,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { MongoClient, ObjectId } from "mongodb";
 import { toIncludeAllMembers } from "jest-extended";
 import config from "../../src/config.js";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
 
 interface ParameterInfo {
     name: string;
@@ -210,6 +211,8 @@ export const dbOperationParameters: ParameterInfo[] = [
     { name: "collection", type: "string", description: "Collection name", required: true },
 ];
 
+export const dbOperationInvalidArgTests = [{}, { database: 123 }, { foo: "bar", database: "test" }, { database: [] }];
+
 export async function validateToolMetadata(
     mcpClient: Client,
     name: string,
@@ -263,4 +266,25 @@ export function validateAutoConnectBehavior(
         const content = getResponseContent(response.content);
         expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
     });
+}
+
+export function validateThrowsForInvalidArguments(
+    integration: IntegrationTestSetup,
+    name: string,
+    args: { [x: string]: unknown }[]
+): void {
+    for (const arg of args) {
+        it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
+            await integration.connectMcpClient();
+            try {
+                await integration.mcpClient().callTool({ name, arguments: arg });
+                expect.fail("Expected an error to be thrown");
+            } catch (error) {
+                expect(error).toBeInstanceOf(McpError);
+                const mcpError = error as McpError;
+                expect(mcpError.code).toEqual(-32602);
+                expect(mcpError.message).toContain(`Invalid arguments for tool ${name}`);
+            }
+        });
+    }
 }

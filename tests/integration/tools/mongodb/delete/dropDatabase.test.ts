@@ -4,9 +4,9 @@ import {
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
+    dbOperationInvalidArgTests,
 } from "../../../helpers.js";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import config from "../../../../../src/config.js";
 
 describe("dropDatabase tool", () => {
     const integration = setupIntegrationTest();
@@ -21,21 +21,7 @@ describe("dropDatabase tool", () => {
     });
 
     describe("with invalid arguments", () => {
-        const args = [{}, { database: 123 }, { foo: "bar", database: "test" }];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "drop-database", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool drop-database");
-                }
-            });
-        }
+        validateThrowsForInvalidArguments(integration, "drop-database", dbOperationInvalidArgTests);
     });
 
     it("can drop non-existing database", async () => {

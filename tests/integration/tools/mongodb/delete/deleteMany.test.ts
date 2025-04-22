@@ -4,9 +4,8 @@ import {
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import config from "../../../../../src/config.js";
 
 describe("deleteMany tool", () => {
     const integration = setupIntegrationTest();
@@ -30,27 +29,13 @@ describe("deleteMany tool", () => {
     });
 
     describe("with invalid arguments", () => {
-        const args = [
+        validateThrowsForInvalidArguments(integration, "delete-many", [
             {},
             { collection: "bar", database: 123, filter: {} },
             { collection: [], database: "test", filter: {} },
             { collection: "bar", database: "test", filter: "my-document" },
             { collection: "bar", database: "test", filter: [{ name: "Peter" }] },
-        ];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "delete-many", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool delete-many");
-                }
-            });
-        }
+        ]);
     });
 
     it("doesn't create the collection if it doesn't exist", async () => {

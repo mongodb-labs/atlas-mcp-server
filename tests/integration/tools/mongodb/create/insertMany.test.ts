@@ -4,6 +4,7 @@ import {
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import config from "../../../../../src/config.js";
@@ -30,27 +31,13 @@ describe("insertMany tool", () => {
     });
 
     describe("with invalid arguments", () => {
-        const args = [
+        validateThrowsForInvalidArguments(integration, "insert-many", [
             {},
             { collection: "bar", database: 123, documents: [] },
             { collection: [], database: "test", documents: [] },
             { collection: "bar", database: "test", documents: "my-document" },
             { collection: "bar", database: "test", documents: { name: "Peter" } },
-        ];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "insert-many", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool insert-many");
-                }
-            });
-        }
+        ]);
     });
 
     const validateDocuments = async (collection: string, expectedDocuments: object[]) => {
