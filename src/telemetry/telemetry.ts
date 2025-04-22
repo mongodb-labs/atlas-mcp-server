@@ -1,5 +1,5 @@
 import { Session } from "../session.js";
-import { BaseEvent, type ToolEvent } from "./types.js";
+import { BaseEvent } from "./types.js";
 import config from "../config.js";
 import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";

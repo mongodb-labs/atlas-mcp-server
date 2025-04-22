@@ -3,6 +3,14 @@ import { ApiClient } from "./common/atlas/apiClient.js";
 import defaultConfig from "./config.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 
+// Define the type for configuration used by Session
+interface SessionConfig {
+    apiBaseUrl?: string;
+    apiClientId?: string;
+    apiClientSecret?: string;
+    [key: string]: unknown;
+}
+
 export class Session {
     sessionId?: string;
     serviceProvider?: NodeDriverServiceProvider;
@@ -13,9 +21,9 @@ export class Session {
     };
     private credentials?: { clientId: string; clientSecret: string };
     private baseUrl: string;
-    private readonly config: any;
+    private readonly config: SessionConfig;
 
-    constructor(config = defaultConfig) {
+    constructor(config: SessionConfig = defaultConfig as SessionConfig) {
         this.config = config;
         this.baseUrl = this.config.apiBaseUrl ?? "https://cloud.mongodb.com/";
 
