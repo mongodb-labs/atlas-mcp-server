@@ -33,13 +33,9 @@ export function setupIntegrationTest(): {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
-<<<<<<< HEAD
-    beforeAll(async () => {
-=======
     let randomDbName: string;
 
     beforeEach(async () => {
->>>>>>> main
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
 
