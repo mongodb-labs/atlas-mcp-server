@@ -66,6 +66,9 @@ export function setupIntegrationTest(): IntegrationTest {
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
+    });
+
+    beforeEach(async () => {
         randomDbName = new ObjectId().toString();
     });
 
@@ -75,10 +78,10 @@ export function setupIntegrationTest(): IntegrationTest {
 
         await mcpServer?.close();
         mcpServer = undefined;
+    });
 
-        await mongoClient?.close();
-        mongoClient = undefined;
-
+    afterEach(async () => {
+        await mcpServer?.session.close();
         config.connectionString = undefined;
     });
 
