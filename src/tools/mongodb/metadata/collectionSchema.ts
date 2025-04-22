@@ -1,7 +1,7 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { getSimplifiedSchema, parseSchema, SchemaField, SchemaType } from "mongodb-schema";
+import { getSimplifiedSchema } from "mongodb-schema";
 
 export class CollectionSchemaTool extends MongoDBToolBase {
     protected name = "collection-schema";
