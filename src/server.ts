@@ -5,6 +5,7 @@ import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
+import config from "./config.js";
 
 export class Server {
     public readonly session: Session;
@@ -19,6 +20,7 @@ export class Server {
         this.mcpServer.server.registerCapabilities({ logging: {} });
 
         this.registerTools();
+        this.registerResources();
 
         await initializeLogger(this.mcpServer);
 
@@ -35,6 +37,28 @@ export class Server {
     private registerTools() {
         for (const tool of [...AtlasTools, ...MongoDbTools]) {
             new tool(this.session).register(this.mcpServer);
+        }
+    }
+
+    private registerResources() {
+        if (config.connectionString) {
+            this.mcpServer.resource(
+                "connection-string",
+                "config://connection-string",
+                {
+                    description: "Preconfigured connection string that will be used as a default in the `connect` tool",
+                },
+                (uri) => {
+                    return {
+                        contents: [
+                            {
+                                text: `Preconfigured connection string: ${config.connectionString}`,
+                                uri: uri.href,
+                            },
+                        ],
+                    };
+                }
+            );
         }
     }
 }
