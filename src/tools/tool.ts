@@ -6,6 +6,7 @@ import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import config from "../config.js";
 import { Telemetry } from "../telemetry/telemetry.js";
+import { type ToolEvent, TELEMETRY_RESULT, type TelemetryResult } from "../telemetry/types.js";
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
 
@@ -31,6 +32,33 @@ export abstract class ToolBase {
         this.telemetry = new Telemetry(session);
     }
 
+    /**
+     * Creates and emits a tool telemetry event
+     * @param startTime - Start time in milliseconds
+     * @param result - Whether the command succeeded or failed
+     * @param error - Optional error if the command failed
+     */
+    private async emitToolEvent(startTime: number, result: TelemetryResult, error?: Error): Promise<void> {
+        const duration = Date.now() - startTime;
+        const event: ToolEvent = {
+            timestamp: new Date().toISOString(),
+            source: "mdbmcp",
+            properties: {
+                ...this.telemetry.getCommonProperties(),
+                command: this.name,
+                category: this.category,
+                duration_ms: duration,
+                result,
+                ...(error && {
+                    error_type: error.name,
+                    error_code: error.message,
+                }),
+            },
+        };
+
+        await this.telemetry.emitEvents([event]);
+    }
+
     public register(server: McpServer): void {
         if (!this.verifyAllowed()) {
             return;
@@ -46,16 +74,14 @@ export abstract class ToolBase {
                 );
 
                 const result = await this.execute(...args);
-                await this.telemetry.emitToolEvent(this.name, this.category, startTime, "success");
+                await this.emitToolEvent(startTime, TELEMETRY_RESULT.SUCCESS);
                 return result;
             } catch (error: unknown) {
                 logger.error(mongoLogId(1_000_000), "tool", `Error executing ${this.name}: ${error as string}`);
 
-                await this.telemetry.emitToolEvent(
-                    this.name,
-                    this.category,
+                await this.emitToolEvent(
                     startTime,
-                    "failure",
+                    TELEMETRY_RESULT.FAILURE,
                     error instanceof Error ? error : new Error(String(error))
                 );
 

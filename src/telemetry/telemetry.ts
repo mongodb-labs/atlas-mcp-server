@@ -52,44 +52,27 @@ export class Telemetry {
     }
 
     /**
-     * Emits a tool event with timing and error information
-     * @param command - The command being executed
-     * @param category - Category of the command
-     * @param startTime - Start time in milliseconds
-     * @param result - Whether the command succeeded or failed
-     * @param error - Optional error if the command failed
+     * Emits events through the telemetry pipeline
+     * @param events - The events to emit
      */
-    public async emitToolEvent(
-        command: string,
-        category: string,
-        startTime: number,
-        result: "success" | "failure",
-        error?: Error
-    ): Promise<void> {
+    public async emitEvents(events: BaseEvent[]): Promise<void> {
         if (!TELEMETRY_ENABLED) {
-            logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping event.");
+            logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping events.");
             return;
         }
 
-        const duration = Date.now() - startTime;
-        const event: ToolEvent = {
-            timestamp: new Date().toISOString(),
-            source: "mdbmcp",
-            properties: {
-                ...this.commonProperties,
-                command,
-                category,
-                duration_ms: duration,
-                session_id: this.session.sessionId,
-                result,
-                ...(error && {
-                    error_type: error.name,
-                    error_code: error.message,
-                }),
-            },
-        };
+        await this.emit(events);
+    }
 
-        await this.emit([event]);
+    /**
+     * Gets the common properties for events
+     * @returns Object containing common properties for all events
+     */
+    public getCommonProperties(): CommonProperties {
+        return {
+            ...this.commonProperties,
+            session_id: this.session.sessionId,
+        };
     }
 
     /**

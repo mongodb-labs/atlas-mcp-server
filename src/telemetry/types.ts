@@ -1,4 +1,14 @@
 /**
+ * Result type constants for telemetry events
+ */
+export const TELEMETRY_RESULT = {
+    SUCCESS: "success" as const,
+    FAILURE: "failure" as const,
+};
+
+export type TelemetryResult = (typeof TELEMETRY_RESULT)[keyof typeof TELEMETRY_RESULT];
+
+/**
  * Base interface for all events
  */
 export interface Event {
@@ -30,7 +40,7 @@ export interface ToolEvent extends BaseEvent {
         command: string;
         category: string;
         duration_ms: number;
-        result: "success" | "failure";
+        result: TelemetryResult;
         error_code?: string;
         error_type?: string;
         project_id?: string;
