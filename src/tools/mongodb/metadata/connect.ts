@@ -42,7 +42,9 @@ export class ConnectTool extends MongoDBToolBase {
         ) {
             connectionString = connectionStringOrClusterName;
         } else {
-            // TODO:
+            // TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/19
+            // We don't support connecting via cluster name since we'd need to obtain the user credentials
+            // and fill in the connection string.
             return {
                 content: [
                     {
