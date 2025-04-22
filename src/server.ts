@@ -25,7 +25,11 @@ export class Server {
 
         this.mcpServer.server.oninitialized = () => {
             this.session.setAgentRunner(this.mcpServer.server.getClientVersion());
-            logger.info(mongoLogId(1_000_004), "server", `Server started with transport ${transport.constructor.name}`);
+            logger.info(
+                mongoLogId(1_000_004),
+                "server",
+                `Server started with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
+            );
         };
     }
 
