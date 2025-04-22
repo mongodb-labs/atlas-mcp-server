@@ -36,7 +36,7 @@ export class Session {
         this.apiClient = new ApiClient({ baseUrl: this.baseUrl });
     }
 
-    setAgentClientData(agentClient: Implementation | undefined) {
+    setAgentRunner(agentClient: Implementation | undefined) {
         if (agentClient?.name && agentClient?.version) {
             this.agentRunner = {
                 name: agentClient.name,
