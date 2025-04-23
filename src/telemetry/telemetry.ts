@@ -1,6 +1,6 @@
 import { Session } from "../session.js";
 import { BaseEvent } from "./types.js";
-import config from "../config.js";
+import { config } from "../config.js";
 import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import { ApiClient } from "../common/atlas/apiClient.js";

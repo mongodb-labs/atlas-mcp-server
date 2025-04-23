@@ -5,19 +5,27 @@ import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
-import config from "./config.js";
 import { ObjectId } from "mongodb";
 import { Telemetry } from "./telemetry/telemetry.js";
+import { UserConfig } from "./config.js";
+
+export interface ServerOptions {
+    session: Session;
+    userConfig: UserConfig;
+    mcpServer: McpServer;
+}
 
 export class Server {
     public readonly session: Session;
     private readonly mcpServer: McpServer;
     private readonly telemetry: Telemetry;
+    private readonly userConfig: UserConfig;
 
-    constructor({ mcpServer, session }: { mcpServer: McpServer; session: Session }) {
-        this.mcpServer = mcpServer;
+    constructor({ session, mcpServer, userConfig }: ServerOptions) {
         this.session = session;
         this.telemetry = new Telemetry(session);
+        this.mcpServer = mcpServer;
+        this.userConfig = userConfig;
     }
 
     async connect(transport: Transport) {
@@ -25,7 +33,7 @@ export class Server {
         this.registerTools();
         this.registerResources();
 
-        await initializeLogger(this.mcpServer);
+        await initializeLogger(this.mcpServer, this.userConfig.logPath);
 
         await this.mcpServer.connect(transport);
 
@@ -48,12 +56,12 @@ export class Server {
 
     private registerTools() {
         for (const tool of [...AtlasTools, ...MongoDbTools]) {
-            new tool(this.session, this.telemetry).register(this.mcpServer);
+            new tool(this.session, this.userConfig, this.telemetry).register(this.mcpServer);
         }
     }
 
     private registerResources() {
-        if (config.connectionString) {
+        if (this.userConfig.connectionString) {
             this.mcpServer.resource(
                 "connection-string",
                 "config://connection-string",
@@ -64,7 +72,7 @@ export class Server {
                     return {
                         contents: [
                             {
-                                text: `Preconfigured connection string: ${config.connectionString}`,
+                                text: `Preconfigured connection string: ${this.userConfig.connectionString}`,
                                 uri: uri.href,
                             },
                         ],

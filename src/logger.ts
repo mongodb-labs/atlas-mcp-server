@@ -1,6 +1,5 @@
 import fs from "fs/promises";
 import { MongoLogId, MongoLogManager, MongoLogWriter } from "mongodb-log-writer";
-import config from "./config.js";
 import redact from "mongodb-redact";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { LoggingMessageNotification } from "@modelcontextprotocol/sdk/types.js";
@@ -98,11 +97,11 @@ class ProxyingLogger extends LoggerBase {
 const logger = new ProxyingLogger();
 export default logger;
 
-export async function initializeLogger(server: McpServer): Promise<void> {
-    await fs.mkdir(config.logPath, { recursive: true });
+export async function initializeLogger(server: McpServer, logPath: string): Promise<void> {
+    await fs.mkdir(logPath, { recursive: true });
 
     const manager = new MongoLogManager({
-        directory: config.logPath,
+        directory: logPath,
         retentionDays: 30,
         onwarn: console.warn,
         onerror: console.error,

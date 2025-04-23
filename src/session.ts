@@ -1,7 +1,12 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ApiClient, ApiClientCredentials } from "./common/atlas/apiClient.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
-import config from "./config.js";
+
+export interface SessionOptions {
+    apiBaseUrl?: string;
+    apiClientId?: string;
+    apiClientSecret?: string;
+}
 
 export class Session {
     sessionId?: string;
@@ -12,17 +17,17 @@ export class Session {
         version: string;
     };
 
-    constructor() {
+    constructor({ apiBaseUrl, apiClientId, apiClientSecret }: SessionOptions = {}) {
         const credentials: ApiClientCredentials | undefined =
-            config.apiClientId && config.apiClientSecret
+            apiClientId && apiClientSecret
                 ? {
-                      clientId: config.apiClientId,
-                      clientSecret: config.apiClientSecret,
+                      clientId: apiClientId,
+                      clientSecret: apiClientSecret,
                   }
                 : undefined;
 
         this.apiClient = new ApiClient({
-            baseUrl: config.apiBaseUrl,
+            baseUrl: apiBaseUrl,
             credentials,
         });
     }

@@ -4,20 +4,25 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import logger from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import config from "./config.js";
+import { config } from "./config.js";
 import { Session } from "./session.js";
 import { Server } from "./server.js";
+import { packageInfo } from "./packageInfo.js";
 
 try {
-    const session = new Session();
-    const mcpServer = new McpServer({
-        name: "MongoDB Atlas",
-        version: config.version,
+    const session = new Session({
+        apiBaseUrl: config.apiBaseUrl,
+        apiClientId: config.apiClientId,
+        apiClientSecret: config.apiClientSecret,
     });
-
+    const mcpServer = new McpServer({
+        name: packageInfo.mcpServerName,
+        version: packageInfo.version,
+    });
     const server = new Server({
         mcpServer,
         session,
+        userConfig: config,
     });
 
     const transport = new StdioServerTransport();

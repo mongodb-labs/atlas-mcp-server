@@ -1,6 +1,6 @@
 import { getResponseContent, setupIntegrationTest, validateToolMetadata } from "../../../helpers.js";
 
-import config from "../../../../../src/config.js";
+import { config } from "../../../../../src/config.js";
 
 describe("Connect tool", () => {
     const integration = setupIntegrationTest();

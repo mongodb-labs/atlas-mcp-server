@@ -4,12 +4,12 @@ import { Server } from "../../src/server.js";
 import runner, { MongoCluster } from "mongodb-runner";
 import path from "path";
 import fs from "fs/promises";
-import { Session } from "../../src/session.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { MongoClient, ObjectId } from "mongodb";
 import { toIncludeAllMembers } from "jest-extended";
-import config from "../../src/config.js";
+import { config, UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Session } from "../../src/session.js";
 
 interface ParameterInfo {
     name: string;
@@ -29,7 +29,7 @@ export interface IntegrationTest {
     randomDbName: () => string;
 }
 
-export function setupIntegrationTest(): IntegrationTest {
+export function setupIntegrationTest(userConfig: UserConfig = config): IntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
 
@@ -58,12 +58,19 @@ export function setupIntegrationTest(): IntegrationTest {
             }
         );
 
+        const session = new Session({
+            apiBaseUrl: userConfig.apiBaseUrl,
+            apiClientId: userConfig.apiClientId,
+            apiClientSecret: userConfig.apiClientSecret,
+        });
+
         mcpServer = new Server({
+            session,
+            userConfig,
             mcpServer: new McpServer({
                 name: "test-server",
                 version: "1.2.3",
             }),
-            session: new Session(),
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
@@ -314,16 +321,5 @@ export function validateThrowsForInvalidArguments(
                 }
             });
         }
-    });
-}
-
-export function describeAtlas(name: number | string | Function | jest.FunctionLike, fn: jest.EmptyFunction) {
-    if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
-        return describe.skip("atlas", () => {
-            describe(name, fn);
-        });
-    }
-    return describe("atlas", () => {
-        describe(name, fn);
     });
 }

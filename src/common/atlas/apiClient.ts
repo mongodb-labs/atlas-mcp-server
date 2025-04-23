@@ -1,4 +1,3 @@
-import config from "../../config.js";
 import createClient, { Client, Middleware } from "openapi-fetch";
 import type { FetchOptions } from "openapi-fetch";
 import { AccessToken, ClientCredentials } from "simple-oauth2";
@@ -7,6 +6,7 @@ import { paths, operations } from "./openapi.js";
 import { BaseEvent } from "../../telemetry/types.js";
 import { mongoLogId } from "mongodb-log-writer";
 import logger from "../../logger.js";
+import { packageInfo } from "../../packageInfo.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
 
@@ -71,7 +71,7 @@ export class ApiClient {
             baseUrl: options?.baseUrl || "https://cloud.mongodb.com/",
             userAgent:
                 options?.userAgent ||
-                `${config.mcpServerName}/${config.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
+                `AtlasMCP/${packageInfo.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
         };
 
         this.client = createClient<paths>({
