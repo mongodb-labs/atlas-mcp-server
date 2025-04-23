@@ -74,14 +74,14 @@ export abstract class ToolBase {
                 );
 
                 const result = await this.execute(...args);
-                await this.emitToolEvent(startTime, TELEMETRY_RESULT.SUCCESS);
+                await this.emitToolEvent(startTime, "success");
                 return result;
             } catch (error: unknown) {
                 logger.error(mongoLogId(1_000_000), "tool", `Error executing ${this.name}: ${error as string}`);
 
                 await this.emitToolEvent(
                     startTime,
-                    TELEMETRY_RESULT.FAILURE,
+                    "failure",
                     error instanceof Error ? error : new Error(String(error))
                 );
 

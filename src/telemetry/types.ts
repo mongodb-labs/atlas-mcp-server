@@ -1,12 +1,7 @@
 /**
  * Result type constants for telemetry events
  */
-export const TELEMETRY_RESULT = {
-    SUCCESS: "success" as const,
-    FAILURE: "failure" as const,
-};
-
-export type TelemetryResult = (typeof TELEMETRY_RESULT)[keyof typeof TELEMETRY_RESULT];
+export type TelemetryResult = "success" | "failure";
 
 /**
  * Base interface for all events
