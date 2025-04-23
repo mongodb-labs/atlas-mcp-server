@@ -38,8 +38,6 @@ export const config = {
     ...getCliConfig(),
 };
 
-export default config;
-
 function getLogPath(): string {
     const localDataPath =
         process.platform === "win32"

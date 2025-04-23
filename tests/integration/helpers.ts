@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs/promises";
 import { MongoClient, ObjectId } from "mongodb";
 import { toIncludeAllMembers } from "jest-extended";
-import config, { UserConfig } from "../../src/config.js";
+import { config, UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 
 interface ParameterInfo {
