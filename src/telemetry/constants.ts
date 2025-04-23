@@ -5,7 +5,7 @@ import { getMachineIdSync } from "native-machine-id";
 /**
  * Machine-specific metadata formatted for telemetry
  */
-export const MACHINE_METADATA = Object.freeze({
+export const MACHINE_METADATA = {
     device_id: getMachineIdSync(),
     mcp_server_version: pkg.version,
     mcp_server_name: config.mcpServerName,
@@ -13,4 +13,4 @@ export const MACHINE_METADATA = Object.freeze({
     arch: process.arch,
     os_type: process.platform,
     os_version: process.version,
-});
+};
