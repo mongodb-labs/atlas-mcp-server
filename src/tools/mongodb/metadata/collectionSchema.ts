@@ -1,7 +1,7 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { parseSchema, SchemaField } from "mongodb-schema";
+import { getSimplifiedSchema } from "mongodb-schema";
 
 export class CollectionSchemaTool extends MongoDBToolBase {
     protected name = "collection-schema";
@@ -13,29 +13,31 @@ export class CollectionSchemaTool extends MongoDBToolBase {
     protected async execute({ database, collection }: ToolArgs<typeof DbOperationArgs>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
         const documents = await provider.find(database, collection, {}, { limit: 5 }).toArray();
-        const schema = await parseSchema(documents);
+        const schema = await getSimplifiedSchema(documents);
+
+        const fieldsCount = Object.entries(schema).length;
+        if (fieldsCount === 0) {
+            return {
+                content: [
+                    {
+                        text: `Could not deduce the schema for "${database}.${collection}". This may be because it doesn't exist or is empty.`,
+                        type: "text",
+                    },
+                ],
+            };
+        }
 
         return {
             content: [
                 {
-                    text: `Found ${schema.fields.length} fields in the schema for \`${database}.${collection}\``,
+                    text: `Found ${fieldsCount} fields in the schema for "${database}.${collection}"`,
                     type: "text",
                 },
                 {
-                    text: this.formatFieldOutput(schema.fields),
+                    text: JSON.stringify(schema),
                     type: "text",
                 },
             ],
         };
-    }
-
-    private formatFieldOutput(fields: SchemaField[]): string {
-        let result = "| Field | Type | Confidence |\n";
-        result += "|-------|------|-------------|\n";
-        for (const field of fields) {
-            const fieldType = Array.isArray(field.type) ? field.type.join(", ") : field.type;
-            result += `| ${field.name} | \`${fieldType}\` | ${(field.probability * 100).toFixed(0)}% |\n`;
-        }
-        return result;
     }
 }

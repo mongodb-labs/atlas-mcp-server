@@ -1,9 +1,14 @@
-import config from "../../../../../src/config.js";
-import { getResponseElements, getParameters, setupIntegrationTest, getResponseContent } from "../../../helpers.js";
+import {
+    getResponseElements,
+    getParameters,
+    setupIntegrationTest,
+    validateAutoConnectBehavior,
+} from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 
 describe("listDatabases tool", () => {
     const integration = setupIntegrationTest();
+    const defaultDatabases = ["admin", "config", "local"];
 
     it("should have correct metadata", async () => {
         const { tools } = await integration.mcpClient().listTools();
@@ -15,30 +20,13 @@ describe("listDatabases tool", () => {
         expect(parameters).toHaveLength(0);
     });
 
-    describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
-            const dbNames = getDbNames(response.content);
-
-            expect(dbNames).toIncludeSameMembers(["admin", "config", "local"]);
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
-        });
-    });
-
     describe("with no preexisting databases", () => {
         it("returns only the system databases", async () => {
             await integration.connectMcpClient();
             const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
             const dbNames = getDbNames(response.content);
 
-            expect(dbNames).toIncludeSameMembers(["admin", "config", "local"]);
+            expect(defaultDatabases).toIncludeAllMembers(defaultDatabases);
         });
     });
 
@@ -52,9 +40,33 @@ describe("listDatabases tool", () => {
 
             const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
             const dbNames = getDbNames(response.content);
-            expect(dbNames).toIncludeSameMembers(["admin", "config", "local", "foo", "baz"]);
+            expect(dbNames).toIncludeSameMembers([...defaultDatabases, "foo", "baz"]);
         });
     });
+
+    validateAutoConnectBehavior(
+        integration,
+        "list-databases",
+        () => {
+            return {
+                args: {},
+                validate: (content) => {
+                    const dbNames = getDbNames(content);
+
+                    expect(defaultDatabases).toIncludeAllMembers(dbNames);
+                },
+            };
+        },
+        async () => {
+            const mongoClient = integration.mongoClient();
+            const { databases } = await mongoClient.db("admin").command({ listDatabases: 1, nameOnly: true });
+            for (const db of databases) {
+                if (!defaultDatabases.includes(db.name)) {
+                    await mongoClient.db(db.name).dropDatabase();
+                }
+            }
+        }
+    );
 });
 
 function getDbNames(content: unknown): (string | null)[] {

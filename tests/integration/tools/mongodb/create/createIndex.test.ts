@@ -1,63 +1,40 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { IndexDirection } from "mongodb";
-import config from "../../../../../src/config.js";
 
 describe("createIndex tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const createIndex = tools.find((tool) => tool.name === "create-index")!;
-        expect(createIndex).toBeDefined();
-        expect(createIndex.description).toBe("Create an index for a collection");
+    validateToolMetadata(integration, "create-index", "Create an index for a collection", [
+        ...dbOperationParameters,
+        {
+            name: "keys",
+            type: "object",
+            description: "The index definition",
+            required: true,
+        },
+        {
+            name: "name",
+            type: "string",
+            description: "The name of the index",
+            required: false,
+        },
+    ]);
 
-        validateParameters(createIndex, [
-            ...dbOperationParameters,
-            {
-                name: "keys",
-                type: "object",
-                description: "The index definition",
-                required: true,
-            },
-            {
-                name: "name",
-                type: "string",
-                description: "The name of the index",
-                required: false,
-            },
-        ]);
-    });
-
-    describe("with invalid arguments", () => {
-        const args = [
-            {},
-            { collection: "bar", database: 123, keys: { foo: 1 } },
-            { collection: "bar", database: "test", keys: { foo: 5 } },
-            { collection: [], database: "test", keys: { foo: 1 } },
-            { collection: "bar", database: "test", keys: { foo: 1 }, name: 123 },
-            { collection: "bar", database: "test", keys: "foo", name: "my-index" },
-        ];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "create-index", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool create-index");
-                }
-            });
-        }
-    });
+    validateThrowsForInvalidArguments(integration, "create-index", [
+        {},
+        { collection: "bar", database: 123, keys: { foo: 1 } },
+        { collection: "bar", database: "test", keys: { foo: 5 } },
+        { collection: [], database: "test", keys: { foo: 1 } },
+        { collection: "bar", database: "test", keys: { foo: 1 }, name: 123 },
+        { collection: "bar", database: "test", keys: "foo", name: "my-index" },
+    ]);
 
     const validateIndex = async (collection: string, expected: { name: string; key: object }[]) => {
         const mongoClient = integration.mongoClient();
@@ -215,35 +192,14 @@ describe("createIndex tool", () => {
         });
     }
 
-    describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "create-index",
-                arguments: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    keys: { prop1: 1 },
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toEqual(
-                `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`
-            );
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "create-index",
-                arguments: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    keys: { prop1: 1 },
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
-        });
+    validateAutoConnectBehavior(integration, "create-index", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "coll1",
+                keys: { prop1: 1 },
+            },
+            expectedResponse: `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`,
+        };
     });
 });
