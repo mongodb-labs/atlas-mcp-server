@@ -47,7 +47,6 @@ const config = {
     ...mergedUserConfig,
     version: SERVER_VERSION,
     mcpServerName: SERVER_NAME,
-    isTelemetryEnabled: true,
 };
 
 export default config;
