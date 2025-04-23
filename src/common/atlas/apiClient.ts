@@ -2,7 +2,7 @@ import createClient, { Client, FetchOptions, Middleware } from "openapi-fetch";
 import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
-import { packageInfo } from "../../package.js";
+import { packageInfo } from "../../packageInfo.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
 

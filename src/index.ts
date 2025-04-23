@@ -6,7 +6,7 @@ import { mongoLogId } from "mongodb-log-writer";
 import { Server } from "./server.js";
 import { config } from "./config.js";
 import { Session } from "./session.js";
-import { packageInfo } from "./package.js";
+import { packageInfo } from "./packageInfo.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 try {
