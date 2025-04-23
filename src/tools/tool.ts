@@ -54,7 +54,7 @@ export abstract class ToolBase {
         };
         await this.telemetry.emitEvents([event]);
     }
- 
+
     public register(server: McpServer): void {
         if (!this.verifyAllowed()) {
             return;
