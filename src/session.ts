@@ -7,13 +7,13 @@ export class Session {
     apiClient: ApiClient;
 
     constructor() {
-        let credentials: ApiClientCredentials | undefined = undefined;
-        if (config.apiClientId && config.apiClientSecret) {
-            credentials = {
-                clientId: config.apiClientId,
-                clientSecret: config.apiClientSecret,
-            };
-        }
+        const credentials: ApiClientCredentials | undefined =
+            config.apiClientId && config.apiClientSecret
+                ? {
+                      clientId: config.apiClientId,
+                      clientSecret: config.apiClientSecret,
+                  }
+                : undefined;
 
         this.apiClient = new ApiClient({
             baseUrl: config.apiBaseUrl,
