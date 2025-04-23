@@ -6,6 +6,7 @@ import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import config from "./config.js";
+import { ObjectId } from "mongodb";
 
 export class Server {
     public readonly session: Session;
@@ -27,6 +28,8 @@ export class Server {
 
         this.mcpServer.server.oninitialized = () => {
             this.session.setAgentRunner(this.mcpServer.server.getClientVersion());
+            this.session.sessionId = new ObjectId().toString();
+
             logger.info(
                 mongoLogId(1_000_004),
                 "server",
