@@ -91,7 +91,7 @@ export class Telemetry {
      * Falls back to caching if both attempts fail
      */
     private async emit(events: BaseEvent[]): Promise<void> {
-        const cachedEvents = await this.readCache();
+        const cachedEvents = this.readCache();
         const allEvents = [...cachedEvents, ...events];
 
         logger.debug(
@@ -102,13 +102,13 @@ export class Telemetry {
 
         const result = await this.sendEvents(this.session.apiClient, allEvents);
         if (result.success) {
-            await this.clearCache();
+            this.clearCache();
             logger.debug(mongoLogId(1_000_000), "telemetry", `Sent ${allEvents.length} events successfully`);
             return;
         }
 
         logger.warning(mongoLogId(1_000_000), "telemetry", `Error sending event to client: ${result.error}`);
-        await this.cacheEvents(allEvents);
+        this.cacheEvents(allEvents);
     }
 
     /**
@@ -130,7 +130,7 @@ export class Telemetry {
      * Reads cached events from memory
      * Returns empty array if no cache exists
      */
-    private async readCache(): Promise<BaseEvent[]> {
+    private readCache(): BaseEvent[] {
         try {
             return EventCache.getInstance().getEvents();
         } catch (error) {
@@ -146,7 +146,7 @@ export class Telemetry {
     /**
      * Caches events in memory for later sending
      */
-    private async cacheEvents(events: BaseEvent[]): Promise<void> {
+    private cacheEvents(events: BaseEvent[]): void {
         try {
             EventCache.getInstance().setEvents(events);
             logger.debug(
@@ -166,7 +166,7 @@ export class Telemetry {
     /**
      * Clears the event cache after successful sending
      */
-    private async clearCache(): Promise<void> {
+    private clearCache(): void {
         try {
             EventCache.getInstance().clearEvents();
             logger.debug(mongoLogId(1_000_000), "telemetry", "In-memory telemetry cache cleared");
