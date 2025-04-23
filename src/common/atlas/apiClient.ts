@@ -1,8 +1,8 @@
-import version from "../../version.js";
 import createClient, { Client, FetchOptions, Middleware } from "openapi-fetch";
 import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
+import { packageInfo } from "../../package.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
 
@@ -67,7 +67,7 @@ export class ApiClient {
             baseUrl: options?.baseUrl || "https://cloud.mongodb.com/",
             userAgent:
                 options?.userAgent ||
-                `AtlasMCP/${version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
+                `AtlasMCP/${packageInfo.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
         };
 
         this.client = createClient<paths>({

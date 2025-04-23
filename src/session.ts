@@ -11,17 +11,17 @@ export class Session {
     serviceProvider?: NodeDriverServiceProvider;
     apiClient: ApiClient;
 
-    constructor(options?: SessionOptions) {
+    constructor({ apiBaseUrl, apiClientId, apiClientSecret }: SessionOptions = {}) {
         const credentials: ApiClientCredentials | undefined =
-            options?.apiClientId && options?.apiClientSecret
+            apiClientId && apiClientSecret
                 ? {
-                      clientId: options?.apiClientId,
-                      clientSecret: options?.apiClientSecret,
+                      clientId: apiClientId,
+                      clientSecret: apiClientSecret,
                   }
                 : undefined;
 
         this.apiClient = new ApiClient({
-            baseUrl: options?.apiBaseUrl,
+            baseUrl: apiBaseUrl,
             credentials,
         });
     }

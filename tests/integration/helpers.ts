@@ -8,6 +8,8 @@ import { MongoClient, ObjectId } from "mongodb";
 import { toIncludeAllMembers } from "jest-extended";
 import { config, UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Session } from "../../src/session.js";
 
 interface ParameterInfo {
     name: string;
@@ -27,7 +29,7 @@ export interface IntegrationTest {
     randomDbName: () => string;
 }
 
-export function setupIntegrationTest(cfg: UserConfig = config): IntegrationTest {
+export function setupIntegrationTest(userConfig: UserConfig = config): IntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
 
@@ -56,7 +58,20 @@ export function setupIntegrationTest(cfg: UserConfig = config): IntegrationTest 
             }
         );
 
-        mcpServer = new Server(cfg);
+        const session = new Session({
+            apiBaseUrl: userConfig.apiBaseUrl,
+            apiClientId: userConfig.apiClientId,
+            apiClientSecret: userConfig.apiClientSecret,
+        });
+
+        mcpServer = new Server({
+            session,
+            userConfig,
+            mcpServer: new McpServer({
+                name: "test-server",
+                version: "1.2.3",
+            }),
+        });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
     });
