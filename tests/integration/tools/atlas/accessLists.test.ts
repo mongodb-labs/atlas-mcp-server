@@ -2,16 +2,25 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../../../../src/session.js";
 import { describeAtlas, withProject } from "./atlasHelpers.js";
 
+function generateRandomIp() {
+    const randomIp: number[] = [192];
+    for (let i = 0; i < 3; i++) {
+        randomIp.push(Math.floor(Math.random() * 256));
+    }
+    return randomIp.join(".");
+}
+
 describeAtlas("ip access lists", (integration) => {
     withProject(integration, ({ getProjectId }) => {
-        let ipInfo: {
-            currentIpv4Address: string;
-        };
+        const ips = [generateRandomIp(), generateRandomIp()]
+        const cidrBlocks = [generateRandomIp() + "/16", generateRandomIp() + "/24"];
+        const values = [...ips, ...cidrBlocks];
 
         beforeAll(async () => {
             const session: Session = integration.mcpServer().session;
             session.ensureAuthenticated();
-            ipInfo = await session.apiClient.getIpInfo();
+            const ipInfo = await session.apiClient.getIpInfo();
+            values.push(ipInfo.currentIpv4Address);
         });
 
         afterAll(async () => {
@@ -20,32 +29,16 @@ describeAtlas("ip access lists", (integration) => {
 
             const projectId = getProjectId();
 
-            await session.apiClient.deleteProjectIpAccessList({
-                params: {
-                    path: {
-                        groupId: projectId,
-                        entryValue: ipInfo.currentIpv4Address,
+            for (const value of values) {
+                await session.apiClient.deleteProjectIpAccessList({
+                    params: {
+                        path: {
+                            groupId: projectId,
+                            entryValue: value,
+                        },
                     },
-                },
-            });
-
-            await session.apiClient.deleteProjectIpAccessList({
-                params: {
-                    path: {
-                        groupId: projectId,
-                        entryValue: "8.8.8.8",
-                    },
-                },
-            });
-
-            await session.apiClient.deleteProjectIpAccessList({
-                params: {
-                    path: {
-                        groupId: projectId,
-                        entryValue: "9.9.9.9/24",
-                    },
-                },
-            });
+                });
+            }
         });
 
         describe("atlas-create-access-list", () => {
@@ -69,8 +62,8 @@ describeAtlas("ip access lists", (integration) => {
                     name: "atlas-create-access-list",
                     arguments: {
                         projectId,
-                        ipAddresses: ["8.8.8.8"],
-                        cidrBlocks: ["9.9.9.9/24"],
+                        ipAddresses: ips,
+                        cidrBlocks: cidrBlocks,
                         currentIpAddress: true,
                     },
                 })) as CallToolResult;
@@ -98,9 +91,9 @@ describeAtlas("ip access lists", (integration) => {
                     .callTool({ name: "atlas-inspect-access-list", arguments: { projectId } })) as CallToolResult;
                 expect(response.content).toBeArray();
                 expect(response.content).toHaveLength(1);
-                expect(response.content[0].text).toContain("8.8.8.8");
-                expect(response.content[0].text).toContain("9.9.9.9/24");
-                expect(response.content[0].text).toContain(ipInfo.currentIpv4Address);
+                for (const value of values) {
+                    expect(response.content[0].text).toContain(value);
+                }
             });
         });
     });
