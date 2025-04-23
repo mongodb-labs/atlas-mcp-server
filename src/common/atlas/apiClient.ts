@@ -6,11 +6,13 @@ import { paths, operations } from "./openapi.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
 
+export interface ApiClientCredentials {
+    clientId: string;
+    clientSecret: string;
+}
+
 export interface ApiClientOptions {
-    credentials?: {
-        clientId: string;
-        clientSecret: string;
-    };
+    credentials?: ApiClientCredentials;
     baseUrl?: string;
     userAgent?: string;
 }

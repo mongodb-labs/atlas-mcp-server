@@ -1,5 +1,5 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
-import { ApiClient } from "./common/atlas/apiClient.js";
+import { ApiClient, ApiClientCredentials } from "./common/atlas/apiClient.js";
 import config from "./config.js";
 
 export class Session {
@@ -7,10 +7,7 @@ export class Session {
     apiClient: ApiClient;
 
     constructor() {
-        let credentials: {
-            clientId: string;
-            clientSecret: string;
-        } | undefined = undefined;
+        let credentials: ApiClientCredentials | undefined = undefined;
         if (config.apiClientId && config.apiClientSecret) {
             credentials = {
                 clientId: config.apiClientId,
