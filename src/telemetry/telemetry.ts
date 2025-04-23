@@ -4,15 +4,8 @@ import config from "../config.js";
 import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import { ApiClient } from "../common/atlas/apiClient.js";
-import fs from "fs/promises";
-import path from "path";
 import { MACHINE_METADATA } from "./constants.js";
-
-const CACHE_FILE = path.join(process.cwd(), ".telemetry-cache.json");
-
-interface TelemetryError extends Error {
-    code?: string;
-}
+import { EventCache } from "./eventCache.js";
 
 type EventResult = {
     success: boolean;
@@ -57,7 +50,6 @@ export class Telemetry {
             return false;
         }
 
-        // Check for DO_NOT_TRACK environment variable as per https://consoledonottrack.com/
         const doNotTrack = process.env.DO_NOT_TRACK;
         if (doNotTrack) {
             const value = doNotTrack.toLowerCase();
@@ -135,38 +127,34 @@ export class Telemetry {
     }
 
     /**
-     * Reads cached events from disk
-     * Returns empty array if no cache exists or on read error
+     * Reads cached events from memory
+     * Returns empty array if no cache exists
      */
     private async readCache(): Promise<BaseEvent[]> {
         try {
-            const data = await fs.readFile(CACHE_FILE, "utf-8");
-            return JSON.parse(data) as BaseEvent[];
+            return EventCache.getInstance().getEvents();
         } catch (error) {
-            const typedError = error as TelemetryError;
-            if (typedError.code !== "ENOENT") {
-                logger.warning(
-                    mongoLogId(1_000_000),
-                    "telemetry",
-                    `Error reading telemetry cache: ${typedError.message}`
-                );
-            }
+            logger.warning(
+                mongoLogId(1_000_000),
+                "telemetry",
+                `Error reading telemetry cache from memory: ${error instanceof Error ? error.message : String(error)}`
+            );
             return [];
         }
     }
 
     /**
-     * Caches events to disk for later sending
+     * Caches events in memory for later sending
      */
     private async cacheEvents(events: BaseEvent[]): Promise<void> {
         try {
-            await fs.writeFile(CACHE_FILE, JSON.stringify(events, null, 2));
-            logger.debug(mongoLogId(1_000_000), "telemetry", `Cached ${events.length} events for later sending`);
+            EventCache.getInstance().setEvents(events);
+            logger.debug(mongoLogId(1_000_000), "telemetry", `Cached ${events.length} events in memory for later sending`);
         } catch (error) {
             logger.warning(
                 mongoLogId(1_000_000),
                 "telemetry",
-                `Failed to cache telemetry events: ${error instanceof Error ? error.message : String(error)}`
+                `Failed to cache telemetry events in memory: ${error instanceof Error ? error.message : String(error)}`
             );
         }
     }
@@ -176,16 +164,14 @@ export class Telemetry {
      */
     private async clearCache(): Promise<void> {
         try {
-            await fs.unlink(CACHE_FILE);
+            EventCache.getInstance().clearEvents();
+            logger.debug(mongoLogId(1_000_000), "telemetry", "In-memory telemetry cache cleared");
         } catch (error) {
-            const typedError = error as TelemetryError;
-            if (typedError.code !== "ENOENT") {
-                logger.warning(
-                    mongoLogId(1_000_000),
-                    "telemetry",
-                    `Error clearing telemetry cache: ${typedError.message}`
-                );
-            }
+            logger.warning(
+                mongoLogId(1_000_000),
+                "telemetry",
+                `Error clearing in-memory telemetry cache: ${error instanceof Error ? error.message : String(error)}`
+            );
         }
     }
 }
