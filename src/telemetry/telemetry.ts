@@ -28,7 +28,10 @@ type CommonProperties = {
 export class Telemetry {
     private readonly commonProperties: CommonProperties;
 
-    constructor(private readonly session: Session, private readonly eventCache: EventCache = EventCache.getInstance()) {
+    constructor(
+        private readonly session: Session,
+        private readonly eventCache: EventCache = EventCache.getInstance()
+    ) {
         this.commonProperties = {
             ...MACHINE_METADATA,
         };
@@ -69,11 +72,11 @@ export class Telemetry {
                 logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping events.");
                 return;
             }
-    
+
             await this.emit(events);
         } catch (error) {
             logger.debug(mongoLogId(1_000_002), "telemetry", `Error emitting telemetry events: ${error}`);
-        }   
+        }
     }
 
     /**
@@ -111,8 +114,8 @@ export class Telemetry {
         }
 
         logger.warning(
-            mongoLogId(1_000_005), 
-            "telemetry", 
+            mongoLogId(1_000_005),
+            "telemetry",
             `Error sending event to client: ${result.error instanceof Error ? result.error.message : String(result.error)}`
         );
         this.eventCache.appendEvents(events);
