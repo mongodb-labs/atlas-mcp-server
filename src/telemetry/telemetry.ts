@@ -28,7 +28,7 @@ type CommonProperties = {
 export class Telemetry {
     private readonly commonProperties: CommonProperties;
 
-    constructor(private readonly session: Session) {
+    constructor(private readonly session: Session, private readonly eventCache: EventCache = EventCache.getInstance()) {
         this.commonProperties = {
             ...MACHINE_METADATA,
             mcp_client_version: this.session.agentRunner?.version,
@@ -90,7 +90,7 @@ export class Telemetry {
      * Falls back to caching if both attempts fail
      */
     private async emit(events: BaseEvent[]): Promise<void> {
-        const cachedEvents = this.readCache();
+        const cachedEvents = this.eventCache.getEvents();
         const allEvents = [...cachedEvents, ...events];
 
         logger.debug(
@@ -101,13 +101,13 @@ export class Telemetry {
 
         const result = await this.sendEvents(this.session.apiClient, allEvents);
         if (result.success) {
-            this.clearCache();
+            this.eventCache.clearEvents();
             logger.debug(mongoLogId(1_000_000), "telemetry", `Sent ${allEvents.length} events successfully`);
             return;
         }
 
         logger.warning(mongoLogId(1_000_000), "telemetry", `Error sending event to client: ${result.error}`);
-        this.cacheEvents(allEvents);
+        this.eventCache.setEvents(allEvents);
     }
 
     /**
@@ -122,59 +122,6 @@ export class Telemetry {
                 success: false,
                 error: error instanceof Error ? error : new Error(String(error)),
             };
-        }
-    }
-
-    /**
-     * Reads cached events from memory
-     * Returns empty array if no cache exists
-     */
-    private readCache(): BaseEvent[] {
-        try {
-            return EventCache.getInstance().getEvents();
-        } catch (error) {
-            logger.warning(
-                mongoLogId(1_000_000),
-                "telemetry",
-                `Error reading telemetry cache from memory: ${error instanceof Error ? error.message : String(error)}`
-            );
-            return [];
-        }
-    }
-
-    /**
-     * Caches events in memory for later sending
-     */
-    private cacheEvents(events: BaseEvent[]): void {
-        try {
-            EventCache.getInstance().setEvents(events);
-            logger.debug(
-                mongoLogId(1_000_000),
-                "telemetry",
-                `Cached ${events.length} events in memory for later sending`
-            );
-        } catch (error) {
-            logger.warning(
-                mongoLogId(1_000_000),
-                "telemetry",
-                `Failed to cache telemetry events in memory: ${error instanceof Error ? error.message : String(error)}`
-            );
-        }
-    }
-
-    /**
-     * Clears the event cache after successful sending
-     */
-    private clearCache(): void {
-        try {
-            EventCache.getInstance().clearEvents();
-            logger.debug(mongoLogId(1_000_000), "telemetry", "In-memory telemetry cache cleared");
-        } catch (error) {
-            logger.warning(
-                mongoLogId(1_000_000),
-                "telemetry",
-                `Error clearing in-memory telemetry cache: ${error instanceof Error ? error.message : String(error)}`
-            );
         }
     }
 }
