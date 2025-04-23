@@ -12,7 +12,7 @@ function generateRandomIp() {
 
 describeAtlas("ip access lists", (integration) => {
     withProject(integration, ({ getProjectId }) => {
-        const ips = [generateRandomIp(), generateRandomIp()]
+        const ips = [generateRandomIp(), generateRandomIp()];
         const cidrBlocks = [generateRandomIp() + "/16", generateRandomIp() + "/24"];
         const values = [...ips, ...cidrBlocks];
 
