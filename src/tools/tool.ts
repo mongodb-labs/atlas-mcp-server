@@ -6,7 +6,7 @@ import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import config from "../config.js";
 import { Telemetry } from "../telemetry/telemetry.js";
-import { type ToolEvent, TELEMETRY_RESULT, type TelemetryResult } from "../telemetry/types.js";
+import { type ToolEvent, type TelemetryResult } from "../telemetry/types.js";
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
 
