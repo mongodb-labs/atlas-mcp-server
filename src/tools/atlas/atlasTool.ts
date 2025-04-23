@@ -10,7 +10,7 @@ export abstract class AtlasToolBase extends ToolBase {
     protected category: ToolCategory = "atlas";
 
     protected verifyAllowed(): boolean {
-        if (config.connectionString || !config.apiClientId || !config.apiClientSecret) {
+        if (!config.apiClientId || !config.apiClientSecret) {
             return false;
         }
         return super.verifyAllowed();
