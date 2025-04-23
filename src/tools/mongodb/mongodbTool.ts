@@ -5,6 +5,7 @@ import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
 import config from "../../config.js";
+import { Telemetry } from "../../telemetry/telemetry.js";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
@@ -12,8 +13,8 @@ export const DbOperationArgs = {
 };
 
 export abstract class MongoDBToolBase extends ToolBase {
-    constructor(session: Session) {
-        super(session);
+    constructor(session: Session, telemetry: Telemetry) {
+        super(session, telemetry);
     }
 
     protected category: ToolCategory = "mongodb";

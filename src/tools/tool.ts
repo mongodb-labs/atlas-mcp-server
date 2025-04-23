@@ -1,12 +1,12 @@
 import { z, type ZodRawShape, type ZodNever } from "zod";
 import type { McpServer, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { CallToolResult, Tool } from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import config from "../config.js";
 import { Telemetry } from "../telemetry/telemetry.js";
-import { type ToolEvent, type TelemetryResult } from "../telemetry/types.js";
+import { type ToolEvent } from "../telemetry/types.js";
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
 
@@ -24,13 +24,12 @@ export abstract class ToolBase {
 
     protected abstract argsShape: ZodRawShape;
 
-    private readonly telemetry: Telemetry;
-
     protected abstract execute(...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<CallToolResult>;
 
-    protected constructor(protected session: Session) {
-        this.telemetry = new Telemetry(session);
-    }
+    protected constructor(
+        protected session: Session,
+        protected readonly telemetry: Telemetry
+    ) {}
 
     /**
      * Creates and emits a tool telemetry event
@@ -40,11 +39,6 @@ export abstract class ToolBase {
      */
     private async emitToolEvent(startTime: number, result: CallToolResult): Promise<void> {
         const duration = Date.now() - startTime;
-        logger.info(
-            mongoLogId(1_000_007),
-            "tool",
-            `Tool ${this.name} executed in ${duration}ms with result: ${result}`
-        );
         const event: ToolEvent = {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",

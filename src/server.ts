@@ -7,14 +7,17 @@ import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
 import config from "./config.js";
 import { ObjectId } from "mongodb";
+import { Telemetry } from "./telemetry/telemetry.js";
 
 export class Server {
     public readonly session: Session;
     private readonly mcpServer: McpServer;
+    private readonly telemetry: Telemetry;
 
     constructor({ mcpServer, session }: { mcpServer: McpServer; session: Session }) {
         this.mcpServer = mcpServer;
         this.session = session;
+        this.telemetry = new Telemetry(session);
     }
 
     async connect(transport: Transport) {
@@ -45,7 +48,7 @@ export class Server {
 
     private registerTools() {
         for (const tool of [...AtlasTools, ...MongoDbTools]) {
-            new tool(this.session).register(this.mcpServer);
+            new tool(this.session, this.telemetry).register(this.mcpServer);
         }
     }
 
