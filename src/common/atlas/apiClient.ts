@@ -66,7 +66,7 @@ export class ApiClient {
     constructor(options?: ApiClientOptions) {
         this.options = {
             ...options,
-            baseUrl: options?.baseUrl || "https://cloud-dev.mongodb.com/",
+            baseUrl: options?.baseUrl || "https://cloud.mongodb.com/",
             userAgent:
                 options?.userAgent ||
                 `${config.mcpServerName}/${config.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
