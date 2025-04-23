@@ -149,7 +149,11 @@ export class Telemetry {
     private async cacheEvents(events: BaseEvent[]): Promise<void> {
         try {
             EventCache.getInstance().setEvents(events);
-            logger.debug(mongoLogId(1_000_000), "telemetry", `Cached ${events.length} events in memory for later sending`);
+            logger.debug(
+                mongoLogId(1_000_000),
+                "telemetry",
+                `Cached ${events.length} events in memory for later sending`
+            );
         } catch (error) {
             logger.warning(
                 mongoLogId(1_000_000),

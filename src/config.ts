@@ -5,6 +5,9 @@ import argv from "yargs-parser";
 import packageJson from "../package.json" with { type: "json" };
 import { ReadConcernLevel, ReadPreferenceMode, W } from "mongodb";
 
+export const SERVER_NAME = "MdbMcpServer";
+export const SERVER_VERSION = packageJson.version;
+
 // If we decide to support non-string config options, we'll need to extend the mechanism for parsing
 // env variables.
 interface UserConfig {
@@ -42,8 +45,8 @@ const mergedUserConfig = {
 
 const config = {
     ...mergedUserConfig,
-    version: packageJson.version,
-    mcpServerName: "MdbMcpServer",
+    version: SERVER_VERSION,
+    mcpServerName: SERVER_NAME,
     isTelemetryEnabled: true,
 };
 
