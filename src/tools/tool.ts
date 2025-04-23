@@ -74,18 +74,9 @@ export abstract class ToolBase {
                 return result;
             } catch (error: unknown) {
                 logger.error(mongoLogId(1_000_000), "tool", `Error executing ${this.name}: ${error as string}`);
-
-                const toolResult: CallToolResult = {
-                    isError: true,
-                    content: [
-                        {
-                            type: "text",
-                            text: `Error running ${this.name}: ${error instanceof Error ? error.message : String(error)}`,
-                        },
-                    ],
-                };
-                await this.emitToolEvent(startTime, toolResult);
-                return await this.handleError(error, args[0] as ToolArgs<typeof this.argsShape>);
+                const toolResult = await this.handleError(error, args[0] as ToolArgs<typeof this.argsShape>);
+                await this.emitToolEvent(startTime, toolResult).catch(() => {});
+                return toolResult;
             }
         };
 
@@ -129,7 +120,6 @@ export abstract class ToolBase {
                     text: `Error running ${this.name}: ${error instanceof Error ? error.message : String(error)}`,
                 },
             ],
-            isError: true,
         };
     }
 }
