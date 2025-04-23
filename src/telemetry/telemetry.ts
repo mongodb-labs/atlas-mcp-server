@@ -74,8 +74,8 @@ export class Telemetry {
             }
 
             await this.emit(events);
-        } catch (error) {
-            logger.debug(mongoLogId(1_000_002), "telemetry", `Error emitting telemetry events: ${error}`);
+        } catch {
+            logger.debug(mongoLogId(1_000_002), "telemetry", `Error emitting telemetry events.`);
         }
     }
 
