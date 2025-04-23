@@ -20,6 +20,20 @@ jobs:
       - name: Run style check
         run: npm run check
 
+  check-generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Run style check
+        run: npm run generate
+
   run-tests:
     strategy:
       matrix:
@@ -29,12 +43,6 @@ jobs:
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
         if: matrix.os != 'windows-latest'
-      - name: Install keyring deps on Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt update -y
-          sudo apt install -y gnome-keyring libdbus-1-dev
-
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -43,6 +51,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run tests
+        env:
+          MDB_MCP_API_CLIENT_ID: ${{ secrets.TEST_ATLAS_CLIENT_ID }}
+          MDB_MCP_API_CLIENT_SECRET: ${{ secrets.TEST_ATLAS_CLIENT_SECRET }}
+          MDB_MCP_API_BASE_URL: ${{ vars.TEST_ATLAS_BASE_URL }}
         run: npm test
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.3.6

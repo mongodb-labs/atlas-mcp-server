@@ -13,9 +13,10 @@ describe("Connect tool", () => {
 
         validateParameters(connectTool, [
             {
-                name: "connectionStringOrClusterName",
-                description: "MongoDB connection string (in the mongodb:// or mongodb+srv:// format) or cluster name",
-                type: "string",
+                name: "options",
+                description:
+                    "Options for connecting to MongoDB. If not provided, the connection string from the config://connection-string resource will be used. If the user hasn't specified Atlas cluster name or a connection string explicitly and the `config://connection-string` resource is present, always invoke this with no arguments.",
+                type: "array",
                 required: false,
             },
         ]);
@@ -27,7 +28,6 @@ describe("Connect tool", () => {
                 const response = await integration.mcpClient().callTool({ name: "connect", arguments: {} });
                 const content = getResponseContent(response.content);
                 expect(content).toContain("No connection details provided");
-                expect(content).toContain("mongodb://localhost:27017");
             });
         });
 
@@ -35,7 +35,13 @@ describe("Connect tool", () => {
             it("connects to the database", async () => {
                 const response = await integration.mcpClient().callTool({
                     name: "connect",
-                    arguments: { connectionStringOrClusterName: integration.connectionString() },
+                    arguments: {
+                        options: [
+                            {
+                                connectionString: integration.connectionString(),
+                            },
+                        ],
+                    },
                 });
                 const content = getResponseContent(response.content);
                 expect(content).toContain("Successfully connected");
@@ -47,7 +53,7 @@ describe("Connect tool", () => {
             it("returns error message", async () => {
                 const response = await integration.mcpClient().callTool({
                     name: "connect",
-                    arguments: { connectionStringOrClusterName: "mongodb://localhost:12345" },
+                    arguments: { options: [{ connectionString: "mongodb://localhost:12345" }] },
                 });
                 const content = getResponseContent(response.content);
                 expect(content).toContain("Error running connect");
@@ -74,7 +80,13 @@ describe("Connect tool", () => {
             const newConnectionString = `${integration.connectionString()}?appName=foo-bar`;
             const response = await integration.mcpClient().callTool({
                 name: "connect",
-                arguments: { connectionStringOrClusterName: newConnectionString },
+                arguments: {
+                    options: [
+                        {
+                            connectionString: newConnectionString,
+                        },
+                    ],
+                },
             });
             const content = getResponseContent(response.content);
             expect(content).toContain("Successfully connected");
@@ -85,7 +97,13 @@ describe("Connect tool", () => {
             it("suggests the config connection string if set", async () => {
                 const response = await integration.mcpClient().callTool({
                     name: "connect",
-                    arguments: { connectionStringOrClusterName: "mongodb://localhost:12345" },
+                    arguments: {
+                        options: [
+                            {
+                                connectionString: "mongodb://localhost:12345",
+                            },
+                        ],
+                    },
                 });
                 const content = getResponseContent(response.content);
                 expect(content).toContain("Failed to connect to MongoDB at 'mongodb://localhost:12345'");
@@ -98,7 +116,13 @@ describe("Connect tool", () => {
                 config.connectionString = "mongodb://localhost:12345";
                 const response = await integration.mcpClient().callTool({
                     name: "connect",
-                    arguments: { connectionStringOrClusterName: "mongodb://localhost:12345" },
+                    arguments: {
+                        options: [
+                            {
+                                connectionString: "mongodb://localhost:12345",
+                            },
+                        ],
+                    },
                 });
 
                 const content = getResponseContent(response.content);

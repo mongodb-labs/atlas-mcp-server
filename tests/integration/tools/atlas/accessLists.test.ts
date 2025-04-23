@@ -1,0 +1,100 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { Session } from "../../../../src/session.js";
+import { describeAtlas, withProject } from "./atlasHelpers.js";
+
+function generateRandomIp() {
+    const randomIp: number[] = [192];
+    for (let i = 0; i < 3; i++) {
+        randomIp.push(Math.floor(Math.random() * 256));
+    }
+    return randomIp.join(".");
+}
+
+describeAtlas("ip access lists", (integration) => {
+    withProject(integration, ({ getProjectId }) => {
+        const ips = [generateRandomIp(), generateRandomIp()];
+        const cidrBlocks = [generateRandomIp() + "/16", generateRandomIp() + "/24"];
+        const values = [...ips, ...cidrBlocks];
+
+        beforeAll(async () => {
+            const session: Session = integration.mcpServer().session;
+            session.ensureAuthenticated();
+            const ipInfo = await session.apiClient.getIpInfo();
+            values.push(ipInfo.currentIpv4Address);
+        });
+
+        afterAll(async () => {
+            const session: Session = integration.mcpServer().session;
+            session.ensureAuthenticated();
+
+            const projectId = getProjectId();
+
+            for (const value of values) {
+                await session.apiClient.deleteProjectIpAccessList({
+                    params: {
+                        path: {
+                            groupId: projectId,
+                            entryValue: value,
+                        },
+                    },
+                });
+            }
+        });
+
+        describe("atlas-create-access-list", () => {
+            it("should have correct metadata", async () => {
+                const { tools } = await integration.mcpClient().listTools();
+                const createAccessList = tools.find((tool) => tool.name === "atlas-create-access-list")!;
+                expect(createAccessList).toBeDefined();
+                expect(createAccessList.inputSchema.type).toBe("object");
+                expect(createAccessList.inputSchema.properties).toBeDefined();
+                expect(createAccessList.inputSchema.properties).toHaveProperty("projectId");
+                expect(createAccessList.inputSchema.properties).toHaveProperty("ipAddresses");
+                expect(createAccessList.inputSchema.properties).toHaveProperty("cidrBlocks");
+                expect(createAccessList.inputSchema.properties).toHaveProperty("currentIpAddress");
+                expect(createAccessList.inputSchema.properties).toHaveProperty("comment");
+            });
+
+            it("should create an access list", async () => {
+                const projectId = getProjectId();
+
+                const response = (await integration.mcpClient().callTool({
+                    name: "atlas-create-access-list",
+                    arguments: {
+                        projectId,
+                        ipAddresses: ips,
+                        cidrBlocks: cidrBlocks,
+                        currentIpAddress: true,
+                    },
+                })) as CallToolResult;
+                expect(response.content).toBeArray();
+                expect(response.content).toHaveLength(1);
+                expect(response.content[0].text).toContain("IP/CIDR ranges added to access list");
+            });
+        });
+
+        describe("atlas-inspect-access-list", () => {
+            it("should have correct metadata", async () => {
+                const { tools } = await integration.mcpClient().listTools();
+                const inspectAccessList = tools.find((tool) => tool.name === "atlas-inspect-access-list")!;
+                expect(inspectAccessList).toBeDefined();
+                expect(inspectAccessList.inputSchema.type).toBe("object");
+                expect(inspectAccessList.inputSchema.properties).toBeDefined();
+                expect(inspectAccessList.inputSchema.properties).toHaveProperty("projectId");
+            });
+
+            it("returns access list data", async () => {
+                const projectId = getProjectId();
+
+                const response = (await integration
+                    .mcpClient()
+                    .callTool({ name: "atlas-inspect-access-list", arguments: { projectId } })) as CallToolResult;
+                expect(response.content).toBeArray();
+                expect(response.content).toHaveLength(1);
+                for (const value of values) {
+                    expect(response.content[0].text).toContain(value);
+                }
+            });
+        });
+    });
+});

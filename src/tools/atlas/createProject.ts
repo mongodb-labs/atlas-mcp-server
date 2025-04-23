@@ -25,28 +25,16 @@ export class CreateProjectTool extends AtlasToolBase {
             try {
                 const organizations = await this.session.apiClient.listOrganizations();
                 if (!organizations?.results?.length) {
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: "No organizations were found in your MongoDB Atlas account. Please create an organization first.",
-                            },
-                        ],
-                        isError: true,
-                    };
+                    throw new Error(
+                        "No organizations were found in your MongoDB Atlas account. Please create an organization first."
+                    );
                 }
                 organizationId = organizations.results[0].id;
                 assumedOrg = true;
             } catch {
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: "Could not search for organizations in your MongoDB Atlas account, please provide an organization ID or create one first.",
-                        },
-                    ],
-                    isError: true,
-                };
+                throw new Error(
+                    "Could not search for organizations in your MongoDB Atlas account, please provide an organization ID or create one first."
+                );
             }
         }
 
@@ -55,9 +43,13 @@ export class CreateProjectTool extends AtlasToolBase {
             orgId: organizationId,
         } as Group;
 
-        await this.session.apiClient.createProject({
+        const group = await this.session.apiClient.createProject({
             body: input,
         });
+
+        if (!group?.id) {
+            throw new Error("Failed to create project");
+        }
 
         return {
             content: [

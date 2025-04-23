@@ -9,38 +9,46 @@ export class ConnectTool extends MongoDBToolBase {
     protected name = "connect";
     protected description = "Connect to a MongoDB instance";
     protected argsShape = {
-        connectionStringOrClusterName: z
-            .string()
+        options: z
+            .array(
+                z
+                    .union([
+                        z.object({
+                            connectionString: z
+                                .string()
+                                .describe("MongoDB connection string (in the mongodb:// or mongodb+srv:// format)"),
+                        }),
+                        z.object({
+                            clusterName: z.string().describe("MongoDB cluster name"),
+                        }),
+                    ])
+                    .optional()
+            )
             .optional()
-            .describe("MongoDB connection string (in the mongodb:// or mongodb+srv:// format) or cluster name"),
+            .describe(
+                "Options for connecting to MongoDB. If not provided, the connection string from the config://connection-string resource will be used. If the user hasn't specified Atlas cluster name or a connection string explicitly and the `config://connection-string` resource is present, always invoke this with no arguments."
+            ),
     };
 
     protected operationType: OperationType = "metadata";
 
-    protected async execute({
-        connectionStringOrClusterName,
-    }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        connectionStringOrClusterName ??= config.connectionString;
-        if (!connectionStringOrClusterName) {
+    protected async execute({ options: optionsArr }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
+        const options = optionsArr?.[0];
+        let connectionString: string;
+        if (!options && !config.connectionString) {
             return {
                 content: [
                     { type: "text", text: "No connection details provided." },
                     { type: "text", text: "Please provide either a connection string or a cluster name" },
-                    {
-                        type: "text",
-                        text: "Alternatively, you can use the default deployment at mongodb://localhost:27017",
-                    },
                 ],
             };
         }
 
-        let connectionString: string;
-
-        if (
-            connectionStringOrClusterName.startsWith("mongodb://") ||
-            connectionStringOrClusterName.startsWith("mongodb+srv://")
-        ) {
-            connectionString = connectionStringOrClusterName;
+        if (!options) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            connectionString = config.connectionString!;
+        } else if ("connectionString" in options) {
+            connectionString = options.connectionString;
         } else {
             // TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/19
             // We don't support connecting via cluster name since we'd need to obtain the user credentials
