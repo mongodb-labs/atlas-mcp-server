@@ -5,17 +5,21 @@ import {
     validateToolMetadata,
     validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    dbOperationInvalidArgTests,
+    databaseInvalidArgs,
+    databaseParameters,
 } from "../../../helpers.js";
 
 describe("listCollections tool", () => {
     const integration = setupIntegrationTest();
 
-    validateToolMetadata(integration, "list-collections", "List all collections for a given database", [
-        { name: "database", description: "Database name", type: "string", required: true },
-    ]);
+    validateToolMetadata(
+        integration,
+        "list-collections",
+        "List all collections for a given database",
+        databaseParameters
+    );
 
-    validateThrowsForInvalidArguments(integration, "list-collections", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "list-collections", databaseInvalidArgs);
 
     describe("with non-existent database", () => {
         it("returns no collections", async () => {

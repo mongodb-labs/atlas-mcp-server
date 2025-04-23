@@ -1,11 +1,11 @@
 import {
     getResponseContent,
-    dbOperationParameters,
+    databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    dbOperationInvalidArgTests,
+    databaseCollectionInvalidArgs,
 } from "../../../helpers.js";
 
 describe("createCollection tool", () => {
@@ -15,10 +15,10 @@ describe("createCollection tool", () => {
         integration,
         "create-collection",
         "Creates a new collection in a database. If the database doesn't exist, it will be created automatically.",
-        dbOperationParameters
+        databaseCollectionParameters
     );
 
-    validateThrowsForInvalidArguments(integration, "create-collection", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "create-collection", databaseCollectionInvalidArgs);
 
     describe("with non-existent database", () => {
         it("creates a new collection", async () => {

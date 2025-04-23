@@ -1,6 +1,6 @@
 import {
     getResponseContent,
-    dbOperationParameters,
+    databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
@@ -15,7 +15,7 @@ describe("deleteMany tool", () => {
         "delete-many",
         "Removes all documents that match the filter from a MongoDB collection",
         [
-            ...dbOperationParameters,
+            ...databaseCollectionParameters,
             {
                 name: "filter",
                 type: "object",

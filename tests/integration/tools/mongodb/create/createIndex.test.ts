@@ -1,6 +1,6 @@
 import {
     getResponseContent,
-    dbOperationParameters,
+    databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
@@ -12,7 +12,7 @@ describe("createIndex tool", () => {
     const integration = setupIntegrationTest();
 
     validateToolMetadata(integration, "create-index", "Create an index for a collection", [
-        ...dbOperationParameters,
+        ...databaseCollectionParameters,
         {
             name: "keys",
             type: "object",

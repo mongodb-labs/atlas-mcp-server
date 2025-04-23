@@ -2,11 +2,11 @@ import {
     getResponseElements,
     getResponseContent,
     setupIntegrationTest,
-    dbOperationParameters,
+    databaseCollectionParameters,
     validateToolMetadata,
     validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    dbOperationInvalidArgTests,
+    databaseCollectionInvalidArgs,
 } from "../../../helpers.js";
 import { Document } from "bson";
 import { OptionalId } from "mongodb";
@@ -19,10 +19,10 @@ describe("collectionSchema tool", () => {
         integration,
         "collection-schema",
         "Describe the schema for a collection",
-        dbOperationParameters
+        databaseCollectionParameters
     );
 
-    validateThrowsForInvalidArguments(integration, "collection-schema", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "collection-schema", databaseCollectionInvalidArgs);
 
     describe("with non-existent database", () => {
         it("returns empty schema", async () => {

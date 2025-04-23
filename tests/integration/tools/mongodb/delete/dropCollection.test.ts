@@ -1,11 +1,11 @@
 import {
     getResponseContent,
-    dbOperationParameters,
+    databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    dbOperationInvalidArgTests,
+    databaseCollectionInvalidArgs,
 } from "../../../helpers.js";
 
 describe("dropCollection tool", () => {
@@ -15,10 +15,10 @@ describe("dropCollection tool", () => {
         integration,
         "drop-collection",
         "Removes a collection or view from the database. The method also removes any indexes associated with the dropped collection.",
-        dbOperationParameters
+        databaseCollectionParameters
     );
 
-    validateThrowsForInvalidArguments(integration, "drop-collection", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "drop-collection", databaseCollectionInvalidArgs);
 
     it("can drop non-existing collection", async () => {
         await integration.connectMcpClient();

@@ -4,7 +4,6 @@ import {
     setupIntegrationTest,
     validateAutoConnectBehavior,
 } from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
 
 describe("listDatabases tool", () => {
     const integration = setupIntegrationTest();
@@ -26,7 +25,7 @@ describe("listDatabases tool", () => {
             const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
             const dbNames = getDbNames(response.content);
 
-            expect(defaultDatabases).toIncludeAllMembers(defaultDatabases);
+            expect(defaultDatabases).toIncludeAllMembers(dbNames);
         });
     });
 

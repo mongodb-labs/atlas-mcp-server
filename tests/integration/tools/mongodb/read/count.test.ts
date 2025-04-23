@@ -1,6 +1,6 @@
 import {
     getResponseContent,
-    dbOperationParameters,
+    databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
@@ -18,7 +18,7 @@ describe("count tool", () => {
             type: "object",
             required: false,
         },
-        ...dbOperationParameters,
+        ...databaseCollectionParameters,
     ]);
 
     validateThrowsForInvalidArguments(integration, "count", [

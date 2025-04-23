@@ -1,6 +1,6 @@
 import {
     getResponseContent,
-    dbOperationParameters,
+    databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
     validateAutoConnectBehavior,
@@ -11,7 +11,7 @@ describe("insertMany tool", () => {
     const integration = setupIntegrationTest();
 
     validateToolMetadata(integration, "insert-many", "Insert an array of documents into a MongoDB collection", [
-        ...dbOperationParameters,
+        ...databaseCollectionParameters,
         {
             name: "documents",
             type: "array",

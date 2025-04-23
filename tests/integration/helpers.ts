@@ -222,12 +222,27 @@ export function getParameters(tool: ToolInfo): ParameterInfo[] {
         });
 }
 
-export const dbOperationParameters: ParameterInfo[] = [
+export const databaseParameters: ParameterInfo[] = [
     { name: "database", type: "string", description: "Database name", required: true },
+];
+
+export const databaseCollectionParameters: ParameterInfo[] = [
+    ...databaseParameters,
     { name: "collection", type: "string", description: "Collection name", required: true },
 ];
 
-export const dbOperationInvalidArgTests = [{}, { database: 123 }, { foo: "bar", database: "test" }, { database: [] }];
+export const databaseCollectionInvalidArgs = [
+    {},
+    { database: "test" },
+    { collection: "foo" },
+    { database: 123, collection: "foo" },
+    { database: "test", collection: "foo", extra: "bar" },
+    { database: "test", collection: 123 },
+    { database: [], collection: "foo" },
+    { database: "test", collection: [] },
+];
+
+export const databaseInvalidArgs = [{}, { database: 123 }, { database: [] }, { database: "test", extra: "bar" }];
 
 export function validateToolMetadata(
     integration: IntegrationTest,

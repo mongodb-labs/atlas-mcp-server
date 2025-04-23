@@ -1,10 +1,10 @@
 import {
     getResponseContent,
     setupIntegrationTest,
-    dbOperationParameters,
+    databaseCollectionParameters,
     validateToolMetadata,
     validateAutoConnectBehavior,
-    dbOperationInvalidArgTests,
+    databaseCollectionInvalidArgs,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 import * as crypto from "crypto";
@@ -16,13 +16,13 @@ describe("collectionStorageSize tool", () => {
         integration,
         "collection-storage-size",
         "Gets the size of the collection",
-        dbOperationParameters
+        databaseCollectionParameters
     );
 
-    validateThrowsForInvalidArguments(integration, "collection-storage-size", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "collection-storage-size", databaseCollectionInvalidArgs);
 
     describe("with non-existent database", () => {
-        it("returns 0 MB", async () => {
+        it("returns an error", async () => {
             await integration.connectMcpClient();
             const response = await integration.mcpClient().callTool({
                 name: "collection-storage-size",
