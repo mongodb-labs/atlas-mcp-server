@@ -13,4 +13,4 @@ export const MACHINE_METADATA = {
     arch: process.arch,
     os_type: process.platform,
     os_version: process.version,
-};
+} as const;
