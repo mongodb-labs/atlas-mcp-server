@@ -1,14 +1,26 @@
 import { BaseEvent } from "./types.js";
+import { LRUCache } from "lru-cache";
 
 /**
  * Singleton class for in-memory telemetry event caching
  * Provides a central storage for telemetry events that couldn't be sent
+ * Uses LRU cache to automatically drop oldest events when limit is exceeded
  */
 export class EventCache {
     private static instance: EventCache;
-    private events: BaseEvent[] = [];
+    private static readonly MAX_EVENTS = 1000;
 
-    private constructor() {}
+    private cache: LRUCache<number, BaseEvent>;
+    private nextId = 0;
+
+    private constructor() {
+        this.cache = new LRUCache({
+            max: EventCache.MAX_EVENTS,
+            // Using FIFO eviction strategy for events
+            allowStale: false,
+            updateAgeOnGet: false,
+        });
+    }
 
     /**
      * Gets the singleton instance of EventCache
@@ -26,21 +38,25 @@ export class EventCache {
      * @returns Array of cached BaseEvent objects
      */
     public getEvents(): BaseEvent[] {
-        return [...this.events];
+        return Array.from(this.cache.values());
     }
 
     /**
-     * Sets the cached events, replacing any existing events
-     * @param events - The events to cache
+     * Appends new events to the cached events
+     * LRU cache automatically handles dropping oldest events when limit is exceeded
+     * @param events - The events to append
      */
-    public setEvents(events: BaseEvent[]): void {
-        this.events = [...events];
+    public appendEvents(events: BaseEvent[]): void {
+        for (const event of events) {
+            this.cache.set(this.nextId++, event);
+        }
     }
 
     /**
      * Clears all cached events
      */
     public clearEvents(): void {
-        this.events = [];
+        this.cache.clear();
+        this.nextId = 0;
     }
 }

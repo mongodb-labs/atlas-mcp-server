@@ -110,8 +110,12 @@ export class Telemetry {
             return;
         }
 
-        logger.warning(mongoLogId(1_000_005), "telemetry", `Error sending event to client: ${result.error}`);
-        this.eventCache.setEvents(allEvents);
+        logger.warning(
+            mongoLogId(1_000_005), 
+            "telemetry", 
+            `Error sending event to client: ${result.error instanceof Error ? result.error.message : String(result.error)}`
+        );
+        this.eventCache.appendEvents(events);
     }
 
     /**
