@@ -77,7 +77,7 @@ jobs:
           MDB_MCP_API_BASE_URL: ${{ vars.TEST_ATLAS_BASE_URL }}
         run: npm test -- --testPathIgnorePatterns "mongodb"
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: atlas-test-results
           path: coverage/lcov.info
