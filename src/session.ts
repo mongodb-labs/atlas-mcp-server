@@ -1,15 +1,7 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
-import { ApiClient } from "./common/atlas/apiClient.js";
-import defaultConfig from "./config.js";
+import { ApiClient, ApiClientCredentials } from "./common/atlas/apiClient.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
-
-// Define the type for configuration used by Session
-interface SessionConfig {
-    apiBaseUrl?: string;
-    apiClientId?: string;
-    apiClientSecret?: string;
-    [key: string]: unknown;
-}
+import config from "./config.js";
 
 export class Session {
     sessionId?: string;
@@ -19,56 +11,28 @@ export class Session {
         name: string;
         version: string;
     };
-    private credentials?: { clientId: string; clientSecret: string };
-    private baseUrl: string;
-    private readonly config: SessionConfig;
 
-    constructor(config: SessionConfig = defaultConfig as SessionConfig) {
-        this.config = config;
-        this.baseUrl = this.config.apiBaseUrl ?? "https://cloud.mongodb.com/";
+    constructor() {
+        const credentials: ApiClientCredentials | undefined =
+            config.apiClientId && config.apiClientSecret
+                ? {
+                      clientId: config.apiClientId,
+                      clientSecret: config.apiClientSecret,
+                  }
+                : undefined;
 
-        // Store credentials if available
-        if (this.config.apiClientId && this.config.apiClientSecret) {
-            this.credentials = {
-                clientId: this.config.apiClientId,
-                clientSecret: this.config.apiClientSecret,
-            };
-
-            // Initialize API client with credentials
-            this.apiClient = new ApiClient({
-                baseUrl: this.baseUrl,
-                credentials: this.credentials,
-            });
-            return;
-        }
-
-        // Initialize API client without credentials
-        this.apiClient = new ApiClient({ baseUrl: this.baseUrl });
+        this.apiClient = new ApiClient({
+            baseUrl: config.apiBaseUrl,
+            credentials,
+        });
     }
 
-    setAgentRunner(agentClient: Implementation | undefined) {
-        if (agentClient?.name && agentClient?.version) {
+    setAgentRunner(agentRunner: Implementation | undefined) {
+        if (agentRunner?.name && agentRunner?.version) {
             this.agentRunner = {
-                name: agentClient.name,
-                version: agentClient.version,
+                name: agentRunner.name,
+                version: agentRunner.version,
             };
-        }
-    }
-
-    ensureAuthenticated(): asserts this is { apiClient: ApiClient } {
-        if (!this.apiClient.hasCredentials()) {
-            if (!this.credentials) {
-                throw new Error(
-                    "Not authenticated make sure to configure MCP server with MDB_MCP_API_CLIENT_ID and MDB_MCP_API_CLIENT_SECRET environment variables."
-                );
-            }
-
-            // Reinitialize API client with the stored credentials
-            // This can happen if the server was configured without credentials but the env variables are later set
-            this.apiClient = new ApiClient({
-                baseUrl: this.baseUrl,
-                credentials: this.credentials,
-            });
         }
     }
 

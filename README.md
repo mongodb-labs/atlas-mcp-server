@@ -109,6 +109,8 @@ You may experiment asking `Can you connect to my mongodb instance?`.
 - `atlas-list-db-users` - List MongoDB Atlas database users
 - `atlas-create-db-user` - List MongoDB Atlas database users
 
+NOTE: atlas tools are only available when you set credentials on [configuration](#configuration) section.
+
 #### MongoDB Database Tools
 
 - `connect` - Connect to a MongoDB instance

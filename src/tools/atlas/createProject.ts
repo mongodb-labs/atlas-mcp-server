@@ -14,7 +14,6 @@ export class CreateProjectTool extends AtlasToolBase {
     };
 
     protected async execute({ projectName, organizationId }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        this.session.ensureAuthenticated();
         let assumedOrg = false;
 
         if (!projectName) {

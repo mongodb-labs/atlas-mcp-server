@@ -15,8 +15,6 @@ export class CreateFreeClusterTool extends AtlasToolBase {
     };
 
     protected async execute({ projectId, name, region }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        this.session.ensureAuthenticated();
-
         const input = {
             groupId: projectId,
             name,

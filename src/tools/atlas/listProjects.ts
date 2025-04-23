@@ -13,8 +13,6 @@ export class ListProjectsTool extends AtlasToolBase {
     };
 
     protected async execute({ orgId }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        this.session.ensureAuthenticated();
-
         const data = orgId
             ? await this.session.apiClient.listOrganizationProjects({
                   params: {

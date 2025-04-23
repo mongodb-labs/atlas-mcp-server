@@ -1,5 +1,4 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { Session } from "../../../../src/session.js";
 import { describeAtlas, withProject } from "./atlasHelpers.js";
 
 function generateRandomIp() {
@@ -17,20 +16,18 @@ describeAtlas("ip access lists", (integration) => {
         const values = [...ips, ...cidrBlocks];
 
         beforeAll(async () => {
-            const session: Session = integration.mcpServer().session;
-            session.ensureAuthenticated();
-            const ipInfo = await session.apiClient.getIpInfo();
+            const apiClient = integration.mcpServer().session.apiClient;
+            const ipInfo = await apiClient.getIpInfo();
             values.push(ipInfo.currentIpv4Address);
         });
 
         afterAll(async () => {
-            const session: Session = integration.mcpServer().session;
-            session.ensureAuthenticated();
+            const apiClient = integration.mcpServer().session.apiClient;
 
             const projectId = getProjectId();
 
             for (const value of values) {
-                await session.apiClient.deleteProjectIpAccessList({
+                await apiClient.deleteProjectIpAccessList({
                     params: {
                         path: {
                             groupId: projectId,

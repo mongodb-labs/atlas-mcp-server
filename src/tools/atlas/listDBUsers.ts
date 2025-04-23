@@ -13,8 +13,6 @@ export class ListDBUsersTool extends AtlasToolBase {
     };
 
     protected async execute({ projectId }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        this.session.ensureAuthenticated();
-
         const data = await this.session.apiClient.listDatabaseUsers({
             params: {
                 path: {

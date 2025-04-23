@@ -1,6 +1,4 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { setupIntegrationTest } from "../../helpers.js";
-import { Session } from "../../../../src/session.js";
 import { ObjectId } from "mongodb";
 import { parseTable, describeAtlas } from "./atlasHelpers.js";
 
@@ -10,8 +8,7 @@ describeAtlas("projects", (integration) => {
     const projName = "testProj-" + randomId;
 
     afterAll(async () => {
-        const session: Session = integration.mcpServer().session;
-        session.ensureAuthenticated();
+        const session = integration.mcpServer().session;
 
         const projects = await session.apiClient.listProjects();
         for (const project of projects?.results || []) {

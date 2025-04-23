@@ -83,6 +83,9 @@ export function setupIntegrationTest(): IntegrationTest {
     afterEach(async () => {
         await mcpServer?.session.close();
         config.connectionString = undefined;
+
+        await mongoClient?.close();
+        mongoClient = undefined;
     });
 
     beforeAll(async function () {
