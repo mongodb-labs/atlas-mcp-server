@@ -1,50 +1,24 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
+    dbOperationInvalidArgTests,
 } from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ObjectId } from "bson";
-import config from "../../../../../src/config.js";
 
 describe("createCollection tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const listCollections = tools.find((tool) => tool.name === "create-collection")!;
-        expect(listCollections).toBeDefined();
-        expect(listCollections.description).toBe(
-            "Creates a new collection in a database. If the database doesn't exist, it will be created automatically."
-        );
+    validateToolMetadata(
+        integration,
+        "create-collection",
+        "Creates a new collection in a database. If the database doesn't exist, it will be created automatically.",
+        dbOperationParameters
+    );
 
-        validateParameters(listCollections, dbOperationParameters);
-    });
-
-    describe("with invalid arguments", () => {
-        const args = [
-            {},
-            { database: 123, collection: "bar" },
-            { foo: "bar", database: "test", collection: "bar" },
-            { collection: [], database: "test" },
-        ];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "create-collection", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool create-collection");
-                }
-            });
-        }
-    });
+    validateThrowsForInvalidArguments(integration, "create-collection", dbOperationInvalidArgTests);
 
     describe("with non-existent database", () => {
         it("creates a new collection", async () => {
@@ -114,25 +88,10 @@ describe("createCollection tool", () => {
         });
     });
 
-    describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "create-collection",
-                arguments: { database: integration.randomDbName(), collection: "new-collection" },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toEqual(`Collection "new-collection" created in database "${integration.randomDbName()}".`);
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "create-collection",
-                arguments: { database: integration.randomDbName(), collection: "new-collection" },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
-        });
+    validateAutoConnectBehavior(integration, "create-collection", () => {
+        return {
+            args: { database: integration.randomDbName(), collection: "new-collection" },
+            expectedResponse: `Collection "new-collection" created in database "${integration.randomDbName()}".`,
+        };
     });
 });

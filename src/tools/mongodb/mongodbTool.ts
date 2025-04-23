@@ -3,6 +3,7 @@ import { ToolBase, ToolCategory } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
+import { ToolArgs } from "../tool.js";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
@@ -24,7 +25,10 @@ export abstract class MongoDBToolBase extends ToolBase {
         return this.session.serviceProvider;
     }
 
-    protected handleError(error: unknown): Promise<CallToolResult> | CallToolResult {
+    protected handleError(
+        error: unknown,
+        args: ToolArgs<typeof this.argsShape>
+    ): Promise<CallToolResult> | CallToolResult {
         if (error instanceof MongoDBError && error.code === ErrorCodes.NotConnectedToMongoDB) {
             return {
                 content: [
@@ -41,7 +45,7 @@ export abstract class MongoDBToolBase extends ToolBase {
             };
         }
 
-        return super.handleError(error);
+        return super.handleError(error, args);
     }
 
     protected async connectToMongoDB(connectionString: string): Promise<void> {

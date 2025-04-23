@@ -1,63 +1,33 @@
 import {
     getResponseContent,
-    validateParameters,
     dbOperationParameters,
     setupIntegrationTest,
+    validateToolMetadata,
+    validateAutoConnectBehavior,
+    validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ObjectId } from "mongodb";
-import config from "../../../../../src/config.js";
 
 describe("count tool", () => {
     const integration = setupIntegrationTest();
 
-    let randomDbName: string;
-    beforeEach(() => {
-        randomDbName = new ObjectId().toString();
-    });
+    validateToolMetadata(integration, "count", "Gets the number of documents in a MongoDB collection", [
+        {
+            name: "query",
+            description:
+                "The query filter to count documents. Matches the syntax of the filter argument of db.collection.count()",
+            type: "object",
+            required: false,
+        },
+        ...dbOperationParameters,
+    ]);
 
-    it("should have correct metadata", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const listCollections = tools.find((tool) => tool.name === "count")!;
-        expect(listCollections).toBeDefined();
-        expect(listCollections.description).toBe("Gets the number of documents in a MongoDB collection");
-
-        validateParameters(listCollections, [
-            {
-                name: "query",
-                description:
-                    "The query filter to count documents. Matches the syntax of the filter argument of db.collection.count()",
-                type: "object",
-                required: false,
-            },
-            ...dbOperationParameters,
-        ]);
-    });
-
-    describe("with invalid arguments", () => {
-        const args = [
-            {},
-            { database: 123, collection: "bar" },
-            { foo: "bar", database: "test", collection: "bar" },
-            { collection: [], database: "test" },
-            { collection: "bar", database: "test", query: "{ $gt: { foo: 5 } }" },
-        ];
-        for (const arg of args) {
-            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
-                try {
-                    await integration.mcpClient().callTool({ name: "count", arguments: arg });
-                    expect.fail("Expected an error to be thrown");
-                } catch (error) {
-                    expect(error).toBeInstanceOf(McpError);
-                    const mcpError = error as McpError;
-                    expect(mcpError.code).toEqual(-32602);
-                    expect(mcpError.message).toContain("Invalid arguments for tool count");
-                }
-            });
-        }
-    });
+    validateThrowsForInvalidArguments(integration, "count", [
+        {},
+        { database: 123, collection: "bar" },
+        { foo: "bar", database: "test", collection: "bar" },
+        { collection: [], database: "test" },
+        { collection: "bar", database: "test", query: "{ $gt: { foo: 5 } }" },
+    ]);
 
     it("returns 0 when database doesn't exist", async () => {
         await integration.connectMcpClient();
@@ -72,10 +42,10 @@ describe("count tool", () => {
     it("returns 0 when collection doesn't exist", async () => {
         await integration.connectMcpClient();
         const mongoClient = integration.mongoClient();
-        await mongoClient.db(randomDbName).collection("bar").insertOne({});
+        await mongoClient.db(integration.randomDbName()).collection("bar").insertOne({});
         const response = await integration.mcpClient().callTool({
             name: "count",
-            arguments: { database: randomDbName, collection: "non-existent" },
+            arguments: { database: integration.randomDbName(), collection: "non-existent" },
         });
         const content = getResponseContent(response.content);
         expect(content).toEqual('Found 0 documents in the collection "non-existent"');
@@ -85,7 +55,7 @@ describe("count tool", () => {
         beforeEach(async () => {
             const mongoClient = integration.mongoClient();
             await mongoClient
-                .db(randomDbName)
+                .db(integration.randomDbName())
                 .collection("foo")
                 .insertMany([
                     { name: "Peter", age: 5 },
@@ -105,7 +75,7 @@ describe("count tool", () => {
                 await integration.connectMcpClient();
                 const response = await integration.mcpClient().callTool({
                     name: "count",
-                    arguments: { database: randomDbName, collection: "foo", query: testCase.filter },
+                    arguments: { database: integration.randomDbName(), collection: "foo", query: testCase.filter },
                 });
 
                 const content = getResponseContent(response.content);
@@ -114,25 +84,10 @@ describe("count tool", () => {
         }
     });
 
-    describe("when not connected", () => {
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const response = await integration.mcpClient().callTool({
-                name: "count",
-                arguments: { database: randomDbName, collection: "coll1" },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toEqual('Found 0 documents in the collection "coll1"');
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "count",
-                arguments: { database: randomDbName, collection: "coll1" },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
-        });
+    validateAutoConnectBehavior(integration, "count", () => {
+        return {
+            args: { database: integration.randomDbName(), collection: "coll1" },
+            expectedResponse: 'Found 0 documents in the collection "coll1"',
+        };
     });
 });

@@ -7,6 +7,7 @@ import fs from "fs/promises";
 import { MongoClient, ObjectId } from "mongodb";
 import { toIncludeAllMembers } from "jest-extended";
 import config, { UserConfig } from "../../src/config.js";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
 
 interface ParameterInfo {
     name: string;
@@ -218,8 +219,91 @@ export const dbOperationParameters: ParameterInfo[] = [
     { name: "collection", type: "string", description: "Collection name", required: true },
 ];
 
-export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]): void {
-    const toolParameters = getParameters(tool);
-    expect(toolParameters).toHaveLength(parameters.length);
-    expect(toolParameters).toIncludeAllMembers(parameters);
+export const dbOperationInvalidArgTests = [{}, { database: 123 }, { foo: "bar", database: "test" }, { database: [] }];
+
+export function validateToolMetadata(
+    integration: IntegrationTest,
+    name: string,
+    description: string,
+    parameters: ParameterInfo[]
+): void {
+    it("should have correct metadata", async () => {
+        const { tools } = await integration.mcpClient().listTools();
+        const tool = tools.find((tool) => tool.name === name)!;
+        expect(tool).toBeDefined();
+        expect(tool.description).toBe(description);
+
+        const toolParameters = getParameters(tool);
+        expect(toolParameters).toHaveLength(parameters.length);
+        expect(toolParameters).toIncludeAllMembers(parameters);
+    });
+}
+
+export function validateAutoConnectBehavior(
+    integration: IntegrationTest,
+    name: string,
+    validation: () => {
+        args: { [x: string]: unknown };
+        expectedResponse?: string;
+        validate?: (content: unknown) => void;
+    },
+    beforeEachImpl?: () => Promise<void>
+): void {
+    describe("when not connected", () => {
+        if (beforeEachImpl) {
+            beforeEach(() => beforeEachImpl());
+        }
+
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
+
+            const validationInfo = validation();
+
+            const response = await integration.mcpClient().callTool({
+                name,
+                arguments: validationInfo.args,
+            });
+
+            if (validationInfo.expectedResponse) {
+                const content = getResponseContent(response.content);
+                expect(content).toContain(validationInfo.expectedResponse);
+            }
+
+            if (validationInfo.validate) {
+                validationInfo.validate(response.content);
+            }
+        });
+
+        it("throws an error if connection string is not configured", async () => {
+            const response = await integration.mcpClient().callTool({
+                name,
+                arguments: validation().args,
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+        });
+    });
+}
+
+export function validateThrowsForInvalidArguments(
+    integration: IntegrationTest,
+    name: string,
+    args: { [x: string]: unknown }[]
+): void {
+    describe("with invalid arguments", () => {
+        for (const arg of args) {
+            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
+                await integration.connectMcpClient();
+                try {
+                    await integration.mcpClient().callTool({ name, arguments: arg });
+                    expect.fail("Expected an error to be thrown");
+                } catch (error) {
+                    expect(error).toBeInstanceOf(McpError);
+                    const mcpError = error as McpError;
+                    expect(mcpError.code).toEqual(-32602);
+                    expect(mcpError.message).toContain(`Invalid arguments for tool ${name}`);
+                }
+            });
+        }
+    });
 }
