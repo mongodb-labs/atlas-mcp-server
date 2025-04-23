@@ -2,10 +2,10 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
+import { EJSON } from "bson";
 
 export const AggregateArgs = {
     pipeline: z.array(z.object({}).passthrough()).describe("An array of aggregation stages to execute"),
-    limit: z.number().optional().default(10).describe("The maximum number of documents to return"),
 };
 
 export class AggregateTool extends MongoDBToolBase {
@@ -27,12 +27,12 @@ export class AggregateTool extends MongoDBToolBase {
 
         const content: Array<{ text: string; type: "text" }> = [
             {
-                text: `Found ${documents.length} documents in the collection \`${collection}\`:`,
+                text: `Found ${documents.length} documents in the collection "${collection}":`,
                 type: "text",
             },
             ...documents.map((doc) => {
                 return {
-                    text: JSON.stringify(doc),
+                    text: EJSON.stringify(doc),
                     type: "text",
                 } as { text: string; type: "text" };
             }),
