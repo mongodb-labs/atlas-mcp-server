@@ -31,8 +31,6 @@ export class Telemetry {
     constructor(private readonly session: Session, private readonly eventCache: EventCache = EventCache.getInstance()) {
         this.commonProperties = {
             ...MACHINE_METADATA,
-            mcp_client_version: this.session.agentRunner?.version,
-            mcp_client_name: this.session.agentRunner?.name,
         };
     }
 
@@ -66,12 +64,16 @@ export class Telemetry {
      * @param events - The events to emit
      */
     public async emitEvents(events: BaseEvent[]): Promise<void> {
-        if (!Telemetry.isTelemetryEnabled()) {
-            logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping events.");
-            return;
-        }
-
-        await this.emit(events);
+        try {
+            if (!Telemetry.isTelemetryEnabled()) {
+                logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping events.");
+                return;
+            }
+    
+            await this.emit(events);
+        } catch (error) {
+            logger.debug(mongoLogId(1_000_002), "telemetry", `Error emitting telemetry events: ${error}`);
+        }   
     }
 
     /**
@@ -81,6 +83,8 @@ export class Telemetry {
     public getCommonProperties(): CommonProperties {
         return {
             ...this.commonProperties,
+            mcp_client_version: this.session.agentRunner?.version,
+            mcp_client_name: this.session.agentRunner?.name,
             session_id: this.session.sessionId,
         };
     }
@@ -94,7 +98,7 @@ export class Telemetry {
         const allEvents = [...cachedEvents, ...events];
 
         logger.debug(
-            mongoLogId(1_000_000),
+            mongoLogId(1_000_003),
             "telemetry",
             `Attempting to send ${allEvents.length} events (${cachedEvents.length} cached)`
         );
@@ -102,11 +106,11 @@ export class Telemetry {
         const result = await this.sendEvents(this.session.apiClient, allEvents);
         if (result.success) {
             this.eventCache.clearEvents();
-            logger.debug(mongoLogId(1_000_000), "telemetry", `Sent ${allEvents.length} events successfully`);
+            logger.debug(mongoLogId(1_000_004), "telemetry", `Sent ${allEvents.length} events successfully`);
             return;
         }
 
-        logger.warning(mongoLogId(1_000_000), "telemetry", `Error sending event to client: ${result.error}`);
+        logger.warning(mongoLogId(1_000_005), "telemetry", `Error sending event to client: ${result.error}`);
         this.eventCache.setEvents(allEvents);
     }
 
