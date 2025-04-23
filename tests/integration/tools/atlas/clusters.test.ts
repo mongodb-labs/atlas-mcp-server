@@ -3,8 +3,6 @@ import { describeAtlas, withProject, sleep, randomId } from "./atlasHelpers.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
-    session.ensureAuthenticated();
-
     await session.apiClient.deleteCluster({
         params: {
             path: {

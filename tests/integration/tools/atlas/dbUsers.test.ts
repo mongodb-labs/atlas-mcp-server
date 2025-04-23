@@ -9,7 +9,6 @@ describeAtlas("db users", (integration) => {
             const projectId = getProjectId();
 
             const session: Session = integration.mcpServer().session;
-            session.ensureAuthenticated();
             await session.apiClient.deleteDatabaseUser({
                 params: {
                     path: {

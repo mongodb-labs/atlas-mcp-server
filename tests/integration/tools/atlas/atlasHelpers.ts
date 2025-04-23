@@ -2,7 +2,6 @@ import { ObjectId } from "mongodb";
 import { Group } from "../../../../src/common/atlas/openapi.js";
 import { ApiClient } from "../../../../src/common/atlas/apiClient.js";
 import { setupIntegrationTest, IntegrationTest } from "../../helpers.js";
-import { Session } from "../../../../src/session.js";
 
 export type IntegrationTestFunction = (integration: IntegrationTest) => void;
 
@@ -35,19 +34,15 @@ export function withProject(integration: IntegrationTest, fn: ProjectTestFunctio
         let projectId: string = "";
 
         beforeAll(async () => {
-            const session: Session = integration.mcpServer().session;
-            session.ensureAuthenticated();
+            const apiClient = integration.mcpServer().session.apiClient;
 
-            const apiClient = session.apiClient;
             const group = await createProject(apiClient);
             projectId = group.id || "";
         });
 
         afterAll(async () => {
-            const session: Session = integration.mcpServer().session;
-            session.ensureAuthenticated();
+            const apiClient = integration.mcpServer().session.apiClient;
 
-            const apiClient = session.apiClient;
             await apiClient.deleteProject({
                 params: {
                     path: {
