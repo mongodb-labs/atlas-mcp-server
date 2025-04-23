@@ -83,6 +83,8 @@ jobs:
           path: coverage/lcov.info
   coverage:
     runs-on: ubuntu-latest
+    needs: [run-tests, run-atlas-tests]
+    if: always()
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
