@@ -6,41 +6,35 @@ import {
     validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { IndexDirection } from "mongodb";
-import config from "../../../../../src/config.js";
 
 describe("createIndex tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(integration.mcpClient(), "create-index", "Create an index for a collection", [
-            ...dbOperationParameters,
-            {
-                name: "keys",
-                type: "object",
-                description: "The index definition",
-                required: true,
-            },
-            {
-                name: "name",
-                type: "string",
-                description: "The name of the index",
-                required: false,
-            },
-        ]);
-    });
+    validateToolMetadata(integration, "create-index", "Create an index for a collection", [
+        ...dbOperationParameters,
+        {
+            name: "keys",
+            type: "object",
+            description: "The index definition",
+            required: true,
+        },
+        {
+            name: "name",
+            type: "string",
+            description: "The name of the index",
+            required: false,
+        },
+    ]);
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "create-index", [
-            {},
-            { collection: "bar", database: 123, keys: { foo: 1 } },
-            { collection: "bar", database: "test", keys: { foo: 5 } },
-            { collection: [], database: "test", keys: { foo: 1 } },
-            { collection: "bar", database: "test", keys: { foo: 1 }, name: 123 },
-            { collection: "bar", database: "test", keys: "foo", name: "my-index" },
-        ]);
-    });
+    validateThrowsForInvalidArguments(integration, "create-index", [
+        {},
+        { collection: "bar", database: 123, keys: { foo: 1 } },
+        { collection: "bar", database: "test", keys: { foo: 5 } },
+        { collection: [], database: "test", keys: { foo: 1 } },
+        { collection: "bar", database: "test", keys: { foo: 1 }, name: 123 },
+        { collection: "bar", database: "test", keys: "foo", name: "my-index" },
+    ]);
 
     const validateIndex = async (collection: string, expected: { name: string; key: object }[]) => {
         const mongoClient = integration.mongoClient();
@@ -198,16 +192,14 @@ describe("createIndex tool", () => {
         });
     }
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "create-index", () => {
-            return {
-                args: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    keys: { prop1: 1 },
-                },
-                expectedResponse: `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`,
-            };
-        });
+    validateAutoConnectBehavior(integration, "create-index", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "coll1",
+                keys: { prop1: 1 },
+            },
+            expectedResponse: `Created the index "prop1_1" on collection "coll1" in database "${integration.randomDbName()}"`,
+        };
     });
 });

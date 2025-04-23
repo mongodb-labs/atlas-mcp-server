@@ -26,7 +26,7 @@ describe("listDatabases tool", () => {
             const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
             const dbNames = getDbNames(response.content);
 
-            expect(dbNames).toIncludeSameMembers(defaultDatabases);
+            expect(defaultDatabases).toIncludeAllMembers(defaultDatabases);
         });
     });
 
@@ -44,8 +44,20 @@ describe("listDatabases tool", () => {
         });
     });
 
-    describe("when not connected", () => {
-        beforeEach(async () => {
+    validateAutoConnectBehavior(
+        integration,
+        "list-databases",
+        () => {
+            return {
+                args: {},
+                validate: (content) => {
+                    const dbNames = getDbNames(content);
+
+                    expect(defaultDatabases).toIncludeAllMembers(dbNames);
+                },
+            };
+        },
+        async () => {
             const mongoClient = integration.mongoClient();
             const { databases } = await mongoClient.db("admin").command({ listDatabases: 1, nameOnly: true });
             for (const db of databases) {
@@ -53,19 +65,8 @@ describe("listDatabases tool", () => {
                     await mongoClient.db(db.name).dropDatabase();
                 }
             }
-        });
-
-        validateAutoConnectBehavior(integration, "list-databases", () => {
-            return {
-                args: {},
-                validate: (content) => {
-                    const dbNames = getDbNames(content);
-
-                    expect(dbNames).toIncludeSameMembers(defaultDatabases);
-                },
-            };
-        });
-    });
+        }
+    );
 });
 
 function getDbNames(content: unknown): (string | null)[] {

@@ -226,20 +226,22 @@ export const dbOperationParameters: ParameterInfo[] = [
 
 export const dbOperationInvalidArgTests = [{}, { database: 123 }, { foo: "bar", database: "test" }, { database: [] }];
 
-export async function validateToolMetadata(
-    mcpClient: Client,
+export function validateToolMetadata(
+    integration: IntegrationTest,
     name: string,
     description: string,
     parameters: ParameterInfo[]
-): Promise<void> {
-    const { tools } = await mcpClient.listTools();
-    const tool = tools.find((tool) => tool.name === name)!;
-    expect(tool).toBeDefined();
-    expect(tool.description).toBe(description);
+): void {
+    it("should have correct metadata", async () => {
+        const { tools } = await integration.mcpClient().listTools();
+        const tool = tools.find((tool) => tool.name === name)!;
+        expect(tool).toBeDefined();
+        expect(tool.description).toBe(description);
 
-    const toolParameters = getParameters(tool);
-    expect(toolParameters).toHaveLength(parameters.length);
-    expect(toolParameters).toIncludeAllMembers(parameters);
+        const toolParameters = getParameters(tool);
+        expect(toolParameters).toHaveLength(parameters.length);
+        expect(toolParameters).toIncludeAllMembers(parameters);
+    });
 }
 
 export function validateAutoConnectBehavior(
@@ -249,35 +251,42 @@ export function validateAutoConnectBehavior(
         args: { [x: string]: unknown };
         expectedResponse?: string;
         validate?: (content: unknown) => void;
-    }
+    },
+    beforeEachImpl?: () => Promise<void>
 ): void {
-    it("connects automatically if connection string is configured", async () => {
-        config.connectionString = integration.connectionString();
+    describe("when not connected", () => {
+        if (beforeEachImpl) {
+            beforeEach(() => beforeEachImpl());
+        }
 
-        const validationInfo = validation();
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
 
-        const response = await integration.mcpClient().callTool({
-            name,
-            arguments: validationInfo.args,
+            const validationInfo = validation();
+
+            const response = await integration.mcpClient().callTool({
+                name,
+                arguments: validationInfo.args,
+            });
+
+            if (validationInfo.expectedResponse) {
+                const content = getResponseContent(response.content);
+                expect(content).toContain(validationInfo.expectedResponse);
+            }
+
+            if (validationInfo.validate) {
+                validationInfo.validate(response.content);
+            }
         });
 
-        if (validationInfo.expectedResponse) {
+        it("throws an error if connection string is not configured", async () => {
+            const response = await integration.mcpClient().callTool({
+                name,
+                arguments: validation().args,
+            });
             const content = getResponseContent(response.content);
-            expect(content).toContain(validationInfo.expectedResponse);
-        }
-
-        if (validationInfo.validate) {
-            validationInfo.validate(response.content);
-        }
-    });
-
-    it("throws an error if connection string is not configured", async () => {
-        const response = await integration.mcpClient().callTool({
-            name,
-            arguments: validation().args,
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
         });
-        const content = getResponseContent(response.content);
-        expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
     });
 }
 
@@ -286,20 +295,22 @@ export function validateThrowsForInvalidArguments(
     name: string,
     args: { [x: string]: unknown }[]
 ): void {
-    for (const arg of args) {
-        it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-            await integration.connectMcpClient();
-            try {
-                await integration.mcpClient().callTool({ name, arguments: arg });
-                expect.fail("Expected an error to be thrown");
-            } catch (error) {
-                expect(error).toBeInstanceOf(McpError);
-                const mcpError = error as McpError;
-                expect(mcpError.code).toEqual(-32602);
-                expect(mcpError.message).toContain(`Invalid arguments for tool ${name}`);
-            }
-        });
-    }
+    describe("with invalid arguments", () => {
+        for (const arg of args) {
+            it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
+                await integration.connectMcpClient();
+                try {
+                    await integration.mcpClient().callTool({ name, arguments: arg });
+                    expect.fail("Expected an error to be thrown");
+                } catch (error) {
+                    expect(error).toBeInstanceOf(McpError);
+                    const mcpError = error as McpError;
+                    expect(mcpError.code).toEqual(-32602);
+                    expect(mcpError.message).toContain(`Invalid arguments for tool ${name}`);
+                }
+            });
+        }
+    });
 }
 
 export function describeAtlas(name: number | string | Function | jest.FunctionLike, fn: jest.EmptyFunction) {

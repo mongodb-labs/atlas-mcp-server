@@ -12,18 +12,14 @@ import * as crypto from "crypto";
 describe("collectionStorageSize tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "collection-storage-size",
-            "Gets the size of the collection",
-            dbOperationParameters
-        );
-    });
+    validateToolMetadata(
+        integration,
+        "collection-storage-size",
+        "Gets the size of the collection",
+        dbOperationParameters
+    );
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "collection-storage-size", dbOperationInvalidArgTests);
-    });
+    validateThrowsForInvalidArguments(integration, "collection-storage-size", dbOperationInvalidArgTests);
 
     describe("with non-existent database", () => {
         it("returns 0 MB", async () => {
@@ -79,15 +75,13 @@ describe("collectionStorageSize tool", () => {
         }
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "collection-storage-size", () => {
-            return {
-                args: {
-                    database: integration.randomDbName(),
-                    collection: "foo",
-                },
-                expectedResponse: `The size of "${integration.randomDbName()}.foo" cannot be determined because the collection does not exist.`,
-            };
-        });
+    validateAutoConnectBehavior(integration, "collection-storage-size", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "foo",
+            },
+            expectedResponse: `The size of "${integration.randomDbName()}.foo" cannot be determined because the collection does not exist.`,
+        };
     });
 });

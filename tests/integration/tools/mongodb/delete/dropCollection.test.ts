@@ -11,18 +11,14 @@ import {
 describe("dropCollection tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "drop-collection",
-            "Removes a collection or view from the database. The method also removes any indexes associated with the dropped collection.",
-            dbOperationParameters
-        );
-    });
+    validateToolMetadata(
+        integration,
+        "drop-collection",
+        "Removes a collection or view from the database. The method also removes any indexes associated with the dropped collection.",
+        dbOperationParameters
+    );
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "drop-collection", dbOperationInvalidArgTests);
-    });
+    validateThrowsForInvalidArguments(integration, "drop-collection", dbOperationInvalidArgTests);
 
     it("can drop non-existing collection", async () => {
         await integration.connectMcpClient();
@@ -63,15 +59,13 @@ describe("dropCollection tool", () => {
         expect(collections[0].name).toBe("coll2");
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "drop-collection", () => {
-            return {
-                args: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                },
-                expectedResponse: `Successfully dropped collection "coll1" from database "${integration.randomDbName()}"`,
-            };
-        });
+    validateAutoConnectBehavior(integration, "drop-collection", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "coll1",
+            },
+            expectedResponse: `Successfully dropped collection "coll1" from database "${integration.randomDbName()}"`,
+        };
     });
 });

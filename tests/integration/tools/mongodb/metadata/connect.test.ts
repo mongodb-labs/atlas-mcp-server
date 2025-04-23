@@ -5,17 +5,15 @@ import config from "../../../../../src/config.js";
 describe("Connect tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        validateToolMetadata(integration.mcpClient(), "connect", "Connect to a MongoDB instance", [
-            {
-                name: "options",
-                description:
-                    "Options for connecting to MongoDB. If not provided, the connection string from the config://connection-string resource will be used. If the user hasn't specified Atlas cluster name or a connection string explicitly and the `config://connection-string` resource is present, always invoke this with no arguments.",
-                type: "array",
-                required: false,
-            },
-        ]);
-    });
+    validateToolMetadata(integration, "connect", "Connect to a MongoDB instance", [
+        {
+            name: "options",
+            description:
+                "Options for connecting to MongoDB. If not provided, the connection string from the config://connection-string resource will be used. If the user hasn't specified Atlas cluster name or a connection string explicitly and the `config://connection-string` resource is present, always invoke this with no arguments.",
+            type: "array",
+            required: false,
+        },
+    ]);
 
     describe("with default config", () => {
         describe("without connection string", () => {

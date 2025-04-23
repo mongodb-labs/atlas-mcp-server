@@ -8,8 +8,6 @@ import {
     validateThrowsForInvalidArguments,
     dbOperationInvalidArgTests,
 } from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { Document } from "bson";
 import { OptionalId } from "mongodb";
 import { SimplifiedSchema } from "mongodb-schema";
@@ -17,18 +15,14 @@ import { SimplifiedSchema } from "mongodb-schema";
 describe("collectionSchema tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "collection-schema",
-            "Describe the schema for a collection",
-            dbOperationParameters
-        );
-    });
+    validateToolMetadata(
+        integration,
+        "collection-schema",
+        "Describe the schema for a collection",
+        dbOperationParameters
+    );
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "collection-schema", dbOperationInvalidArgTests);
-    });
+    validateThrowsForInvalidArguments(integration, "collection-schema", dbOperationInvalidArgTests);
 
     describe("with non-existent database", () => {
         it("returns empty schema", async () => {
@@ -147,15 +141,13 @@ describe("collectionSchema tool", () => {
         }
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "collection-schema", () => {
-            return {
-                args: {
-                    database: integration.randomDbName(),
-                    collection: "new-collection",
-                },
-                expectedResponse: `Could not deduce the schema for "${integration.randomDbName()}.new-collection". This may be because it doesn't exist or is empty.`,
-            };
-        });
+    validateAutoConnectBehavior(integration, "collection-schema", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "new-collection",
+            },
+            expectedResponse: `Could not deduce the schema for "${integration.randomDbName()}.new-collection". This may be because it doesn't exist or is empty.`,
+        };
     });
 });

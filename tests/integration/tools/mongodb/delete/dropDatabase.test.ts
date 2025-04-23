@@ -11,18 +11,14 @@ import {
 describe("dropDatabase tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "drop-database",
-            "Removes the specified database, deleting the associated data files",
-            [dbOperationParameters.find((d) => d.name === "database")!]
-        );
-    });
+    validateToolMetadata(
+        integration,
+        "drop-database",
+        "Removes the specified database, deleting the associated data files",
+        [dbOperationParameters.find((d) => d.name === "database")!]
+    );
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "drop-database", dbOperationInvalidArgTests);
-    });
+    validateThrowsForInvalidArguments(integration, "drop-database", dbOperationInvalidArgTests);
 
     it("can drop non-existing database", async () => {
         let { databases } = await integration.mongoClient().db("").admin().listDatabases();
@@ -70,16 +66,17 @@ describe("dropDatabase tool", () => {
         expect(collections).toHaveLength(0);
     });
 
-    describe("when not connected", () => {
-        beforeEach(async () => {
-            await integration.mongoClient().db(integration.randomDbName()).createCollection("coll1");
-        });
-
-        validateAutoConnectBehavior(integration, "drop-database", () => {
+    validateAutoConnectBehavior(
+        integration,
+        "drop-database",
+        () => {
             return {
                 args: { database: integration.randomDbName() },
                 expectedResponse: `Successfully dropped database "${integration.randomDbName()}"`,
             };
-        });
-    });
+        },
+        async () => {
+            await integration.mongoClient().db(integration.randomDbName()).createCollection("coll1");
+        }
+    );
 });

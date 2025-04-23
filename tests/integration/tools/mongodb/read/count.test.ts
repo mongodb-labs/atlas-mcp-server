@@ -6,46 +6,28 @@ import {
     validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ObjectId } from "mongodb";
-import config from "../../../../../src/config.js";
 
 describe("count tool", () => {
     const integration = setupIntegrationTest();
 
-    let randomDbName: string;
-    beforeEach(() => {
-        randomDbName = new ObjectId().toString();
-    });
+    validateToolMetadata(integration, "count", "Gets the number of documents in a MongoDB collection", [
+        {
+            name: "query",
+            description:
+                "The query filter to count documents. Matches the syntax of the filter argument of db.collection.count()",
+            type: "object",
+            required: false,
+        },
+        ...dbOperationParameters,
+    ]);
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "count",
-            "Gets the number of documents in a MongoDB collection",
-            [
-                {
-                    name: "query",
-                    description:
-                        "The query filter to count documents. Matches the syntax of the filter argument of db.collection.count()",
-                    type: "object",
-                    required: false,
-                },
-                ...dbOperationParameters,
-            ]
-        );
-    });
-
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "count", [
-            {},
-            { database: 123, collection: "bar" },
-            { foo: "bar", database: "test", collection: "bar" },
-            { collection: [], database: "test" },
-            { collection: "bar", database: "test", query: "{ $gt: { foo: 5 } }" },
-        ]);
-    });
+    validateThrowsForInvalidArguments(integration, "count", [
+        {},
+        { database: 123, collection: "bar" },
+        { foo: "bar", database: "test", collection: "bar" },
+        { collection: [], database: "test" },
+        { collection: "bar", database: "test", query: "{ $gt: { foo: 5 } }" },
+    ]);
 
     it("returns 0 when database doesn't exist", async () => {
         await integration.connectMcpClient();
@@ -60,10 +42,10 @@ describe("count tool", () => {
     it("returns 0 when collection doesn't exist", async () => {
         await integration.connectMcpClient();
         const mongoClient = integration.mongoClient();
-        await mongoClient.db(randomDbName).collection("bar").insertOne({});
+        await mongoClient.db(integration.randomDbName()).collection("bar").insertOne({});
         const response = await integration.mcpClient().callTool({
             name: "count",
-            arguments: { database: randomDbName, collection: "non-existent" },
+            arguments: { database: integration.randomDbName(), collection: "non-existent" },
         });
         const content = getResponseContent(response.content);
         expect(content).toEqual('Found 0 documents in the collection "non-existent"');
@@ -73,7 +55,7 @@ describe("count tool", () => {
         beforeEach(async () => {
             const mongoClient = integration.mongoClient();
             await mongoClient
-                .db(randomDbName)
+                .db(integration.randomDbName())
                 .collection("foo")
                 .insertMany([
                     { name: "Peter", age: 5 },
@@ -93,7 +75,7 @@ describe("count tool", () => {
                 await integration.connectMcpClient();
                 const response = await integration.mcpClient().callTool({
                     name: "count",
-                    arguments: { database: randomDbName, collection: "foo", query: testCase.filter },
+                    arguments: { database: integration.randomDbName(), collection: "foo", query: testCase.filter },
                 });
 
                 const content = getResponseContent(response.content);
@@ -102,12 +84,10 @@ describe("count tool", () => {
         }
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "count", () => {
-            return {
-                args: { database: randomDbName, collection: "coll1" },
-                expectedResponse: 'Found 0 documents in the collection "coll1"',
-            };
-        });
+    validateAutoConnectBehavior(integration, "count", () => {
+        return {
+            args: { database: integration.randomDbName(), collection: "coll1" },
+            expectedResponse: 'Found 0 documents in the collection "coll1"',
+        };
     });
 });

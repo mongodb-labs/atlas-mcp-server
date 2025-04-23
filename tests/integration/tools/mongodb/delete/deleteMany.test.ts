@@ -10,23 +10,21 @@ import {
 describe("deleteMany tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "delete-many",
-            "Removes all documents that match the filter from a MongoDB collection",
-            [
-                ...dbOperationParameters,
-                {
-                    name: "filter",
-                    type: "object",
-                    description:
-                        "The query filter, specifying the deletion criteria. Matches the syntax of the filter argument of db.collection.deleteMany()",
-                    required: false,
-                },
-            ]
-        );
-    });
+    validateToolMetadata(
+        integration,
+        "delete-many",
+        "Removes all documents that match the filter from a MongoDB collection",
+        [
+            ...dbOperationParameters,
+            {
+                name: "filter",
+                type: "object",
+                description:
+                    "The query filter, specifying the deletion criteria. Matches the syntax of the filter argument of db.collection.deleteMany()",
+                required: false,
+            },
+        ]
+    );
 
     describe("with invalid arguments", () => {
         validateThrowsForInvalidArguments(integration, "delete-many", [
@@ -145,16 +143,14 @@ describe("deleteMany tool", () => {
         await validateDocuments([]);
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "delete-many", () => {
-            return {
-                args: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    filter: {},
-                },
-                expectedResponse: 'Deleted `0` document(s) from collection "coll1"',
-            };
-        });
+    validateAutoConnectBehavior(integration, "delete-many", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "coll1",
+                filter: {},
+            },
+            expectedResponse: 'Deleted `0` document(s) from collection "coll1"',
+        };
     });
 });

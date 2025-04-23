@@ -7,25 +7,15 @@ import {
     validateThrowsForInvalidArguments,
     dbOperationInvalidArgTests,
 } from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import config from "../../../../../src/config.js";
 
 describe("listCollections tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "list-collections",
-            "List all collections for a given database",
-            [{ name: "database", description: "Database name", type: "string", required: true }]
-        );
-    });
+    validateToolMetadata(integration, "list-collections", "List all collections for a given database", [
+        { name: "database", description: "Database name", type: "string", required: true },
+    ]);
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "list-collections", dbOperationInvalidArgTests);
-    });
+    validateThrowsForInvalidArguments(integration, "list-collections", dbOperationInvalidArgTests);
 
     describe("with non-existent database", () => {
         it("returns no collections", async () => {
@@ -70,17 +60,15 @@ describe("listCollections tool", () => {
         });
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(
-            integration,
-            "list-collections",
+    validateAutoConnectBehavior(
+        integration,
+        "list-collections",
 
-            () => {
-                return {
-                    args: { database: integration.randomDbName() },
-                    expectedResponse: `No collections found for database "${integration.randomDbName()}". To create a collection, use the "create-collection" tool.`,
-                };
-            }
-        );
-    });
+        () => {
+            return {
+                args: { database: integration.randomDbName() },
+                expectedResponse: `No collections found for database "${integration.randomDbName()}". To create a collection, use the "create-collection" tool.`,
+            };
+        }
+    );
 });

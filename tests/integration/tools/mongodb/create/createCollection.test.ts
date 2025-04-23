@@ -7,24 +7,18 @@ import {
     validateThrowsForInvalidArguments,
     dbOperationInvalidArgTests,
 } from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
 
 describe("createCollection tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        await validateToolMetadata(
-            integration.mcpClient(),
-            "create-collection",
-            "Creates a new collection in a database. If the database doesn't exist, it will be created automatically.",
-            dbOperationParameters
-        );
-    });
+    validateToolMetadata(
+        integration,
+        "create-collection",
+        "Creates a new collection in a database. If the database doesn't exist, it will be created automatically.",
+        dbOperationParameters
+    );
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "create-collection", dbOperationInvalidArgTests);
-    });
+    validateThrowsForInvalidArguments(integration, "create-collection", dbOperationInvalidArgTests);
 
     describe("with non-existent database", () => {
         it("creates a new collection", async () => {
@@ -94,12 +88,10 @@ describe("createCollection tool", () => {
         });
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "create-collection", () => {
-            return {
-                args: { database: integration.randomDbName(), collection: "new-collection" },
-                expectedResponse: `Collection "new-collection" created in database "${integration.randomDbName()}".`,
-            };
-        });
+    validateAutoConnectBehavior(integration, "create-collection", () => {
+        return {
+            args: { database: integration.randomDbName(), collection: "new-collection" },
+            expectedResponse: `Collection "new-collection" created in database "${integration.randomDbName()}".`,
+        };
     });
 });

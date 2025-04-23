@@ -6,39 +6,28 @@ import {
     validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import config from "../../../../../src/config.js";
 
 describe("insertMany tool", () => {
     const integration = setupIntegrationTest();
 
-    it("should have correct metadata", async () => {
-        validateToolMetadata(
-            integration.mcpClient(),
-            "insert-many",
-            "Insert an array of documents into a MongoDB collection",
-            [
-                ...dbOperationParameters,
-                {
-                    name: "documents",
-                    type: "array",
-                    description:
-                        "The array of documents to insert, matching the syntax of the document argument of db.collection.insertMany()",
-                    required: true,
-                },
-            ]
-        );
-    });
+    validateToolMetadata(integration, "insert-many", "Insert an array of documents into a MongoDB collection", [
+        ...dbOperationParameters,
+        {
+            name: "documents",
+            type: "array",
+            description:
+                "The array of documents to insert, matching the syntax of the document argument of db.collection.insertMany()",
+            required: true,
+        },
+    ]);
 
-    describe("with invalid arguments", () => {
-        validateThrowsForInvalidArguments(integration, "insert-many", [
-            {},
-            { collection: "bar", database: 123, documents: [] },
-            { collection: [], database: "test", documents: [] },
-            { collection: "bar", database: "test", documents: "my-document" },
-            { collection: "bar", database: "test", documents: { name: "Peter" } },
-        ]);
-    });
+    validateThrowsForInvalidArguments(integration, "insert-many", [
+        {},
+        { collection: "bar", database: 123, documents: [] },
+        { collection: [], database: "test", documents: [] },
+        { collection: "bar", database: "test", documents: "my-document" },
+        { collection: "bar", database: "test", documents: { name: "Peter" } },
+    ]);
 
     const validateDocuments = async (collection: string, expectedDocuments: object[]) => {
         const collections = await integration.mongoClient().db(integration.randomDbName()).listCollections().toArray();
@@ -97,16 +86,14 @@ describe("insertMany tool", () => {
         expect(content).toContain(insertedIds[0].toString());
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "insert-many", () => {
-            return {
-                args: {
-                    database: integration.randomDbName(),
-                    collection: "coll1",
-                    documents: [{ prop1: "value1" }],
-                },
-                expectedResponse: 'Inserted `1` document(s) into collection "coll1"',
-            };
-        });
+    validateAutoConnectBehavior(integration, "insert-many", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "coll1",
+                documents: [{ prop1: "value1" }],
+            },
+            expectedResponse: 'Inserted `1` document(s) into collection "coll1"',
+        };
     });
 });
