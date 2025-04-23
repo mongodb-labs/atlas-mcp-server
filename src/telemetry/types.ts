@@ -22,6 +22,10 @@ export interface BaseEvent extends Event {
         platform: string;
         arch: string;
         os_type: string;
+        component: string;
+        duration_ms: number;
+        result: TelemetryResult;
+        category: string;
         os_version?: string;
         session_id?: string;
     } & Event["properties"];
@@ -33,9 +37,6 @@ export interface BaseEvent extends Event {
 export interface ToolEvent extends BaseEvent {
     properties: {
         command: string;
-        category: string;
-        duration_ms: number;
-        result: TelemetryResult;
         error_code?: string;
         error_type?: string;
         project_id?: string;
