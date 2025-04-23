@@ -1,9 +1,8 @@
 import { z } from "zod";
-import { ToolBase, ToolCategory } from "../tool.js";
+import { ToolArgs, ToolBase, ToolCategory } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
-import { ToolArgs } from "../tool.js";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
