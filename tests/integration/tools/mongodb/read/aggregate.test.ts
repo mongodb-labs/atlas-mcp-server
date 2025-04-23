@@ -1,6 +1,4 @@
-import { pipeline } from "stream";
 import {
-    getResponseContent,
     databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
@@ -92,7 +90,11 @@ describe("aggregate tool", () => {
 
     validateAutoConnectBehavior(integration, "aggregate", () => {
         return {
-            args: { database: integration.randomDbName(), collection: "coll1" },
+            args: {
+                database: integration.randomDbName(),
+                collection: "coll1",
+                pipeline: [{ $match: { name: "Liva" } }],
+            },
             expectedResponse: 'Found 0 documents in the collection "coll1"',
         };
     });
