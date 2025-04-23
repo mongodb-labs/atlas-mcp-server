@@ -1,22 +1,27 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ApiClient, ApiClientCredentials } from "./common/atlas/apiClient.js";
-import config from "./config.js";
+
+export interface SessionOptions {
+    apiBaseUrl?: string;
+    apiClientId?: string;
+    apiClientSecret?: string;
+}
 
 export class Session {
     serviceProvider?: NodeDriverServiceProvider;
     apiClient: ApiClient;
 
-    constructor() {
+    constructor(options?: SessionOptions) {
         const credentials: ApiClientCredentials | undefined =
-            config.apiClientId && config.apiClientSecret
+            options?.apiClientId && options?.apiClientSecret
                 ? {
-                      clientId: config.apiClientId,
-                      clientSecret: config.apiClientSecret,
+                      clientId: options?.apiClientId,
+                      clientSecret: options?.apiClientSecret,
                   }
                 : undefined;
 
         this.apiClient = new ApiClient({
-            baseUrl: config.apiBaseUrl,
+            baseUrl: options?.apiBaseUrl,
             credentials,
         });
     }

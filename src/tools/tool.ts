@@ -4,7 +4,7 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger from "../logger.js";
 import { mongoLogId } from "mongodb-log-writer";
-import config from "../config.js";
+import { UserConfig } from "../config.js";
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
 
@@ -24,7 +24,10 @@ export abstract class ToolBase {
 
     protected abstract execute(...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<CallToolResult>;
 
-    protected constructor(protected session: Session) {}
+    constructor(
+        protected readonly session: Session,
+        protected readonly config: UserConfig
+    ) {}
 
     public register(server: McpServer): void {
         if (!this.verifyAllowed()) {
@@ -54,11 +57,11 @@ export abstract class ToolBase {
     // Checks if a tool is allowed to run based on the config
     protected verifyAllowed(): boolean {
         let errorClarification: string | undefined;
-        if (config.disabledTools.includes(this.category)) {
+        if (this.config.disabledTools.includes(this.category)) {
             errorClarification = `its category, \`${this.category}\`,`;
-        } else if (config.disabledTools.includes(this.operationType)) {
+        } else if (this.config.disabledTools.includes(this.operationType)) {
             errorClarification = `its operation type, \`${this.operationType}\`,`;
-        } else if (config.disabledTools.includes(this.name)) {
+        } else if (this.config.disabledTools.includes(this.name)) {
             errorClarification = `it`;
         }
 

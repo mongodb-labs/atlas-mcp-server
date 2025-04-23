@@ -4,11 +4,9 @@ import { Server } from "../../src/server.js";
 import runner, { MongoCluster } from "mongodb-runner";
 import path from "path";
 import fs from "fs/promises";
-import { Session } from "../../src/session.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { MongoClient, ObjectId } from "mongodb";
 import { toIncludeAllMembers } from "jest-extended";
-import config from "../../src/config.js";
+import config, { UserConfig } from "../../src/config.js";
 
 interface ParameterInfo {
     name: string;
@@ -28,7 +26,7 @@ export interface IntegrationTest {
     randomDbName: () => string;
 }
 
-export function setupIntegrationTest(): IntegrationTest {
+export function setupIntegrationTest(cfg: UserConfig = config): IntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
 
@@ -57,13 +55,7 @@ export function setupIntegrationTest(): IntegrationTest {
             }
         );
 
-        mcpServer = new Server({
-            mcpServer: new McpServer({
-                name: "test-server",
-                version: "1.2.3",
-            }),
-            session: new Session(),
-        });
+        mcpServer = new Server(cfg);
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
     });
@@ -230,15 +222,4 @@ export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]):
     const toolParameters = getParameters(tool);
     expect(toolParameters).toHaveLength(parameters.length);
     expect(toolParameters).toIncludeAllMembers(parameters);
-}
-
-export function describeAtlas(name: number | string | Function | jest.FunctionLike, fn: jest.EmptyFunction) {
-    if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
-        return describe.skip("atlas", () => {
-            describe(name, fn);
-        });
-    }
-    return describe("atlas", () => {
-        describe(name, fn);
-    });
 }

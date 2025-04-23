@@ -5,15 +5,22 @@ import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
-import config from "./config.js";
+import { UserConfig } from "./config.js";
+import version from "./version.js";
 
 export class Server {
     public readonly session: Session;
-    private readonly mcpServer: McpServer;
+    private readonly mcpServer: McpServer = new McpServer({
+        name: "MongoDB Atlas",
+        version,
+    });
 
-    constructor({ mcpServer, session }: { mcpServer: McpServer; session: Session }) {
-        this.mcpServer = mcpServer;
-        this.session = session;
+    constructor(private readonly config: UserConfig) {
+        this.session = new Session({
+            apiBaseUrl: config.apiBaseUrl,
+            apiClientId: config.apiClientId,
+            apiClientSecret: config.apiClientSecret,
+        });
     }
 
     async connect(transport: Transport) {
@@ -22,7 +29,7 @@ export class Server {
         this.registerTools();
         this.registerResources();
 
-        await initializeLogger(this.mcpServer);
+        await initializeLogger(this.mcpServer, this.config.logPath);
 
         await this.mcpServer.connect(transport);
 
@@ -36,12 +43,12 @@ export class Server {
 
     private registerTools() {
         for (const tool of [...AtlasTools, ...MongoDbTools]) {
-            new tool(this.session).register(this.mcpServer);
+            new tool(this.session, this.config).register(this.mcpServer);
         }
     }
 
     private registerResources() {
-        if (config.connectionString) {
+        if (this.config.connectionString) {
             this.mcpServer.resource(
                 "connection-string",
                 "config://connection-string",
@@ -52,7 +59,7 @@ export class Server {
                     return {
                         contents: [
                             {
-                                text: `Preconfigured connection string: ${config.connectionString}`,
+                                text: `Preconfigured connection string: ${this.config.connectionString}`,
                                 uri: uri.href,
                             },
                         ],

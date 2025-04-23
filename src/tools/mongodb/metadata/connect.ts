@@ -2,7 +2,6 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import config from "../../../config.js";
 import { MongoError as DriverError } from "mongodb";
 
 export class ConnectTool extends MongoDBToolBase {
@@ -35,7 +34,7 @@ export class ConnectTool extends MongoDBToolBase {
     protected async execute({ options: optionsArr }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         const options = optionsArr?.[0];
         let connectionString: string;
-        if (!options && !config.connectionString) {
+        if (!options && !this.config.connectionString) {
             return {
                 content: [
                     { type: "text", text: "No connection details provided." },
@@ -46,7 +45,7 @@ export class ConnectTool extends MongoDBToolBase {
 
         if (!options) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            connectionString = config.connectionString!;
+            connectionString = this.config.connectionString!;
         } else if ("connectionString" in options) {
             connectionString = options.connectionString;
         } else {
@@ -72,9 +71,9 @@ export class ConnectTool extends MongoDBToolBase {
             // Sometimes the model will supply an incorrect connection string. If the user has configured
             // a different one as environment variable or a cli argument, suggest using that one instead.
             if (
-                config.connectionString &&
+                this.config.connectionString &&
                 error instanceof DriverError &&
-                config.connectionString !== connectionString
+                this.config.connectionString !== connectionString
             ) {
                 return {
                     content: [
@@ -82,7 +81,7 @@ export class ConnectTool extends MongoDBToolBase {
                             type: "text",
                             text:
                                 `Failed to connect to MongoDB at '${connectionString}' due to error: '${error.message}.` +
-                                `Your config lists a different connection string: '${config.connectionString}' - do you want to try connecting to it instead?`,
+                                `Your config lists a different connection string: '${this.config.connectionString}' - do you want to try connecting to it instead?`,
                         },
                     ],
                 };

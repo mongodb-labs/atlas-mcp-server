@@ -1,4 +1,4 @@
-import config from "../../config.js";
+import version from "../../version.js";
 import createClient, { Client, FetchOptions, Middleware } from "openapi-fetch";
 import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
@@ -67,7 +67,7 @@ export class ApiClient {
             baseUrl: options?.baseUrl || "https://cloud.mongodb.com/",
             userAgent:
                 options?.userAgent ||
-                `AtlasMCP/${config.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
+                `AtlasMCP/${version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
         };
 
         this.client = createClient<paths>({

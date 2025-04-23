@@ -2,12 +2,11 @@ import path from "path";
 import os from "os";
 import argv from "yargs-parser";
 
-import packageJson from "../package.json" with { type: "json" };
 import { ReadConcernLevel, ReadPreferenceMode, W } from "mongodb";
 
 // If we decide to support non-string config options, we'll need to extend the mechanism for parsing
 // env variables.
-interface UserConfig {
+export interface UserConfig {
     apiBaseUrl?: string;
     apiClientId?: string;
     apiClientSecret?: string;
@@ -33,15 +32,10 @@ const defaults: UserConfig = {
     disabledTools: [],
 };
 
-const mergedUserConfig = {
+export const config = {
     ...defaults,
     ...getEnvConfig(),
     ...getCliConfig(),
-};
-
-const config = {
-    ...mergedUserConfig,
-    version: packageJson.version,
 };
 
 export default config;
