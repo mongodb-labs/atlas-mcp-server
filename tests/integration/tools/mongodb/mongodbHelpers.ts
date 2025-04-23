@@ -39,11 +39,10 @@ export function setupMongoDBIntegrationTest(integration: IntegrationTest, userCo
         mongoClient = undefined;
     });
 
-    const tmpDir = path.join(__dirname, "..", "tmp");
-
     beforeAll(async function () {
         // Downloading Windows executables in CI takes a long time because
         // they include debug symbols...
+        const tmpDir = path.join(__dirname, "..", "..", "..", "tmp");
         await fs.mkdir(tmpDir, { recursive: true });
 
         // On Windows, we may have a situation where mongod.exe is not fully released by the OS
@@ -79,7 +78,6 @@ export function setupMongoDBIntegrationTest(integration: IntegrationTest, userCo
     afterAll(async function () {
         await mongoCluster?.close();
         mongoCluster = undefined;
-        await fs.rmdir(tmpDir, { recursive: true });
     });
 
     const getConnectionString = () => {
