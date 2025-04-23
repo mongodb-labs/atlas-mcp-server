@@ -117,8 +117,8 @@ export class ApiClient {
     }
 
     // DO NOT EDIT. This is auto-generated code.
-    async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/orgs", options);
+    async listClustersForAllProjects(options?: FetchOptions<operations["listClustersForAllProjects"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/clusters", options);
         return data;
     }
 
@@ -132,23 +132,12 @@ export class ApiClient {
         return data;
     }
 
-    async listClustersForAllProjects(options?: FetchOptions<operations["listClustersForAllProjects"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/clusters", options);
-        return data;
+    async deleteProject(options: FetchOptions<operations["deleteProject"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}", options);
     }
 
     async getProject(options: FetchOptions<operations["getProject"]>) {
         const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}", options);
-        return data;
-    }
-
-    async listClusters(options: FetchOptions<operations["listClusters"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters", options);
-        return data;
-    }
-
-    async createCluster(options: FetchOptions<operations["createCluster"]>) {
-        const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/clusters", options);
         return data;
     }
 
@@ -162,6 +151,29 @@ export class ApiClient {
         return data;
     }
 
+    async deleteProjectIpAccessList(options: FetchOptions<operations["deleteProjectIpAccessList"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/accessList/{entryValue}", options);
+    }
+
+    async listClusters(options: FetchOptions<operations["listClusters"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters", options);
+        return data;
+    }
+
+    async createCluster(options: FetchOptions<operations["createCluster"]>) {
+        const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/clusters", options);
+        return data;
+    }
+
+    async deleteCluster(options: FetchOptions<operations["deleteCluster"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
+    }
+
+    async getCluster(options: FetchOptions<operations["getCluster"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
+        return data;
+    }
+
     async listDatabaseUsers(options: FetchOptions<operations["listDatabaseUsers"]>) {
         const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/databaseUsers", options);
         return data;
@@ -172,9 +184,19 @@ export class ApiClient {
         return data;
     }
 
-    async getCluster(options: FetchOptions<operations["getCluster"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
+    async deleteDatabaseUser(options: FetchOptions<operations["deleteDatabaseUser"]>) {
+        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/databaseUsers/{databaseName}/{username}", options);
+    }
+
+    async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/orgs", options);
         return data;
     }
+
+    async listOrganizationProjects(options: FetchOptions<operations["listOrganizationProjects"]>) {
+        const { data } = await this.client.GET("/api/atlas/v2/orgs/{orgId}/groups", options);
+        return data;
+    }
+
     // DO NOT EDIT. This is auto-generated code.
 }

@@ -48,20 +48,23 @@ export class ListClustersTool extends AtlasToolBase {
         if (!clusters?.results?.length) {
             throw new Error("No clusters found.");
         }
-        const rows = clusters.results
+        const formattedClusters = clusters.results
             .map((result) => {
                 return (result.clusters || []).map((cluster) => {
                     return { ...result, ...cluster, clusters: undefined };
                 });
             })
-            .flat()
+            .flat();
+        if (!formattedClusters.length) {
+            throw new Error("No clusters found.");
+        }
+        const rows = formattedClusters
             .map((cluster) => {
                 return `${cluster.groupName} (${cluster.groupId}) | ${cluster.name}`;
             })
             .join("\n");
         return {
             content: [
-                { type: "text", text: `Here are your MongoDB Atlas clusters:` },
                 {
                     type: "text",
                     text: `Project | Cluster Name
