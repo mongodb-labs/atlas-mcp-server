@@ -107,7 +107,7 @@ jobs:
           npm install -g lcov-result-merger
       - name: Merge coverage reports
         run: |
-          lcov-result-merger coverage/mongodb/lcov.info coverage/atlas/lcov.info coverage/lcov.info
+          lcov-result-merger "coverage/*/lcov.info" "coverage/lcov.info"
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.3.6
         with:
