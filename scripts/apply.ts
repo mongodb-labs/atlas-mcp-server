@@ -2,18 +2,22 @@ import fs from "fs/promises";
 import { OpenAPIV3_1 } from "openapi-types";
 import argv from "yargs-parser";
 
-function findParamFromRef(ref: string, openapi: OpenAPIV3_1.Document): OpenAPIV3_1.ParameterObject {
+function findObjectFromRef<T>(obj: T | OpenAPIV3_1.ReferenceObject, openapi: OpenAPIV3_1.Document): T {
+    const ref = (obj as OpenAPIV3_1.ReferenceObject).$ref;
+    if (ref === undefined) {
+        return obj as T;
+    }
     const paramParts = ref.split("/");
     paramParts.shift(); // Remove the first part which is always '#'
-    let param: any = openapi; // eslint-disable-line @typescript-eslint/no-explicit-any
+    let foundObj: any = openapi; // eslint-disable-line @typescript-eslint/no-explicit-any
     while (true) {
         const part = paramParts.shift();
         if (!part) {
             break;
         }
-        param = param[part];
+        foundObj = foundObj[part];
     }
-    return param;
+    return foundObj as T;
 }
 
 async function main() {
@@ -32,6 +36,7 @@ async function main() {
         operationId: string;
         requiredParams: boolean;
         tag: string;
+        hasResponseBody: boolean;
     }[] = [];
 
     const openapi = JSON.parse(specFile) as OpenAPIV3_1.Document;
@@ -44,13 +49,27 @@ async function main() {
             }
 
             let requiredParams = !!operation.requestBody;
+            let hasResponseBody = false;
+            for (const code in operation.responses) {
+                try {
+                    const httpCode = parseInt(code, 10);
+                    if (httpCode >= 200 && httpCode < 300) {
+                        const response = operation.responses[code];
+                        const responseObject = findObjectFromRef(response, openapi);
+                        if (responseObject.content) {
+                            for (const contentType in responseObject.content) {
+                                const content = responseObject.content[contentType];
+                                hasResponseBody = !!content.schema;
+                            }
+                        }
+                    }
+                } catch {
+                    continue;
+                }
+            }
 
             for (const param of operation.parameters || []) {
-                const ref = (param as OpenAPIV3_1.ReferenceObject).$ref as string | undefined;
-                let paramObject: OpenAPIV3_1.ParameterObject = param as OpenAPIV3_1.ParameterObject;
-                if (ref) {
-                    paramObject = findParamFromRef(ref, openapi);
-                }
+                const paramObject = findObjectFromRef(param, openapi);
                 if (paramObject.in === "path") {
                     requiredParams = true;
                 }
@@ -61,6 +80,7 @@ async function main() {
                 method: method.toUpperCase(),
                 operationId: operation.operationId || "",
                 requiredParams,
+                hasResponseBody,
                 tag: operation.tags[0],
             });
         }
@@ -68,20 +88,37 @@ async function main() {
 
     const operationOutput = operations
         .map((operation) => {
-            const { operationId, method, path, requiredParams } = operation;
+            const { operationId, method, path, requiredParams, hasResponseBody } = operation;
             return `async ${operationId}(options${requiredParams ? "" : "?"}: FetchOptions<operations["${operationId}"]>) {
-    const { data } = await this.client.${method}("${path}", options);
-    return data;
-}
+    ${hasResponseBody ? `const { data } = ` : ``}await this.client.${method}("${path}", options);
+    ${
+        hasResponseBody
+            ? `return data;
+`
+            : ``
+    }}
 `;
         })
         .join("\n");
 
     const templateFile = (await fs.readFile(file, "utf8")) as string;
-    const output = templateFile.replace(
-        /\/\/ DO NOT EDIT\. This is auto-generated code\.\n.*\/\/ DO NOT EDIT\. This is auto-generated code\./g,
-        operationOutput
-    );
+    const templateLines = templateFile.split("\n");
+    let outputLines: string[] = [];
+    let addLines = true;
+    for (const line of templateLines) {
+        if (line.includes("DO NOT EDIT. This is auto-generated code.")) {
+            addLines = !addLines;
+            outputLines.push(line);
+            if (!addLines) {
+                outputLines.push(operationOutput);
+            }
+            continue;
+        }
+        if (addLines) {
+            outputLines.push(line);
+        }
+    }
+    const output = outputLines.join("\n");
 
     await fs.writeFile(file, output, "utf8");
 }

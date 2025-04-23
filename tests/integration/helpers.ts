@@ -19,13 +19,16 @@ interface ParameterInfo {
 
 type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 
-export function setupIntegrationTest(): {
+export interface IntegrationTest {
     mcpClient: () => Client;
+    mcpServer: () => Server;
     mongoClient: () => MongoClient;
     connectionString: () => string;
     connectMcpClient: () => Promise<void>;
     randomDbName: () => string;
-} {
+}
+
+export function setupIntegrationTest(): IntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
 
@@ -34,7 +37,7 @@ export function setupIntegrationTest(): {
 
     let randomDbName: string;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
 
@@ -63,19 +66,22 @@ export function setupIntegrationTest(): {
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
+    });
+
+    beforeEach(async () => {
         randomDbName = new ObjectId().toString();
     });
 
-    afterEach(async () => {
+    afterAll(async () => {
         await mcpClient?.close();
         mcpClient = undefined;
 
         await mcpServer?.close();
         mcpServer = undefined;
+    });
 
-        await mongoClient?.close();
-        mongoClient = undefined;
-
+    afterEach(async () => {
+        await mcpServer?.session.close();
         config.connectionString = undefined;
     });
 
@@ -128,6 +134,14 @@ export function setupIntegrationTest(): {
         return mcpClient;
     };
 
+    const getMcpServer = () => {
+        if (!mcpServer) {
+            throw new Error("beforeEach() hook not ran yet");
+        }
+
+        return mcpServer;
+    };
+
     const getConnectionString = () => {
         if (!mongoCluster) {
             throw new Error("beforeAll() hook not ran yet");
@@ -138,6 +152,7 @@ export function setupIntegrationTest(): {
 
     return {
         mcpClient: getMcpClient,
+        mcpServer: getMcpServer,
         mongoClient: () => {
             if (!mongoClient) {
                 mongoClient = new MongoClient(getConnectionString());
@@ -212,4 +227,15 @@ export function validateParameters(tool: ToolInfo, parameters: ParameterInfo[]):
     const toolParameters = getParameters(tool);
     expect(toolParameters).toHaveLength(parameters.length);
     expect(toolParameters).toIncludeAllMembers(parameters);
+}
+
+export function describeAtlas(name: number | string | Function | jest.FunctionLike, fn: jest.EmptyFunction) {
+    if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
+        return describe.skip("atlas", () => {
+            describe(name, fn);
+        });
+    }
+    return describe("atlas", () => {
+        describe(name, fn);
+    });
 }
