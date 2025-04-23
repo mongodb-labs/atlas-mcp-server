@@ -9,8 +9,6 @@ export class ListProjectsTool extends AtlasToolBase {
     protected argsShape = {};
 
     protected async execute(): Promise<CallToolResult> {
-        this.session.ensureAuthenticated();
-
         const data = await this.session.apiClient.listProjects();
 
         if (!data?.results?.length) {

@@ -52,7 +52,7 @@ export abstract class ToolBase {
     }
 
     // Checks if a tool is allowed to run based on the config
-    private verifyAllowed(): boolean {
+    protected verifyAllowed(): boolean {
         let errorClarification: string | undefined;
         if (config.disabledTools.includes(this.category)) {
             errorClarification = `its category, \`${this.category}\`,`;

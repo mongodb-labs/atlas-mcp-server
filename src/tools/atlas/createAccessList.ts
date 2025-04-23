@@ -27,8 +27,6 @@ export class CreateAccessListTool extends AtlasToolBase {
         comment,
         currentIpAddress,
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        this.session.ensureAuthenticated();
-
         if (!ipAddresses?.length && !cidrBlocks?.length && !currentIpAddress) {
             throw new Error("One of  ipAddresses, cidrBlocks, currentIpAddress must be provided.");
         }

@@ -34,8 +34,6 @@ export class CreateDBUserTool extends AtlasToolBase {
         roles,
         clusters,
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        this.session.ensureAuthenticated();
-
         const input = {
             groupId: projectId,
             awsIAMType: "NONE",

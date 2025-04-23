@@ -4,24 +4,24 @@ import config from "./config.js";
 
 export class Session {
     serviceProvider?: NodeDriverServiceProvider;
-    apiClient?: ApiClient;
+    apiClient: ApiClient;
 
-    ensureAuthenticated(): asserts this is { apiClient: ApiClient } {
-        if (!this.apiClient) {
-            if (!config.apiClientId || !config.apiClientSecret) {
-                throw new Error(
-                    "Not authenticated make sure to configure MCP server with MDB_MCP_API_CLIENT_ID and MDB_MCP_API_CLIENT_SECRET environment variables."
-                );
-            }
-
-            this.apiClient = new ApiClient({
-                baseUrl: config.apiBaseUrl,
-                credentials: {
-                    clientId: config.apiClientId,
-                    clientSecret: config.apiClientSecret,
-                },
-            });
+    constructor() {
+        let credentials: {
+            clientId: string;
+            clientSecret: string;
+        } | undefined = undefined;
+        if (config.apiClientId && config.apiClientSecret) {
+            credentials = {
+                clientId: config.apiClientId,
+                clientSecret: config.apiClientSecret,
+            };
         }
+
+        this.apiClient = new ApiClient({
+            baseUrl: config.apiBaseUrl,
+            credentials,
+        });
     }
 
     async close(): Promise<void> {
