@@ -98,12 +98,14 @@ You may experiment asking `Can you connect to my mongodb instance?`.
 
 #### MongoDB Atlas Tools
 
-- `atlas-list-clusters` - Lists MongoDB Atlas clusters
+- `atlas-list-orgs` - Lists MongoDB Atlas organizations
 - `atlas-list-projects` - Lists MongoDB Atlas projects
+- `atlas-create-project` - Creates a new MongoDB Atlas project
+- `atlas-list-clusters` - Lists MongoDB Atlas clusters
 - `atlas-inspect-cluster` - Inspect a specific MongoDB Atlas cluster
 - `atlas-create-free-cluster` - Create a free MongoDB Atlas cluster
-- `atlas-create-access-list` - Configure IP/CIDR access list for MongoDB Atlas clusters
 - `atlas-inspect-access-list` - Inspect IP/CIDR ranges with access to MongoDB Atlas clusters
+- `atlas-create-access-list` - Configure IP/CIDR access list for MongoDB Atlas clusters
 - `atlas-list-db-users` - List MongoDB Atlas database users
 - `atlas-create-db-user` - List MongoDB Atlas database users
 
