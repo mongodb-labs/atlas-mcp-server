@@ -327,28 +327,3 @@ export function describeAtlas(name: number | string | Function | jest.FunctionLi
         describe(name, fn);
     });
 }
-
-// Telemetry control functions for tests
-export function disableTelemetry(): void {
-    process.env.DO_NOT_TRACK = "1";
-}
-
-export function enableTelemetry(): void {
-    delete process.env.DO_NOT_TRACK;
-}
-
-export function withTelemetryDisabled(fn: () => Promise<void> | void): () => Promise<void> {
-    return async () => {
-        const originalValue = process.env.DO_NOT_TRACK;
-        disableTelemetry();
-        try {
-            await fn();
-        } finally {
-            if (originalValue === undefined) {
-                delete process.env.DO_NOT_TRACK;
-            } else {
-                process.env.DO_NOT_TRACK = originalValue;
-            }
-        }
-    };
-}
