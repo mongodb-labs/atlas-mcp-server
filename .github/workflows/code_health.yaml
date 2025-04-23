@@ -102,6 +102,9 @@ jobs:
         with:
           name: atlas-test-results
           path: coverage/atlas
+      - name: Install lcov-result-merger
+        run: |
+          npm install -g lcov-result-merger
       - name: Merge coverage reports
         run: |
           lcov-result-merger coverage/mongodb/lcov.info coverage/atlas/lcov.info coverage/lcov.info
