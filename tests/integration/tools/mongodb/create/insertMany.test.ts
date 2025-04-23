@@ -1,3 +1,5 @@
+import { describeMongoDB } from "../mongodbHelpers.js";
+
 import {
     getResponseContent,
     dbOperationParameters,
@@ -7,8 +9,7 @@ import {
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 
-describe("insertMany tool", () => {
-    const integration = setupIntegrationTest();
+describeMongoDB("insertMany tool", (integration) => {
 
     validateToolMetadata(integration, "insert-many", "Insert an array of documents into a MongoDB collection", [
         ...dbOperationParameters,

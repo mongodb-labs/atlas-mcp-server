@@ -1,3 +1,5 @@
+import { describeMongoDB } from "../mongodbHelpers.js";
+
 import {
     getResponseContent,
     setupIntegrationTest,
@@ -9,8 +11,7 @@ import {
 } from "../../../helpers.js";
 import * as crypto from "crypto";
 
-describe("collectionStorageSize tool", () => {
-    const integration = setupIntegrationTest();
+describeMongoDB("collectionStorageSize tool", (integration) => {
 
     validateToolMetadata(
         integration,

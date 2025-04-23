@@ -1,3 +1,5 @@
+import { describeMongoDB } from "../mongodbHelpers.js";
+
 import {
     getResponseElements,
     getResponseContent,
@@ -8,8 +10,7 @@ import {
     dbOperationInvalidArgTests,
 } from "../../../helpers.js";
 
-describe("listCollections tool", () => {
-    const integration = setupIntegrationTest();
+describeMongoDB("listCollections tool", (integration) => {
 
     validateToolMetadata(integration, "list-collections", "List all collections for a given database", [
         { name: "database", description: "Database name", type: "string", required: true },

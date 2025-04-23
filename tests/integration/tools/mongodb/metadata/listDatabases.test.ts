@@ -1,3 +1,5 @@
+import { describeMongoDB } from "../mongodbHelpers.js";
+
 import {
     getResponseElements,
     getParameters,
@@ -6,8 +8,7 @@ import {
 } from "../../../helpers.js";
 import { toIncludeSameMembers } from "jest-extended";
 
-describe("listDatabases tool", () => {
-    const integration = setupIntegrationTest();
+describeMongoDB("listDatabases tool", (integration) => {
     const defaultDatabases = ["admin", "config", "local"];
 
     it("should have correct metadata", async () => {

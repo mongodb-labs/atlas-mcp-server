@@ -1,3 +1,5 @@
+import { describeMongoDB } from "../mongodbHelpers.js";
+
 import {
     getResponseContent,
     dbOperationParameters,
@@ -7,8 +9,7 @@ import {
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 
-describe("deleteMany tool", () => {
-    const integration = setupIntegrationTest();
+describeMongoDB("deleteMany tool", (integration) => {
 
     validateToolMetadata(
         integration,

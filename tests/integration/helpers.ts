@@ -23,16 +23,9 @@ type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 export interface IntegrationTest {
     mcpClient: () => Client;
     mcpServer: () => Server;
-    mongoClient: () => MongoClient;
-    connectionString: () => string;
-    connectMcpClient: () => Promise<void>;
-    randomDbName: () => string;
 }
 
 export function setupIntegrationTest(userConfig: UserConfig = config): IntegrationTest {
-    let mongoCluster: runner.MongoCluster | undefined;
-    let mongoClient: MongoClient | undefined;
-
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
@@ -76,10 +69,6 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
         await mcpClient.connect(clientTransport);
     });
 
-    beforeEach(async () => {
-        randomDbName = new ObjectId().toString();
-    });
-
     afterAll(async () => {
         await mcpClient?.close();
         mcpClient = undefined;
@@ -88,54 +77,7 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
         mcpServer = undefined;
     });
 
-    afterEach(async () => {
-        await mcpServer?.session.close();
-        config.connectionString = undefined;
 
-        await mongoClient?.close();
-        mongoClient = undefined;
-    });
-
-    beforeAll(async function () {
-        // Downloading Windows executables in CI takes a long time because
-        // they include debug symbols...
-        const tmpDir = path.join(__dirname, "..", "tmp");
-        await fs.mkdir(tmpDir, { recursive: true });
-
-        // On Windows, we may have a situation where mongod.exe is not fully released by the OS
-        // before we attempt to run it again, so we add a retry.
-        let dbsDir = path.join(tmpDir, "mongodb-runner", "dbs");
-        for (let i = 0; i < 10; i++) {
-            try {
-                mongoCluster = await MongoCluster.start({
-                    tmpDir: dbsDir,
-                    logDir: path.join(tmpDir, "mongodb-runner", "logs"),
-                    topology: "standalone",
-                });
-
-                return;
-            } catch (err) {
-                if (i < 5) {
-                    // Just wait a little bit and retry
-                    console.error(`Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}`);
-                    await new Promise((resolve) => setTimeout(resolve, 1000));
-                } else {
-                    // If we still fail after 5 seconds, try another db dir
-                    console.error(
-                        `Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}. Retrying with a new db dir.`
-                    );
-                    dbsDir = path.join(tmpDir, "mongodb-runner", `dbs${i - 5}`);
-                }
-            }
-        }
-
-        throw new Error("Failed to start cluster after 10 attempts");
-    }, 120_000);
-
-    afterAll(async function () {
-        await mongoCluster?.close();
-        mongoCluster = undefined;
-    });
 
     const getMcpClient = () => {
         if (!mcpClient) {

@@ -1,3 +1,5 @@
+import { describeMongoDB } from "../mongodbHelpers.js";
+
 import {
     getResponseElements,
     getResponseContent,
@@ -12,8 +14,7 @@ import { Document } from "bson";
 import { OptionalId } from "mongodb";
 import { SimplifiedSchema } from "mongodb-schema";
 
-describe("collectionSchema tool", () => {
-    const integration = setupIntegrationTest();
+describeMongoDB("collectionSchema tool", (integration) => {
 
     validateToolMetadata(
         integration,
