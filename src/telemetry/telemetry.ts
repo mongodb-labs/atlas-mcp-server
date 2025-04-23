@@ -29,12 +29,11 @@ export class Telemetry {
     private readonly commonProperties: CommonProperties;
 
     constructor(private readonly session: Session) {
-        // Create an immutable object with all telemetry properties
-        this.commonProperties = Object.freeze({
+        this.commonProperties = {
             ...MACHINE_METADATA,
             mcp_client_version: this.session.agentRunner?.version,
             mcp_client_name: this.session.agentRunner?.name,
-        });
+        };
     }
 
     /**
