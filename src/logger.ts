@@ -54,38 +54,36 @@ class ConsoleLogger extends LoggerBase {
 
 class DiskLogger extends LoggerBase {
     private logWriter?: MongoLogWriter;
-    
-    constructor(
-        private logPath: string
-    ) {
+
+    constructor(private logPath: string) {
         super();
     }
 
-async initialize(): Promise<void> {
-    await fs.mkdir(this.logPath, { recursive: true });
+    async initialize(): Promise<void> {
+        await fs.mkdir(this.logPath, { recursive: true });
 
-    const manager = new MongoLogManager({
-        directory: this.logPath,
-        retentionDays: 30,
-        onwarn: console.warn,
-        onerror: console.error,
-        gzip: false,
-        retentionGB: 1,
-    });
+        const manager = new MongoLogManager({
+            directory: this.logPath,
+            retentionDays: 30,
+            onwarn: console.warn,
+            onerror: console.error,
+            gzip: false,
+            retentionGB: 1,
+        });
 
-    await manager.cleanupOldLogFiles();
+        await manager.cleanupOldLogFiles();
 
-    this.logWriter = await manager.createLogWriter();
-}
+        this.logWriter = await manager.createLogWriter();
+    }
 
     log(level: LogLevel, id: MongoLogId, context: string, message: string): void {
         message = redact(message);
         const mongoDBLevel = this.mapToMongoDBLogLevel(level);
-        
+
         if (!this.logWriter) {
             throw new Error("DiskLogger is not initialized");
         }
-        
+
         this.logWriter[mongoDBLevel]("MONGODB-MCP", id, context, message);
     }
 
@@ -110,11 +108,8 @@ async initialize(): Promise<void> {
     }
 }
 
-
 class McpLogger extends LoggerBase {
-    constructor(
-        private server: McpServer
-    ) {
+    constructor(private server: McpServer) {
         super();
     }
 
@@ -131,14 +126,15 @@ class CompositeLogger extends LoggerBase {
 
     constructor(...loggers: LoggerBase[]) {
         super();
-        if (loggers.length === 0) { // default to ConsoleLogger
+        if (loggers.length === 0) {
+            // default to ConsoleLogger
             loggers.push(new ConsoleLogger());
         }
         this.loggers = [...loggers];
     }
 
     async initialize(): Promise<void> {
-        for(const logger of this.loggers) {
+        for (const logger of this.loggers) {
             await logger.initialize();
         }
     }
@@ -148,7 +144,7 @@ class CompositeLogger extends LoggerBase {
     }
 
     log(level: LogLevel, id: MongoLogId, context: string, message: string): void {
-        for(const logger of this.loggers) {
+        for (const logger of this.loggers) {
             logger.log(level, id, context, message);
         }
     }
@@ -158,9 +154,6 @@ const logger = new CompositeLogger();
 export default logger;
 
 export async function initializeLogger(server: McpServer, logPath: string): Promise<void> {
-    logger.setLoggers(
-        new McpLogger(server),
-        new DiskLogger(logPath),
-    )
+    logger.setLoggers(new McpLogger(server), new DiskLogger(logPath));
     await logger.initialize();
 }
