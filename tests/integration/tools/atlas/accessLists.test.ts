@@ -1,5 +1,5 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { describeAtlas, withProject } from "./atlasHelpers.js";
+import { describeWithAtlas, withProject } from "./atlasHelpers.js";
 
 function generateRandomIp() {
     const randomIp: number[] = [192];
@@ -9,7 +9,7 @@ function generateRandomIp() {
     return randomIp.join(".");
 }
 
-describeAtlas("ip access lists", (integration) => {
+describeWithAtlas("ip access lists", (integration) => {
     withProject(integration, ({ getProjectId }) => {
         const ips = [generateRandomIp(), generateRandomIp()];
         const cidrBlocks = [generateRandomIp() + "/16", generateRandomIp() + "/24"];

@@ -1,4 +1,4 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB } from "../mongodbHelpers.js";
 
 import {
     getResponseElements,
@@ -14,7 +14,7 @@ import { Document } from "bson";
 import { OptionalId } from "mongodb";
 import { SimplifiedSchema } from "mongodb-schema";
 
-describeMongoDB("collectionSchema tool", (integration) => {
+describeWithMongoDB("collectionSchema tool", (integration) => {
     validateToolMetadata(
         integration,
         "collection-schema",

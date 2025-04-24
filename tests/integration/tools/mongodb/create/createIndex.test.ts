@@ -1,4 +1,4 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
@@ -10,7 +10,7 @@ import {
 } from "../../../helpers.js";
 import { IndexDirection } from "mongodb";
 
-describeMongoDB("createIndex tool", (integration) => {
+describeWithMongoDB("createIndex tool", (integration) => {
     validateToolMetadata(integration, "create-index", "Create an index for a collection", [
         ...dbOperationParameters,
         {

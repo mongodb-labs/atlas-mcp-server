@@ -1,4 +1,4 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
@@ -11,7 +11,7 @@ import {
 } from "../../../helpers.js";
 import * as crypto from "crypto";
 
-describeMongoDB("collectionStorageSize tool", (integration) => {
+describeWithMongoDB("collectionStorageSize tool", (integration) => {
     validateToolMetadata(
         integration,
         "collection-storage-size",

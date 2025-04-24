@@ -1,4 +1,4 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
@@ -10,7 +10,7 @@ import {
     dbOperationInvalidArgTests,
 } from "../../../helpers.js";
 
-describeMongoDB("dropCollection tool", (integration) => {
+describeWithMongoDB("dropCollection tool", (integration) => {
     validateToolMetadata(
         integration,
         "drop-collection",

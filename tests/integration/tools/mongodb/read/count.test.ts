@@ -1,4 +1,4 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
@@ -9,7 +9,7 @@ import {
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 
-describeMongoDB("count tool", (integration) => {
+describeWithMongoDB("count tool", (integration) => {
     validateToolMetadata(integration, "count", "Gets the number of documents in a MongoDB collection", [
         {
             name: "query",
