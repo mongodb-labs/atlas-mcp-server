@@ -53,23 +53,29 @@ export class Server {
 
             this.emitServerEvent("start", Date.now() - this.startTime);
         };
+
+        this.mcpServer.server.onclose = () => {
+            const closeTime = Date.now();
+            this.emitServerEvent("stop", Date.now() - closeTime);
+        };
+
+        this.mcpServer.server.onerror = (error: Error) => {
+            const closeTime = Date.now();
+            this.emitServerEvent("stop", Date.now() - closeTime, error);
+        };
     }
 
     async close(): Promise<void> {
-        const closeTime = Date.now();
         await this.session.close();
         await this.mcpServer.close();
-
-        this.emitServerEvent("stop", Date.now() - closeTime);
     }
-
 
     /**
      * Emits a server event
      * @param command - The server command (e.g., "start", "stop", "register", "deregister")
      * @param additionalProperties - Additional properties specific to the event
      */
-    async emitServerEvent(command: ServerCommand, commandDuration: number): Promise<void> {
+    emitServerEvent(command: ServerCommand, commandDuration: number, error?: Error) {
         const event: ServerEvent = {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
@@ -88,9 +94,13 @@ export class Server {
         }
         if (command === "stop") {
             event.properties.runtime_duration_ms = Date.now() - this.startTime;
+            if (error) {
+                event.properties.result = "failure";
+                event.properties.reason = error.message;
+            }
         }
 
-        await this.telemetry.emitEvents([event]);
+        this.telemetry.emitEvents([event]).catch(() => {});
     }
 
     private registerTools() {

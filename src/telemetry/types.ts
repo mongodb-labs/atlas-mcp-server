@@ -2,7 +2,7 @@
  * Result type constants for telemetry events
  */
 export type TelemetryResult = "success" | "failure";
-export type ServerCommand =  "start" | "stop" | "register" | "deregister";  
+export type ServerCommand = "start" | "stop" | "register" | "deregister";
 
 /**
  * Base interface for all events
@@ -53,7 +53,8 @@ export interface ToolEvent extends BaseEvent {
 export interface ServerEvent extends BaseEvent {
     properties: {
         command: ServerCommand;
+        reason?: string;
         startup_time_ms?: number;
         runtime_duration_ms?: number;
-    }  & BaseEvent["properties"];
+    } & BaseEvent["properties"];
 }
