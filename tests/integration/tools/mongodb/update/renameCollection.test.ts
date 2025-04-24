@@ -3,13 +3,11 @@ import {
     databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-describe("renameCollection tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("renameCollection tool", (integration) => {
     validateToolMetadata(integration, "rename-collection", "Renames a collection in a MongoDB database", [
         ...databaseCollectionParameters,
 

@@ -1,15 +1,12 @@
 import {
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
     getResponseContent,
 } from "../../../helpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-describe("updateMany tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("updateMany tool", (integration) => {
     validateToolMetadata(
         integration,
         "update-many",

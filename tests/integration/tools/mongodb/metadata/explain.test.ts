@@ -2,15 +2,12 @@ import {
     databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    getResponseContent,
     getResponseElements,
 } from "../../../helpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-describe("explain tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("explain tool", (integration) => {
     validateToolMetadata(
         integration,
         "explain",
