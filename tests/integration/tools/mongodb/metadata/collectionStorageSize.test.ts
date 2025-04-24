@@ -1,17 +1,15 @@
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
+
 import {
     getResponseContent,
-    setupIntegrationTest,
     databaseCollectionParameters,
-    validateToolMetadata,
-    validateAutoConnectBehavior,
     databaseCollectionInvalidArgs,
+    validateToolMetadata,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 import * as crypto from "crypto";
 
-describe("collectionStorageSize tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("collectionStorageSize tool", (integration) => {
     validateToolMetadata(
         integration,
         "collection-storage-size",

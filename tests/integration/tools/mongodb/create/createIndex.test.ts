@@ -1,16 +1,14 @@
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
+
 import {
     getResponseContent,
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 import { IndexDirection } from "mongodb";
 
-describe("createIndex tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("createIndex tool", (integration) => {
     validateToolMetadata(integration, "create-index", "Create an index for a collection", [
         ...databaseCollectionParameters,
         {

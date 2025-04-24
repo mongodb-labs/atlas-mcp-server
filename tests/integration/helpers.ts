@@ -1,15 +1,12 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "./inMemoryTransport.js";
 import { Server } from "../../src/server.js";
-import runner, { MongoCluster } from "mongodb-runner";
-import path from "path";
-import fs from "fs/promises";
-import { Session } from "../../src/session.js";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { MongoClient, ObjectId } from "mongodb";
-import { toIncludeAllMembers } from "jest-extended";
-import config from "../../src/config.js";
+import { ObjectId } from "mongodb";
+import { config, UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Session } from "../../src/session.js";
+import { toIncludeAllMembers } from "jest-extended";
 
 interface ParameterInfo {
     name: string;
@@ -23,16 +20,9 @@ type ToolInfo = Awaited<ReturnType<Client["listTools"]>>["tools"][number];
 export interface IntegrationTest {
     mcpClient: () => Client;
     mcpServer: () => Server;
-    mongoClient: () => MongoClient;
-    connectionString: () => string;
-    connectMcpClient: () => Promise<void>;
-    randomDbName: () => string;
 }
 
-export function setupIntegrationTest(): IntegrationTest {
-    let mongoCluster: runner.MongoCluster | undefined;
-    let mongoClient: MongoClient | undefined;
-
+export function setupIntegrationTest(userConfig: UserConfig = config): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
@@ -58,18 +48,26 @@ export function setupIntegrationTest(): IntegrationTest {
             }
         );
 
+        const session = new Session({
+            apiBaseUrl: userConfig.apiBaseUrl,
+            apiClientId: userConfig.apiClientId,
+            apiClientSecret: userConfig.apiClientSecret,
+        });
+
         mcpServer = new Server({
+            session,
+            userConfig,
             mcpServer: new McpServer({
                 name: "test-server",
                 version: "1.2.3",
             }),
-            session: new Session(),
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
     });
 
     beforeEach(async () => {
+        config.telemetry = "disabled";
         randomDbName = new ObjectId().toString();
     });
 
@@ -79,55 +77,6 @@ export function setupIntegrationTest(): IntegrationTest {
 
         await mcpServer?.close();
         mcpServer = undefined;
-    });
-
-    afterEach(async () => {
-        await mcpServer?.session.close();
-        config.connectionString = undefined;
-
-        await mongoClient?.close();
-        mongoClient = undefined;
-    });
-
-    beforeAll(async function () {
-        // Downloading Windows executables in CI takes a long time because
-        // they include debug symbols...
-        const tmpDir = path.join(__dirname, "..", "tmp");
-        await fs.mkdir(tmpDir, { recursive: true });
-
-        // On Windows, we may have a situation where mongod.exe is not fully released by the OS
-        // before we attempt to run it again, so we add a retry.
-        let dbsDir = path.join(tmpDir, "mongodb-runner", "dbs");
-        for (let i = 0; i < 10; i++) {
-            try {
-                mongoCluster = await MongoCluster.start({
-                    tmpDir: dbsDir,
-                    logDir: path.join(tmpDir, "mongodb-runner", "logs"),
-                    topology: "standalone",
-                });
-
-                return;
-            } catch (err) {
-                if (i < 5) {
-                    // Just wait a little bit and retry
-                    console.error(`Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}`);
-                    await new Promise((resolve) => setTimeout(resolve, 1000));
-                } else {
-                    // If we still fail after 5 seconds, try another db dir
-                    console.error(
-                        `Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}. Retrying with a new db dir.`
-                    );
-                    dbsDir = path.join(tmpDir, "mongodb-runner", `dbs${i - 5}`);
-                }
-            }
-        }
-
-        throw new Error("Failed to start cluster after 10 attempts");
-    }, 120_000);
-
-    afterAll(async function () {
-        await mongoCluster?.close();
-        mongoCluster = undefined;
     });
 
     const getMcpClient = () => {
@@ -146,31 +95,9 @@ export function setupIntegrationTest(): IntegrationTest {
         return mcpServer;
     };
 
-    const getConnectionString = () => {
-        if (!mongoCluster) {
-            throw new Error("beforeAll() hook not ran yet");
-        }
-
-        return mongoCluster.connectionString;
-    };
-
     return {
         mcpClient: getMcpClient,
         mcpServer: getMcpServer,
-        mongoClient: () => {
-            if (!mongoClient) {
-                mongoClient = new MongoClient(getConnectionString());
-            }
-            return mongoClient;
-        },
-        connectionString: getConnectionString,
-        connectMcpClient: async () => {
-            await getMcpClient().callTool({
-                name: "connect",
-                arguments: { options: [{ connectionString: getConnectionString() }] },
-            });
-        },
-        randomDbName: () => randomDbName,
     };
 }
 
@@ -262,52 +189,6 @@ export function validateToolMetadata(
     });
 }
 
-export function validateAutoConnectBehavior(
-    integration: IntegrationTest,
-    name: string,
-    validation: () => {
-        args: { [x: string]: unknown };
-        expectedResponse?: string;
-        validate?: (content: unknown) => void;
-    },
-    beforeEachImpl?: () => Promise<void>
-): void {
-    describe("when not connected", () => {
-        if (beforeEachImpl) {
-            beforeEach(() => beforeEachImpl());
-        }
-
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const validationInfo = validation();
-
-            const response = await integration.mcpClient().callTool({
-                name,
-                arguments: validationInfo.args,
-            });
-
-            if (validationInfo.expectedResponse) {
-                const content = getResponseContent(response.content);
-                expect(content).toContain(validationInfo.expectedResponse);
-            }
-
-            if (validationInfo.validate) {
-                validationInfo.validate(response.content);
-            }
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name,
-                arguments: validation().args,
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
-        });
-    });
-}
-
 export function validateThrowsForInvalidArguments(
     integration: IntegrationTest,
     name: string,
@@ -316,7 +197,6 @@ export function validateThrowsForInvalidArguments(
     describe("with invalid arguments", () => {
         for (const arg of args) {
             it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
                 try {
                     await integration.mcpClient().callTool({ name, arguments: arg });
                     expect.fail("Expected an error to be thrown");
@@ -328,16 +208,5 @@ export function validateThrowsForInvalidArguments(
                 }
             });
         }
-    });
-}
-
-export function describeAtlas(name: number | string | Function | jest.FunctionLike, fn: jest.EmptyFunction) {
-    if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
-        return describe.skip("atlas", () => {
-            describe(name, fn);
-        });
-    }
-    return describe("atlas", () => {
-        describe(name, fn);
     });
 }

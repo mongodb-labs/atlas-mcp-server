@@ -1,10 +1,10 @@
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
+
 import {
     getResponseElements,
     getResponseContent,
-    setupIntegrationTest,
     databaseCollectionParameters,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
     databaseCollectionInvalidArgs,
 } from "../../../helpers.js";
@@ -12,9 +12,7 @@ import { Document } from "bson";
 import { OptionalId } from "mongodb";
 import { SimplifiedSchema } from "mongodb-schema";
 
-describe("collectionSchema tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("collectionSchema tool", (integration) => {
     validateToolMetadata(
         integration,
         "collection-schema",

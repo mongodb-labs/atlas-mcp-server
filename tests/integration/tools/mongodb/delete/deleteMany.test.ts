@@ -1,15 +1,13 @@
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
+
 import {
     getResponseContent,
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 
-describe("deleteMany tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("deleteMany tool", (integration) => {
     validateToolMetadata(
         integration,
         "delete-many",

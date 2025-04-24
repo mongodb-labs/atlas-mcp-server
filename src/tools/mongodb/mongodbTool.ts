@@ -1,10 +1,8 @@
 import { z } from "zod";
 import { ToolArgs, ToolBase, ToolCategory } from "../tool.js";
-import { Session } from "../../session.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
-import config from "../../config.js";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
@@ -12,15 +10,11 @@ export const DbOperationArgs = {
 };
 
 export abstract class MongoDBToolBase extends ToolBase {
-    constructor(session: Session) {
-        super(session);
-    }
-
     protected category: ToolCategory = "mongodb";
 
     protected async ensureConnected(): Promise<NodeDriverServiceProvider> {
-        if (!this.session.serviceProvider && config.connectionString) {
-            await this.connectToMongoDB(config.connectionString);
+        if (!this.session.serviceProvider && this.config.connectionString) {
+            await this.connectToMongoDB(this.config.connectionString);
         }
 
         if (!this.session.serviceProvider) {
@@ -58,13 +52,13 @@ export abstract class MongoDBToolBase extends ToolBase {
             productDocsLink: "https://docs.mongodb.com/todo-mcp",
             productName: "MongoDB MCP",
             readConcern: {
-                level: config.connectOptions.readConcern,
+                level: this.config.connectOptions.readConcern,
             },
-            readPreference: config.connectOptions.readPreference,
+            readPreference: this.config.connectOptions.readPreference,
             writeConcern: {
-                w: config.connectOptions.writeConcern,
+                w: this.config.connectOptions.writeConcern,
             },
-            timeoutMS: config.connectOptions.timeoutMS,
+            timeoutMS: this.config.connectOptions.timeoutMS,
         });
 
         this.session.serviceProvider = provider;

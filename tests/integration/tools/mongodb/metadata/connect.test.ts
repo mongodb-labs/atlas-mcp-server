@@ -1,10 +1,10 @@
-import { getResponseContent, setupIntegrationTest, validateToolMetadata } from "../../../helpers.js";
+import { describeWithMongoDB } from "../mongodbHelpers.js";
 
-import config from "../../../../../src/config.js";
+import { getResponseContent, validateToolMetadata } from "../../../helpers.js";
 
-describe("Connect tool", () => {
-    const integration = setupIntegrationTest();
+import { config } from "../../../../../src/config.js";
 
+describeWithMongoDB("Connect tool", (integration) => {
     validateToolMetadata(integration, "connect", "Connect to a MongoDB instance", [
         {
             name: "options",

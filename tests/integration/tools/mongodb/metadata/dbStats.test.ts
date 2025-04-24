@@ -1,18 +1,15 @@
 import { ObjectId } from "bson";
 import {
-    setupIntegrationTest,
     databaseParameters,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
     databaseInvalidArgs,
     getResponseElements,
 } from "../../../helpers.js";
 import * as crypto from "crypto";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-describe("dbStats tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("dbStats tool", (integration) => {
     validateToolMetadata(
         integration,
         "db-stats",

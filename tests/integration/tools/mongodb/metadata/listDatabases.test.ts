@@ -1,12 +1,7 @@
-import {
-    getResponseElements,
-    getParameters,
-    setupIntegrationTest,
-    validateAutoConnectBehavior,
-} from "../../../helpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
+import { getResponseElements, getParameters } from "../../../helpers.js";
 
-describe("listDatabases tool", () => {
-    const integration = setupIntegrationTest();
+describeWithMongoDB("listDatabases tool", (integration) => {
     const defaultDatabases = ["admin", "config", "local"];
 
     it("should have correct metadata", async () => {

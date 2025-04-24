@@ -1,5 +1,5 @@
 import { Session } from "../../../../src/session.js";
-import { describeAtlas, withProject, sleep, randomId } from "./atlasHelpers.js";
+import { describeWithAtlas, withProject, sleep, randomId } from "./atlasHelpers.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
@@ -28,7 +28,7 @@ async function deleteAndWaitCluster(session: Session, projectId: string, cluster
     }
 }
 
-describeAtlas("clusters", (integration) => {
+describeWithAtlas("clusters", (integration) => {
     withProject(integration, ({ getProjectId }) => {
         const clusterName = "ClusterTest-" + randomId;
 

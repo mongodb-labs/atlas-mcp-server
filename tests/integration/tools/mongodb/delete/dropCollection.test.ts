@@ -1,16 +1,14 @@
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
+
 import {
     getResponseContent,
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
     databaseCollectionInvalidArgs,
 } from "../../../helpers.js";
 
-describe("dropCollection tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("dropCollection tool", (integration) => {
     validateToolMetadata(
         integration,
         "drop-collection",
