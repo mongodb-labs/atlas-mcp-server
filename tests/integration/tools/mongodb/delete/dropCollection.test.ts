@@ -11,7 +11,6 @@ import {
 } from "../../../helpers.js";
 
 describeMongoDB("dropCollection tool", (integration) => {
-
     validateToolMetadata(
         integration,
         "drop-collection",

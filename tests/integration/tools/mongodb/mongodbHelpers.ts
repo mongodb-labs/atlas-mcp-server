@@ -12,17 +12,23 @@ interface MongoDBIntegrationTest {
     randomDbName: () => string;
 }
 
-export function describeMongoDB(name: number | string | Function | jest.FunctionLike, fn: (integration: IntegrationTest & MongoDBIntegrationTest) => void): void {
+export function describeMongoDB(
+    name: number | string | Function | jest.FunctionLike,
+    fn: (integration: IntegrationTest & MongoDBIntegrationTest) => void
+): void {
     describe("mongodb", () => {
         const integration = setupIntegrationTest();
         const mdbIntegration = setupMongoDBIntegrationTest(integration);
         describe(name, () => {
-            fn({...integration, ...mdbIntegration});
+            fn({ ...integration, ...mdbIntegration });
         });
     });
 }
 
-export function setupMongoDBIntegrationTest(integration: IntegrationTest, userConfig: UserConfig = config): MongoDBIntegrationTest {
+export function setupMongoDBIntegrationTest(
+    integration: IntegrationTest,
+    userConfig: UserConfig = config
+): MongoDBIntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
     let randomDbName: string;

@@ -10,7 +10,6 @@ import {
 } from "../../../helpers.js";
 
 describeMongoDB("count tool", (integration) => {
-
     validateToolMetadata(integration, "count", "Gets the number of documents in a MongoDB collection", [
         {
             name: "query",

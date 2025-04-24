@@ -11,7 +11,6 @@ import {
 import { IndexDirection } from "mongodb";
 
 describeMongoDB("createIndex tool", (integration) => {
-
     validateToolMetadata(integration, "create-index", "Create an index for a collection", [
         ...dbOperationParameters,
         {

@@ -5,7 +5,6 @@ import { getResponseContent, setupIntegrationTest, validateToolMetadata } from "
 import { config } from "../../../../../src/config.js";
 
 describeMongoDB("Connect tool", (integration) => {
-
     validateToolMetadata(integration, "connect", "Connect to a MongoDB instance", [
         {
             name: "options",

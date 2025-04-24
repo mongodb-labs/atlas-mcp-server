@@ -82,8 +82,6 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
         mcpServer = undefined;
     });
 
-
-
     const getMcpClient = () => {
         if (!mcpClient) {
             throw new Error("beforeEach() hook not ran yet");

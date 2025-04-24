@@ -15,7 +15,6 @@ import { OptionalId } from "mongodb";
 import { SimplifiedSchema } from "mongodb-schema";
 
 describeMongoDB("collectionSchema tool", (integration) => {
-
     validateToolMetadata(
         integration,
         "collection-schema",

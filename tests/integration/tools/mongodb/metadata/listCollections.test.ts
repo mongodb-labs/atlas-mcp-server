@@ -11,7 +11,6 @@ import {
 } from "../../../helpers.js";
 
 describeMongoDB("listCollections tool", (integration) => {
-
     validateToolMetadata(integration, "list-collections", "List all collections for a given database", [
         { name: "database", description: "Database name", type: "string", required: true },
     ]);

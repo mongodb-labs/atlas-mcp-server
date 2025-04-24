@@ -12,7 +12,6 @@ import {
 import * as crypto from "crypto";
 
 describeMongoDB("collectionStorageSize tool", (integration) => {
-
     validateToolMetadata(
         integration,
         "collection-storage-size",

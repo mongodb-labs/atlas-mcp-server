@@ -10,7 +10,6 @@ import {
 } from "../../../helpers.js";
 
 describeMongoDB("insertMany tool", (integration) => {
-
     validateToolMetadata(integration, "insert-many", "Insert an array of documents into a MongoDB collection", [
         ...dbOperationParameters,
         {

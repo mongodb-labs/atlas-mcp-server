@@ -11,7 +11,6 @@ import {
 } from "../../../helpers.js";
 
 describeMongoDB("createCollection tool", (integration) => {
-
     validateToolMetadata(
         integration,
         "create-collection",
