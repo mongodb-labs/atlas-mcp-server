@@ -2,6 +2,7 @@
  * Result type constants for telemetry events
  */
 export type TelemetryResult = "success" | "failure";
+export type ServerCommand =  "start" | "stop" | "register" | "deregister";  
 
 /**
  * Base interface for all events
@@ -44,4 +45,15 @@ export interface ToolEvent extends BaseEvent {
         cluster_name?: string;
         is_atlas?: boolean;
     } & BaseEvent["properties"];
+}
+
+/**
+ * Interface for server events
+ */
+export interface ServerEvent extends BaseEvent {
+    properties: {
+        command: ServerCommand;
+        startup_time_ms?: number;
+        runtime_duration_ms?: number;
+    }  & BaseEvent["properties"];
 }

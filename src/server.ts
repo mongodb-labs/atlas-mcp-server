@@ -8,6 +8,8 @@ import { mongoLogId } from "mongodb-log-writer";
 import { ObjectId } from "mongodb";
 import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
+import { type ServerEvent } from "./telemetry/types.js";
+import { type ServerCommand } from "./telemetry/types.js";
 
 export interface ServerOptions {
     session: Session;
@@ -20,8 +22,10 @@ export class Server {
     private readonly mcpServer: McpServer;
     private readonly telemetry: Telemetry;
     private readonly userConfig: UserConfig;
+    private readonly startTime: number;
 
     constructor({ session, mcpServer, userConfig }: ServerOptions) {
+        this.startTime = Date.now();
         this.session = session;
         this.telemetry = new Telemetry(session);
         this.mcpServer = mcpServer;
@@ -46,12 +50,47 @@ export class Server {
                 "server",
                 `Server started with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
             );
+
+            this.emitServerEvent("start", Date.now() - this.startTime);
         };
     }
 
     async close(): Promise<void> {
+        const closeTime = Date.now();
         await this.session.close();
         await this.mcpServer.close();
+
+        this.emitServerEvent("stop", Date.now() - closeTime);
+    }
+
+
+    /**
+     * Emits a server event
+     * @param command - The server command (e.g., "start", "stop", "register", "deregister")
+     * @param additionalProperties - Additional properties specific to the event
+     */
+    async emitServerEvent(command: ServerCommand, commandDuration: number): Promise<void> {
+        const event: ServerEvent = {
+            timestamp: new Date().toISOString(),
+            source: "mdbmcp",
+            properties: {
+                ...this.telemetry.getCommonProperties(),
+                result: "success",
+                duration_ms: commandDuration,
+                component: "server",
+                category: "other",
+                command: command,
+            },
+        };
+
+        if (command === "start") {
+            event.properties.startup_time_ms = commandDuration;
+        }
+        if (command === "stop") {
+            event.properties.runtime_duration_ms = Date.now() - this.startTime;
+        }
+
+        await this.telemetry.emitEvents([event]);
     }
 
     private registerTools() {
