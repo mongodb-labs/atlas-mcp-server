@@ -1,7 +1,11 @@
-import createClient, { Client, FetchOptions, Middleware } from "openapi-fetch";
+import createClient, { Client, Middleware } from "openapi-fetch";
+import type { FetchOptions } from "openapi-fetch";
 import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
+import { BaseEvent } from "../../telemetry/types.js";
+import { mongoLogId } from "mongodb-log-writer";
+import logger from "../../logger.js";
 import { packageInfo } from "../../packageInfo.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
@@ -93,6 +97,15 @@ export class ApiClient {
         this.client.use(this.errorMiddleware);
     }
 
+    public hasCredentials(): boolean {
+        logger.info(
+            mongoLogId(1_000_000),
+            "api-client",
+            `Checking if API client has credentials: ${!!(this.oauth2Client && this.accessToken)}`
+        );
+        return !!(this.oauth2Client && this.accessToken);
+    }
+
     public async getIpInfo(): Promise<{
         currentIpv4Address: string;
     }> {
@@ -116,6 +129,32 @@ export class ApiClient {
         return (await response.json()) as Promise<{
             currentIpv4Address: string;
         }>;
+    }
+
+    async sendEvents(events: BaseEvent[]): Promise<void> {
+        let endpoint = "api/private/unauth/telemetry/events";
+        const headers: Record<string, string> = {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": this.options.userAgent,
+        };
+
+        const accessToken = await this.getAccessToken();
+        if (accessToken) {
+            endpoint = "api/private/v1.0/telemetry/events";
+            headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+
+        const url = new URL(endpoint, this.options.baseUrl);
+        const response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(events),
+        });
+
+        if (!response.ok) {
+            throw await ApiClientError.fromResponse(response);
+        }
     }
 
     // DO NOT EDIT. This is auto-generated code.

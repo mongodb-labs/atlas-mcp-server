@@ -5,6 +5,8 @@ import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
 import logger, { initializeLogger } from "./logger.js";
 import { mongoLogId } from "mongodb-log-writer";
+import { ObjectId } from "mongodb";
+import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
 
 export interface ServerOptions {
@@ -16,17 +18,18 @@ export interface ServerOptions {
 export class Server {
     public readonly session: Session;
     private readonly mcpServer: McpServer;
+    private readonly telemetry: Telemetry;
     private readonly userConfig: UserConfig;
 
     constructor({ session, mcpServer, userConfig }: ServerOptions) {
         this.session = session;
+        this.telemetry = new Telemetry(session);
         this.mcpServer = mcpServer;
         this.userConfig = userConfig;
     }
 
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
-
         this.registerTools();
         this.registerResources();
 
@@ -34,7 +37,16 @@ export class Server {
 
         await this.mcpServer.connect(transport);
 
-        logger.info(mongoLogId(1_000_004), "server", `Server started with transport ${transport.constructor.name}`);
+        this.mcpServer.server.oninitialized = () => {
+            this.session.setAgentRunner(this.mcpServer.server.getClientVersion());
+            this.session.sessionId = new ObjectId().toString();
+
+            logger.info(
+                mongoLogId(1_000_004),
+                "server",
+                `Server started with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
+            );
+        };
     }
 
     async close(): Promise<void> {
@@ -44,7 +56,7 @@ export class Server {
 
     private registerTools() {
         for (const tool of [...AtlasTools, ...MongoDbTools]) {
-            new tool(this.session, this.userConfig).register(this.mcpServer);
+            new tool(this.session, this.userConfig, this.telemetry).register(this.mcpServer);
         }
     }
 

@@ -69,6 +69,11 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
         await mcpClient.connect(clientTransport);
     });
 
+    beforeEach(async () => {
+        config.telemetry = "disabled";
+        randomDbName = new ObjectId().toString();
+    });
+
     afterAll(async () => {
         await mcpClient?.close();
         mcpClient = undefined;

@@ -10,6 +10,7 @@ export interface UserConfig {
     apiBaseUrl?: string;
     apiClientId?: string;
     apiClientSecret?: string;
+    telemetry?: "enabled" | "disabled";
     logPath: string;
     connectionString?: string;
     connectOptions: {
