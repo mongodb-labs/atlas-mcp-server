@@ -20,6 +20,10 @@ export function describeWithMongoDB(
         const mdbIntegration = setupMongoDBIntegrationTest();
         const integration = setupIntegrationTest(() => userConfigGetter(mdbIntegration));
 
+        afterEach(() => {
+            integration.mcpServer().userConfig.connectionString = undefined;
+        });
+
         fn({
             ...integration,
             ...mdbIntegration,

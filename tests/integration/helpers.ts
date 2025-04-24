@@ -3,7 +3,7 @@ import { InMemoryTransport } from "./inMemoryTransport.js";
 import { Server } from "../../src/server.js";
 import { ObjectId } from "mongodb";
 import { config, UserConfig } from "../../src/config.js";
-import { McpError, ToolListChangedNotificationSchema } from "@modelcontextprotocol/sdk/types.js";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
 import { toIncludeAllMembers } from "jest-extended";
@@ -78,7 +78,6 @@ export function setupIntegrationTest(userConfigGetter: () => UserConfig = () => 
     afterEach(async () => {
         if (mcpServer) {
             await mcpServer.session.close();
-            mcpServer.userConfig.connectionString = undefined;
         }
     });
 
