@@ -3,7 +3,7 @@ import { InMemoryTransport } from "./inMemoryTransport.js";
 import { Server } from "../../src/server.js";
 import { ObjectId } from "mongodb";
 import { config, UserConfig } from "../../src/config.js";
-import { McpError } from "@modelcontextprotocol/sdk/types.js";
+import { McpError, ToolListChangedNotificationSchema } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
 import { toIncludeAllMembers } from "jest-extended";
@@ -22,13 +22,14 @@ export interface IntegrationTest {
     mcpServer: () => Server;
 }
 
-export function setupIntegrationTest(userConfig: UserConfig = config): IntegrationTest {
+export function setupIntegrationTest(userConfigGetter: () => UserConfig = () => config): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
     let randomDbName: string;
 
     beforeAll(async () => {
+        const userConfig = userConfigGetter();
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
 
@@ -54,6 +55,7 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
             apiClientSecret: userConfig.apiClientSecret,
         });
 
+        userConfig.telemetry = "disabled";
         mcpServer = new Server({
             session,
             userConfig,
@@ -67,8 +69,17 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
     });
 
     beforeEach(async () => {
-        config.telemetry = "disabled";
+        if (mcpServer) {
+            mcpServer.userConfig.telemetry = "disabled";
+        }
         randomDbName = new ObjectId().toString();
+    });
+
+    afterEach(async () => {
+        if (mcpServer) {
+            await mcpServer.session.close();
+            mcpServer.userConfig.connectionString = undefined;
+        }
     });
 
     afterAll(async () => {

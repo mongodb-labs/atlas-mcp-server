@@ -1,5 +1,5 @@
-import { z, type ZodRawShape, type ZodNever } from "zod";
-import type { McpServer, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z, type ZodRawShape, type ZodNever, AnyZodObject } from "zod";
+import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger from "../logger.js";
@@ -81,7 +81,35 @@ export abstract class ToolBase {
         };
 
         server.tool(this.name, this.description, this.argsShape, callback);
+
+        // This is very similar to RegisteredTool.update, but without the bugs around the name.
+        // In the upstream update method, the name is captured in the closure and not updated when
+        // the tool name changes. This means that you only get one name update before things end up
+        // in a broken state.
+        this.update = (updates: { name?: string; description?: string; inputSchema?: AnyZodObject }) => {
+            const tools = server["_registeredTools"] as { [toolName: string]: RegisteredTool };
+            const existingTool = tools[this.name];
+
+            if (updates.name && updates.name !== this.name) {
+                delete tools[this.name];
+                this.name = updates.name;
+                tools[this.name] = existingTool;
+            }
+
+            if (updates.description) {
+                existingTool.description = updates.description;
+                this.description = updates.description;
+            }
+
+            if (updates.inputSchema) {
+                existingTool.inputSchema = updates.inputSchema;
+            }
+
+            server.sendToolListChanged();
+        };
     }
+
+    protected update?: (updates: { name?: string; description?: string; inputSchema?: AnyZodObject }) => void;
 
     // Checks if a tool is allowed to run based on the config
     protected verifyAllowed(): boolean {

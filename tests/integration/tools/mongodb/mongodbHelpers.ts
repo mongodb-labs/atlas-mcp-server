@@ -8,27 +8,32 @@ import { UserConfig, config } from "../../../../src/config.js";
 interface MongoDBIntegrationTest {
     mongoClient: () => MongoClient;
     connectionString: () => string;
-    connectMcpClient: () => Promise<void>;
     randomDbName: () => string;
 }
 
 export function describeWithMongoDB(
-    name: number | string | Function | jest.FunctionLike,
-    fn: (integration: IntegrationTest & MongoDBIntegrationTest) => void
-): void {
-    describe("mongodb", () => {
-        const integration = setupIntegrationTest();
-        const mdbIntegration = setupMongoDBIntegrationTest(integration);
-        describe(name, () => {
-            fn({ ...integration, ...mdbIntegration });
+    name: string,
+    fn: (integration: IntegrationTest & MongoDBIntegrationTest & { connectMcpClient: () => Promise<void> }) => void,
+    userConfigGetter: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => config
+) {
+    describe(name, () => {
+        const mdbIntegration = setupMongoDBIntegrationTest();
+        const integration = setupIntegrationTest(() => userConfigGetter(mdbIntegration));
+
+        fn({
+            ...integration,
+            ...mdbIntegration,
+            connectMcpClient: async () => {
+                await integration.mcpClient().callTool({
+                    name: "connect",
+                    arguments: { connectionString: mdbIntegration.connectionString() },
+                });
+            },
         });
     });
 }
 
-export function setupMongoDBIntegrationTest(
-    integration: IntegrationTest,
-    userConfig: UserConfig = config
-): MongoDBIntegrationTest {
+export function setupMongoDBIntegrationTest(userConfig: UserConfig = config): MongoDBIntegrationTest {
     let mongoCluster: runner.MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
     let randomDbName: string;
@@ -38,9 +43,6 @@ export function setupMongoDBIntegrationTest(
     });
 
     afterEach(async () => {
-        await integration.mcpServer().session.close();
-        config.connectionString = undefined;
-
         await mongoClient?.close();
         mongoClient = undefined;
     });
@@ -102,12 +104,7 @@ export function setupMongoDBIntegrationTest(
             return mongoClient;
         },
         connectionString: getConnectionString,
-        connectMcpClient: async () => {
-            await integration.mcpClient().callTool({
-                name: "connect",
-                arguments: { options: [{ connectionString: getConnectionString() }] },
-            });
-        },
+
         randomDbName: () => randomDbName,
     };
 }
@@ -128,7 +125,7 @@ export function validateAutoConnectBehavior(
         }
 
         it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
+            integration.mcpServer().userConfig.connectionString = integration.connectionString();
 
             const validationInfo = validation();
 

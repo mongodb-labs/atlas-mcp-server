@@ -21,7 +21,7 @@ export class Server {
     public readonly session: Session;
     private readonly mcpServer: McpServer;
     private readonly telemetry: Telemetry;
-    private readonly userConfig: UserConfig;
+    public readonly userConfig: UserConfig;
 
     constructor({ session, mcpServer, userConfig }: ServerOptions) {
         this.session = session;
@@ -32,6 +32,7 @@ export class Server {
 
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
+        this.mcpServer.sendToolListChanged;
         this.registerTools();
         this.registerResources();
 
@@ -86,6 +87,32 @@ export class Server {
     }
 
     private registerResources() {
+        this.mcpServer.resource(
+            "config",
+            "config://config",
+            {
+                description:
+                    "Server configuration, supplied by the user either as environment variables or as startup arguments",
+            },
+            (uri) => {
+                const result = {
+                    telemetry: this.userConfig.telemetry,
+                    logPath: this.userConfig.logPath,
+                    connectionString: this.userConfig.connectionString
+                        ? "set; no explicit connect needed, use switch-connection tool to connect to a different connection if necessary"
+                        : "not set; before using any mongodb tool, you need to call the connect tool with a connection string",
+                    connectOptions: this.userConfig.connectOptions,
+                };
+                return {
+                    contents: [
+                        {
+                            text: JSON.stringify(result),
+                            uri: uri.href,
+                        },
+                    ],
+                };
+            }
+        );
         if (this.userConfig.connectionString) {
             this.mcpServer.resource(
                 "connection-string",
