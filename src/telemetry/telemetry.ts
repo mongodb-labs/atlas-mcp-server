@@ -1,8 +1,7 @@
 import { Session } from "../session.js";
 import { BaseEvent } from "./types.js";
 import { config } from "../config.js";
-import logger from "../logger.js";
-import { mongoLogId } from "mongodb-log-writer";
+import logger, { LogId } from "../logger.js";
 import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
@@ -69,13 +68,13 @@ export class Telemetry {
     public async emitEvents(events: BaseEvent[]): Promise<void> {
         try {
             if (!Telemetry.isTelemetryEnabled()) {
-                logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping events.");
+                logger.debug(LogId.telemetryDisabled, "telemetry", "Telemetry is disabled, skipping events.");
                 return;
             }
 
             await this.emit(events);
         } catch {
-            logger.debug(mongoLogId(1_000_002), "telemetry", `Error emitting telemetry events.`);
+            logger.debug(LogId.telemetryEmitFailure, "telemetry", `Error emitting telemetry events.`);
         }
     }
 
@@ -101,7 +100,7 @@ export class Telemetry {
         const allEvents = [...cachedEvents, ...events];
 
         logger.debug(
-            mongoLogId(1_000_003),
+            LogId.telemetryEmitStart,
             "telemetry",
             `Attempting to send ${allEvents.length} events (${cachedEvents.length} cached)`
         );
@@ -109,12 +108,12 @@ export class Telemetry {
         const result = await this.sendEvents(this.session.apiClient, allEvents);
         if (result.success) {
             this.eventCache.clearEvents();
-            logger.debug(mongoLogId(1_000_004), "telemetry", `Sent ${allEvents.length} events successfully`);
+            logger.debug(LogId.telemetryEmitSuccess, "telemetry", `Sent ${allEvents.length} events successfully`);
             return;
         }
 
-        logger.warning(
-            mongoLogId(1_000_005),
+        logger.debug(
+            LogId.telemetryEmitFailure,
             "telemetry",
             `Error sending event to client: ${result.error instanceof Error ? result.error.message : String(result.error)}`
         );

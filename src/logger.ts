@@ -1,10 +1,28 @@
 import fs from "fs/promises";
-import { MongoLogId, MongoLogManager, MongoLogWriter } from "mongodb-log-writer";
+import { mongoLogId, MongoLogId, MongoLogManager, MongoLogWriter } from "mongodb-log-writer";
 import redact from "mongodb-redact";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { LoggingMessageNotification } from "@modelcontextprotocol/sdk/types.js";
 
 export type LogLevel = LoggingMessageNotification["params"]["level"];
+
+export const LogId = {
+    serverStartFailure: mongoLogId(1_000_001),
+    serverInitialized: mongoLogId(1_000_002),
+
+    atlasCheckCredentials: mongoLogId(1_001_001),
+
+    telemetryDisabled: mongoLogId(1_002_001),
+    telemetryEmitFailure: mongoLogId(1_002_002),
+    telemetryEmitStart: mongoLogId(1_002_003),
+    telemetryEmitSuccess: mongoLogId(1_002_004),
+
+    toolExecute: mongoLogId(1_003_001),
+    toolExecuteFailure: mongoLogId(1_003_002),
+    toolDisabled: mongoLogId(1_003_003),
+
+    mongodbConnectFailure: mongoLogId(1_004_001),
+} as const;
 
 abstract class LoggerBase {
     abstract log(level: LogLevel, id: MongoLogId, context: string, message: string): void;

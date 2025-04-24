@@ -3,8 +3,7 @@ import { Session } from "./session.js";
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
-import logger, { initializeLogger } from "./logger.js";
-import { mongoLogId } from "mongodb-log-writer";
+import logger, { initializeLogger, LogId } from "./logger.js";
 import { ObjectId } from "mongodb";
 import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
@@ -67,7 +66,7 @@ export class Server {
             this.session.sessionId = new ObjectId().toString();
 
             logger.info(
-                mongoLogId(1_000_004),
+                LogId.serverInitialized,
                 "server",
                 `Server started with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
             );

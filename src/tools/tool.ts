@@ -2,8 +2,7 @@ import { z, type ZodRawShape, type ZodNever, AnyZodObject } from "zod";
 import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
-import logger from "../logger.js";
-import { mongoLogId } from "mongodb-log-writer";
+import logger, { LogId } from "../logger.js";
 import { Telemetry } from "../telemetry/telemetry.js";
 import { type ToolEvent } from "../telemetry/types.js";
 import { UserConfig } from "../config.js";
@@ -63,17 +62,13 @@ export abstract class ToolBase {
         const callback: ToolCallback<typeof this.argsShape> = async (...args) => {
             const startTime = Date.now();
             try {
-                logger.debug(
-                    mongoLogId(1_000_006),
-                    "tool",
-                    `Executing ${this.name} with args: ${JSON.stringify(args)}`
-                );
+                logger.debug(LogId.toolExecute, "tool", `Executing ${this.name} with args: ${JSON.stringify(args)}`);
 
                 const result = await this.execute(...args);
                 await this.emitToolEvent(startTime, result);
                 return result;
             } catch (error: unknown) {
-                logger.error(mongoLogId(1_000_000), "tool", `Error executing ${this.name}: ${error as string}`);
+                logger.error(LogId.toolExecuteFailure, "tool", `Error executing ${this.name}: ${error as string}`);
                 const toolResult = await this.handleError(error, args[0] as ToolArgs<typeof this.argsShape>);
                 await this.emitToolEvent(startTime, toolResult).catch(() => {});
                 return toolResult;
@@ -124,7 +119,7 @@ export abstract class ToolBase {
 
         if (errorClarification) {
             logger.debug(
-                mongoLogId(1_000_010),
+                LogId.toolDisabled,
                 "tool",
                 `Prevented registration of ${this.name} because ${errorClarification} is disabled in the config`
             );
