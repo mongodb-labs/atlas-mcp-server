@@ -1,14 +1,7 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
+import { getResponseElements, getParameters } from "../../../helpers.js";
 
-import {
-    getResponseElements,
-    getParameters,
-    setupIntegrationTest,
-    validateAutoConnectBehavior,
-} from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
-
-describeMongoDB("listDatabases tool", (integration) => {
+describeWithMongoDB("listDatabases tool", (integration) => {
     const defaultDatabases = ["admin", "config", "local"];
 
     it("should have correct metadata", async () => {
@@ -27,7 +20,7 @@ describeMongoDB("listDatabases tool", (integration) => {
             const response = await integration.mcpClient().callTool({ name: "list-databases", arguments: {} });
             const dbNames = getDbNames(response.content);
 
-            expect(defaultDatabases).toIncludeAllMembers(defaultDatabases);
+            expect(defaultDatabases).toIncludeAllMembers(dbNames);
         });
     });
 

@@ -1,21 +1,23 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
 import {
     getResponseElements,
     getResponseContent,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    dbOperationInvalidArgTests,
+    databaseInvalidArgs,
+    databaseParameters,
 } from "../../../helpers.js";
 
-describeMongoDB("listCollections tool", (integration) => {
-    validateToolMetadata(integration, "list-collections", "List all collections for a given database", [
-        { name: "database", description: "Database name", type: "string", required: true },
-    ]);
+describeWithMongoDB("listCollections tool", (integration) => {
+    validateToolMetadata(
+        integration,
+        "list-collections",
+        "List all collections for a given database",
+        databaseParameters
+    );
 
-    validateThrowsForInvalidArguments(integration, "list-collections", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "list-collections", databaseInvalidArgs);
 
     describe("with non-existent database", () => {
         it("returns no collections", async () => {

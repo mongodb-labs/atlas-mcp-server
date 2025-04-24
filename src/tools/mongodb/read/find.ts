@@ -3,6 +3,7 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
 import { SortDirection } from "mongodb";
+import { EJSON } from "bson";
 
 export const FindArgs = {
     filter: z
@@ -44,12 +45,12 @@ export class FindTool extends MongoDBToolBase {
 
         const content: Array<{ text: string; type: "text" }> = [
             {
-                text: `Found ${documents.length} documents in the collection \`${collection}\`:`,
+                text: `Found ${documents.length} documents in the collection "${collection}":`,
                 type: "text",
             },
             ...documents.map((doc) => {
                 return {
-                    text: JSON.stringify(doc),
+                    text: EJSON.stringify(doc),
                     type: "text",
                 } as { text: string; type: "text" };
             }),

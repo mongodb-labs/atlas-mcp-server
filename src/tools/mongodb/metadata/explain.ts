@@ -47,14 +47,24 @@ export class ExplainTool extends MongoDBToolBase {
         const method = methods[0];
 
         if (!method) {
-            throw new Error("No method provided");
+            throw new Error("No method provided. Expected one of the following: `aggregate`, `find`, or `count`");
         }
 
         let result: Document;
         switch (method.name) {
             case "aggregate": {
                 const { pipeline } = method.arguments;
-                result = await provider.aggregate(database, collection, pipeline).explain(ExplainTool.defaultVerbosity);
+                result = await provider
+                    .aggregate(
+                        database,
+                        collection,
+                        pipeline,
+                        {},
+                        {
+                            writeConcern: undefined,
+                        }
+                    )
+                    .explain(ExplainTool.defaultVerbosity);
                 break;
             }
             case "find": {
@@ -66,10 +76,13 @@ export class ExplainTool extends MongoDBToolBase {
             }
             case "count": {
                 const { query } = method.arguments;
-                // This helper doesn't have explain() command but does have the argument explain
-                result = (await provider.count(database, collection, query, {
-                    explain: ExplainTool.defaultVerbosity,
-                })) as unknown as Document;
+                result = await provider.mongoClient.db(database).command({
+                    explain: {
+                        count: collection,
+                        query,
+                    },
+                    verbosity: ExplainTool.defaultVerbosity,
+                });
                 break;
             }
         }
@@ -77,7 +90,7 @@ export class ExplainTool extends MongoDBToolBase {
         return {
             content: [
                 {
-                    text: `Here is some information about the winning plan chosen by the query optimizer for running the given \`${method.name}\` operation in \`${database}.${collection}\`. This information can be used to understand how the query was executed and to optimize the query performance.`,
+                    text: `Here is some information about the winning plan chosen by the query optimizer for running the given \`${method.name}\` operation in "${database}.${collection}". This information can be used to understand how the query was executed and to optimize the query performance.`,
                     type: "text",
                 },
                 {

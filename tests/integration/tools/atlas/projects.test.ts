@@ -1,10 +1,10 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ObjectId } from "mongodb";
-import { parseTable, describeAtlas } from "./atlasHelpers.js";
+import { parseTable, describeWithAtlas } from "./atlasHelpers.js";
 
 const randomId = new ObjectId().toString();
 
-describeAtlas("projects", (integration) => {
+describeWithAtlas("projects", (integration) => {
     const projName = "testProj-" + randomId;
 
     afterAll(async () => {

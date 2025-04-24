@@ -1,14 +1,13 @@
 import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { MongoDBToolBase } from "../mongodbTool.js";
+import { DbOperationArgs, MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
 
 export class UpdateManyTool extends MongoDBToolBase {
     protected name = "update-many";
     protected description = "Updates all documents that match the specified filter for a collection";
     protected argsShape = {
-        collection: z.string().describe("Collection name"),
-        database: z.string().describe("Database name"),
+        ...DbOperationArgs,
         filter: z
             .object({})
             .passthrough()
@@ -19,7 +18,6 @@ export class UpdateManyTool extends MongoDBToolBase {
         update: z
             .object({})
             .passthrough()
-            .optional()
             .describe("An update document describing the modifications to apply using update operator expressions"),
         upsert: z
             .boolean()
@@ -41,15 +39,15 @@ export class UpdateManyTool extends MongoDBToolBase {
         });
 
         let message = "";
-        if (result.matchedCount === 0) {
-            message = `No documents matched the filter.`;
+        if (result.matchedCount === 0 && result.modifiedCount === 0 && result.upsertedCount === 0) {
+            message = "No documents matched the filter.";
         } else {
             message = `Matched ${result.matchedCount} document(s).`;
             if (result.modifiedCount > 0) {
                 message += ` Modified ${result.modifiedCount} document(s).`;
             }
             if (result.upsertedCount > 0) {
-                message += ` Upserted ${result.upsertedCount} document(s) (with id: ${result.upsertedId?.toString()}).`;
+                message += ` Upserted ${result.upsertedCount} document with id: ${result.upsertedId?.toString()}.`;
             }
         }
 

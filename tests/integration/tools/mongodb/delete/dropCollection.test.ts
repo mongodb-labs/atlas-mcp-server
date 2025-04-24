@@ -1,24 +1,22 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
-    dbOperationParameters,
-    setupIntegrationTest,
+    databaseCollectionParameters,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    dbOperationInvalidArgTests,
+    databaseCollectionInvalidArgs,
 } from "../../../helpers.js";
 
-describeMongoDB("dropCollection tool", (integration) => {
+describeWithMongoDB("dropCollection tool", (integration) => {
     validateToolMetadata(
         integration,
         "drop-collection",
         "Removes a collection or view from the database. The method also removes any indexes associated with the dropped collection.",
-        dbOperationParameters
+        databaseCollectionParameters
     );
 
-    validateThrowsForInvalidArguments(integration, "drop-collection", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "drop-collection", databaseCollectionInvalidArgs);
 
     it("can drop non-existing collection", async () => {
         await integration.connectMcpClient();

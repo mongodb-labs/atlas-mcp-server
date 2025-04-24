@@ -1,24 +1,22 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
-    dbOperationParameters,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
-    dbOperationInvalidArgTests,
+    databaseParameters,
+    databaseInvalidArgs,
 } from "../../../helpers.js";
 
-describeMongoDB("dropDatabase tool", (integration) => {
+describeWithMongoDB("dropDatabase tool", (integration) => {
     validateToolMetadata(
         integration,
         "drop-database",
         "Removes the specified database, deleting the associated data files",
-        [dbOperationParameters.find((d) => d.name === "database")!]
+        databaseParameters
     );
 
-    validateThrowsForInvalidArguments(integration, "drop-database", dbOperationInvalidArgTests);
+    validateThrowsForInvalidArguments(integration, "drop-database", databaseInvalidArgs);
 
     it("can drop non-existing database", async () => {
         let { databases } = await integration.mongoClient().db("").admin().listDatabases();

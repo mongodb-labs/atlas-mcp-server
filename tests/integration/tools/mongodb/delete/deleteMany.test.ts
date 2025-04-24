@@ -1,21 +1,19 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
-    dbOperationParameters,
-    setupIntegrationTest,
+    databaseCollectionParameters,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 
-describeMongoDB("deleteMany tool", (integration) => {
+describeWithMongoDB("deleteMany tool", (integration) => {
     validateToolMetadata(
         integration,
         "delete-many",
         "Removes all documents that match the filter from a MongoDB collection",
         [
-            ...dbOperationParameters,
+            ...databaseCollectionParameters,
             {
                 name: "filter",
                 type: "object",

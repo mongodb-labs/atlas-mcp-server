@@ -1,15 +1,13 @@
-import { describeMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
 import {
     getResponseContent,
-    dbOperationParameters,
-    setupIntegrationTest,
+    databaseCollectionParameters,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
 
-describeMongoDB("count tool", (integration) => {
+describeWithMongoDB("count tool", (integration) => {
     validateToolMetadata(integration, "count", "Gets the number of documents in a MongoDB collection", [
         {
             name: "query",
@@ -18,7 +16,7 @@ describeMongoDB("count tool", (integration) => {
             type: "object",
             required: false,
         },
-        ...dbOperationParameters,
+        ...databaseCollectionParameters,
     ]);
 
     validateThrowsForInvalidArguments(integration, "count", [

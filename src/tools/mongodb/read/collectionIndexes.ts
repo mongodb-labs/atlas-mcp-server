@@ -13,12 +13,36 @@ export class CollectionIndexesTool extends MongoDBToolBase {
         const indexes = await provider.getIndexes(database, collection);
 
         return {
-            content: indexes.map((indexDefinition) => {
-                return {
-                    text: `Field: ${indexDefinition.name}: ${JSON.stringify(indexDefinition.key)}`,
+            content: [
+                {
+                    text: `Found ${indexes.length} indexes in the collection "${collection}":`,
                     type: "text",
-                };
-            }),
+                },
+                ...(indexes.map((indexDefinition) => {
+                    return {
+                        text: `Name "${indexDefinition.name}", definition: ${JSON.stringify(indexDefinition.key)}`,
+                        type: "text",
+                    };
+                }) as { text: string; type: "text" }[]),
+            ],
         };
+    }
+
+    protected handleError(
+        error: unknown,
+        args: ToolArgs<typeof this.argsShape>
+    ): Promise<CallToolResult> | CallToolResult {
+        if (error instanceof Error && "codeName" in error && error.codeName === "NamespaceNotFound") {
+            return {
+                content: [
+                    {
+                        text: `The indexes for "${args.database}.${args.collection}" cannot be determined because the collection does not exist.`,
+                        type: "text",
+                    },
+                ],
+            };
+        }
+
+        return super.handleError(error, args);
     }
 }
