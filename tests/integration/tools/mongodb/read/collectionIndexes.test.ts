@@ -1,17 +1,14 @@
 import { IndexDirection } from "mongodb";
 import {
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
     getResponseElements,
     databaseCollectionInvalidArgs,
 } from "../../../helpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-describe("collectionIndexes tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("collectionIndexes tool", (integration) => {
     validateToolMetadata(
         integration,
         "collection-indexes",

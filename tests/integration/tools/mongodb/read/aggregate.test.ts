@@ -1,15 +1,12 @@
 import {
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
     getResponseElements,
 } from "../../../helpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-describe("aggregate tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("aggregate tool", (integration) => {
     validateToolMetadata(integration, "aggregate", "Run an aggregation against a MongoDB collection", [
         ...databaseCollectionParameters,
         {

@@ -3,14 +3,12 @@ import {
     databaseCollectionParameters,
     setupIntegrationTest,
     validateToolMetadata,
-    validateAutoConnectBehavior,
     validateThrowsForInvalidArguments,
     getResponseElements,
 } from "../../../helpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-describe("find tool", () => {
-    const integration = setupIntegrationTest();
-
+describeWithMongoDB("find tool", (integration) => {
     validateToolMetadata(integration, "find", "Run a find query against a MongoDB collection", [
         ...databaseCollectionParameters,
 
