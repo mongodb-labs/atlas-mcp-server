@@ -9,6 +9,7 @@ import { ObjectId } from "mongodb";
 import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
 import { CallToolRequestSchema, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import assert from "assert";
 
 export interface ServerOptions {
     session: Session;
@@ -40,7 +41,15 @@ export class Server {
         //
         // see: https://github.com/modelcontextprotocol/typescript-sdk/blob/131776764536b5fdca642df51230a3746fb4ade0/src/server/mcp.ts#L705
         // Since paramsSchema here is not undefined, the server will create a non-optional z.object from it.
-        const existingHandler = this.mcpServer.server["_requestHandlers"].get(CallToolRequestSchema.shape.method.value);
+        const existingHandler = (
+            this.mcpServer.server["_requestHandlers"] as Map<
+                string,
+                (request: unknown, extra: unknown) => Promise<CallToolResult>
+            >
+        ).get(CallToolRequestSchema.shape.method.value);
+
+        assert(existingHandler, "No existing handler found for CallToolRequestSchema");
+
         this.mcpServer.server.setRequestHandler(CallToolRequestSchema, (request, extra): Promise<CallToolResult> => {
             if (!request.params.arguments) {
                 request.params.arguments = {};
