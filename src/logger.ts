@@ -126,10 +126,13 @@ class CompositeLogger extends LoggerBase {
 
     constructor(...loggers: LoggerBase[]) {
         super();
+
         if (loggers.length === 0) {
             // default to ConsoleLogger
-            loggers.push(new ConsoleLogger());
+            this.loggers = [new ConsoleLogger()];
+            return;
         }
+
         this.loggers = [...loggers];
     }
 
