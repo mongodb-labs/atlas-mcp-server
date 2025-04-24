@@ -34,6 +34,12 @@ export class Server {
         this.registerTools();
         this.registerResources();
 
+        // This is a workaround for an issue we've seen with some models, where they'll see that everything in the `arguments`
+        // object is optional, and then not pass it at all. However, the MCP server expects the `arguments` object to be if
+        // the tool accepts any arguments, even if they're all optional.
+        //
+        // see: https://github.com/modelcontextprotocol/typescript-sdk/blob/131776764536b5fdca642df51230a3746fb4ade0/src/server/mcp.ts#L705
+        // Since paramsSchema here is not undefined, the server will create a non-optional z.object from it.
         const existingHandler = this.mcpServer.server["_requestHandlers"].get(CallToolRequestSchema.shape.method.value);
         this.mcpServer.server.setRequestHandler(CallToolRequestSchema, (request, extra): Promise<CallToolResult> => {
             if (!request.params.arguments) {
