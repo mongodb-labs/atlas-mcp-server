@@ -69,7 +69,6 @@ export class Telemetry {
     public async emitEvents(events: BaseEvent[]): Promise<void> {
         try {
             if (!Telemetry.isTelemetryEnabled()) {
-                logger.debug(mongoLogId(1_000_000), "telemetry", "Telemetry is disabled, skipping events.");
                 return;
             }
 
