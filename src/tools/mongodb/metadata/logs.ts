@@ -1,7 +1,6 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { EJSON } from "bson";
 import { z } from "zod";
 
 export class LogsTool extends MongoDBToolBase {
