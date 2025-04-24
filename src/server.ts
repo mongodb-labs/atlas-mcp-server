@@ -8,6 +8,7 @@ import { mongoLogId } from "mongodb-log-writer";
 import { ObjectId } from "mongodb";
 import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
+import { CallToolRequestSchema, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 export interface ServerOptions {
     session: Session;
@@ -32,6 +33,15 @@ export class Server {
         this.mcpServer.server.registerCapabilities({ logging: {} });
         this.registerTools();
         this.registerResources();
+
+        const existingHandler = this.mcpServer.server["_requestHandlers"].get(CallToolRequestSchema.shape.method.value);
+        this.mcpServer.server.setRequestHandler(CallToolRequestSchema, (request, extra): Promise<CallToolResult> => {
+            if (!request.params.arguments) {
+                request.params.arguments = {};
+            }
+
+            return existingHandler(request, extra);
+        });
 
         await initializeLogger(this.mcpServer, this.userConfig.logPath);
 

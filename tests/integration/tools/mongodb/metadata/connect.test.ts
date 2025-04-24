@@ -15,6 +15,23 @@ describeWithMongoDB("Connect tool", (integration) => {
         },
     ]);
 
+    describe("without arguments", () => {
+        it("prompts for connection string if not set", async () => {
+            const response = await integration.mcpClient().callTool({ name: "connect" });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("No connection details provided");
+        });
+
+        it("connects to the database if connection string is set", async () => {
+            config.connectionString = integration.connectionString();
+
+            const response = await integration.mcpClient().callTool({ name: "connect" });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("Successfully connected");
+            expect(content).toContain(integration.connectionString());
+        });
+    });
+
     describe("with default config", () => {
         describe("without connection string", () => {
             it("prompts for connection string", async () => {
