@@ -2,7 +2,7 @@
  * Result type constants for telemetry events
  */
 export type TelemetryResult = "success" | "failure";
-export type ServerCommand = "start" | "stop" | "register" | "deregister";
+export type ServerCommand = "start" | "stop";
 
 /**
  * Base interface for all events
