@@ -52,7 +52,7 @@ jobs:
       - name: Run tests
         run: npm test
       - name: Upload test results
-        if: matrix.os == 'ubuntu-latest'
+        if: always() && matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -77,6 +77,7 @@ jobs:
         run: npm test -- --testPathIgnorePatterns "tests/integration/tools/mongodb" --testPathIgnorePatterns "tests/integration/[^/]+\.ts"
       - name: Upload test results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: atlas-test-results
           path: coverage/lcov.info
@@ -102,12 +103,9 @@ jobs:
         with:
           name: atlas-test-results
           path: coverage/atlas
-      - name: Install lcov-result-merger
-        run: |
-          npm install -g lcov-result-merger
       - name: Merge coverage reports
         run: |
-          lcov-result-merger "coverage/*/lcov.info" "coverage/lcov.info"
+          npx -y lcov-result-merger "coverage/*/lcov.info" "coverage/lcov.info"
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2.3.6
         with:
