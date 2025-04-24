@@ -32,7 +32,6 @@ export class Server {
 
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
-        this.mcpServer.sendToolListChanged;
         this.registerTools();
         this.registerResources();
 

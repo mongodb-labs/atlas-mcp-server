@@ -1,4 +1,4 @@
-import { AnyZodObject, z, ZodRawShape } from "zod";
+import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { MongoDBToolBase } from "../mongodbTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
