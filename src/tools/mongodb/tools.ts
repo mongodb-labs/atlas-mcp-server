@@ -17,6 +17,7 @@ import { DropDatabaseTool } from "./delete/dropDatabase.js";
 import { DropCollectionTool } from "./delete/dropCollection.js";
 import { ExplainTool } from "./metadata/explain.js";
 import { CreateCollectionTool } from "./create/createCollection.js";
+import { LogsTool } from "./metadata/logs.js";
 
 export const MongoDbTools = [
     ConnectTool,
@@ -38,4 +39,5 @@ export const MongoDbTools = [
     DropCollectionTool,
     ExplainTool,
     CreateCollectionTool,
+    LogsTool,
 ];

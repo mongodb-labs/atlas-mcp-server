@@ -1,4 +1,4 @@
-# Atlas MCP Server
+# MongoDB MCP Server
 
 A Model Context Protocol server for interacting with MongoDB Atlas. This project implements a Model Context Protocol (MCP) server enabling AI assistants to interact with MongoDB Atlas resources through natural language.
 
@@ -40,7 +40,7 @@ Step 1: Add the mcp server to VSCode configuration
 
 - Press `Cmd + Shift + P` and type `MCP: Add MCP Server` and select it.
 - Select command (Stdio).
-- Input command `npx -y @mongodb-js/mongodb-mcp-server`.
+- Input command `npx -y mongodb-mcp-server`.
 - Choose between user / workspace
 - Add arguments to the file
 
@@ -54,7 +54,7 @@ Note: the file should look like:
             "command": "npx",
             "args": [
                 "-y",
-                "@mongodb-js/mongodb-mcp-server"
+                "mongodb-mcp-server"
             ]
         }
     }
@@ -82,7 +82,7 @@ Paste the mcp server configuration into the file
   "mcpServers": {
     "MongoDB": {
       "command": "npx",
-      "args": ["-y", "@mongodb-js/mongodb-mcp-server"]
+      "args": ["-y", "mongodb-mcp-server"]
     }
   }
 }
@@ -228,7 +228,7 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
 Pass configuration options as command-line arguments when starting the server:
 
 ```shell
-npx -y @mongodb-js/mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret="your-atlas-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
+npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret="your-atlas-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
 ```
 
 ## 🤝 Contributing

@@ -10,6 +10,8 @@ import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
 import { type ServerEvent } from "./telemetry/types.js";
 import { type ServerCommand } from "./telemetry/types.js";
+import { CallToolRequestSchema, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import assert from "assert";
 
 export interface ServerOptions {
     session: Session;
@@ -36,6 +38,29 @@ export class Server {
         this.mcpServer.server.registerCapabilities({ logging: {} });
         this.registerTools();
         this.registerResources();
+
+        // This is a workaround for an issue we've seen with some models, where they'll see that everything in the `arguments`
+        // object is optional, and then not pass it at all. However, the MCP server expects the `arguments` object to be if
+        // the tool accepts any arguments, even if they're all optional.
+        //
+        // see: https://github.com/modelcontextprotocol/typescript-sdk/blob/131776764536b5fdca642df51230a3746fb4ade0/src/server/mcp.ts#L705
+        // Since paramsSchema here is not undefined, the server will create a non-optional z.object from it.
+        const existingHandler = (
+            this.mcpServer.server["_requestHandlers"] as Map<
+                string,
+                (request: unknown, extra: unknown) => Promise<CallToolResult>
+            >
+        ).get(CallToolRequestSchema.shape.method.value);
+
+        assert(existingHandler, "No existing handler found for CallToolRequestSchema");
+
+        this.mcpServer.server.setRequestHandler(CallToolRequestSchema, (request, extra): Promise<CallToolResult> => {
+            if (!request.params.arguments) {
+                request.params.arguments = {};
+            }
+
+            return existingHandler(request, extra);
+        });
 
         await initializeLogger(this.mcpServer, this.userConfig.logPath);
 

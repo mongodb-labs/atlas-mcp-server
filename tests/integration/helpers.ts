@@ -101,13 +101,17 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
     };
 }
 
-export function getResponseContent(content: unknown): string {
+export function getResponseContent(content: unknown | { content: unknown }): string {
     return getResponseElements(content)
         .map((item) => item.text)
         .join("\n");
 }
 
-export function getResponseElements(content: unknown): { type: string; text: string }[] {
+export function getResponseElements(content: unknown | { content: unknown }): { type: string; text: string }[] {
+    if (typeof content === "object" && content !== null && "content" in content) {
+        content = (content as { content: unknown }).content;
+    }
+
     expect(Array.isArray(content)).toBe(true);
 
     const response = content as { type: string; text: string }[];
