@@ -1,6 +1,6 @@
 import { describeWithMongoDB } from "../mongodbHelpers.js";
 
-import { getResponseContent, setupIntegrationTest, validateToolMetadata } from "../../../helpers.js";
+import { getResponseContent, validateToolMetadata } from "../../../helpers.js";
 
 import { config } from "../../../../../src/config.js";
 

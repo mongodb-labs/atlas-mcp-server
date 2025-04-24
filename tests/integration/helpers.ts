@@ -1,15 +1,12 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "./inMemoryTransport.js";
 import { Server } from "../../src/server.js";
-import runner, { MongoCluster } from "mongodb-runner";
-import path from "path";
-import fs from "fs/promises";
-import { MongoClient, ObjectId } from "mongodb";
-import { toIncludeAllMembers } from "jest-extended";
+import { ObjectId } from "mongodb";
 import { config, UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
+import { toIncludeAllMembers } from "jest-extended";
 
 interface ParameterInfo {
     name: string;
@@ -98,31 +95,9 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
         return mcpServer;
     };
 
-    const getConnectionString = () => {
-        if (!mongoCluster) {
-            throw new Error("beforeAll() hook not ran yet");
-        }
-
-        return mongoCluster.connectionString;
-    };
-
     return {
         mcpClient: getMcpClient,
         mcpServer: getMcpServer,
-        mongoClient: () => {
-            if (!mongoClient) {
-                mongoClient = new MongoClient(getConnectionString());
-            }
-            return mongoClient;
-        },
-        connectionString: getConnectionString,
-        connectMcpClient: async () => {
-            await getMcpClient().callTool({
-                name: "connect",
-                arguments: { options: [{ connectionString: getConnectionString() }] },
-            });
-        },
-        randomDbName: () => randomDbName,
     };
 }
 
@@ -199,52 +174,6 @@ export function validateToolMetadata(
     });
 }
 
-export function validateAutoConnectBehavior(
-    integration: IntegrationTest,
-    name: string,
-    validation: () => {
-        args: { [x: string]: unknown };
-        expectedResponse?: string;
-        validate?: (content: unknown) => void;
-    },
-    beforeEachImpl?: () => Promise<void>
-): void {
-    describe("when not connected", () => {
-        if (beforeEachImpl) {
-            beforeEach(() => beforeEachImpl());
-        }
-
-        it("connects automatically if connection string is configured", async () => {
-            config.connectionString = integration.connectionString();
-
-            const validationInfo = validation();
-
-            const response = await integration.mcpClient().callTool({
-                name,
-                arguments: validationInfo.args,
-            });
-
-            if (validationInfo.expectedResponse) {
-                const content = getResponseContent(response.content);
-                expect(content).toContain(validationInfo.expectedResponse);
-            }
-
-            if (validationInfo.validate) {
-                validationInfo.validate(response.content);
-            }
-        });
-
-        it("throws an error if connection string is not configured", async () => {
-            const response = await integration.mcpClient().callTool({
-                name,
-                arguments: validation().args,
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
-        });
-    });
-}
-
 export function validateThrowsForInvalidArguments(
     integration: IntegrationTest,
     name: string,
@@ -253,7 +182,6 @@ export function validateThrowsForInvalidArguments(
     describe("with invalid arguments", () => {
         for (const arg of args) {
             it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
-                await integration.connectMcpClient();
                 try {
                     await integration.mcpClient().callTool({ name, arguments: arg });
                     expect.fail("Expected an error to be thrown");

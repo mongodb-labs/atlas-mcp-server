@@ -1,12 +1,6 @@
-import { describeWithMongoDB } from "../mongodbHelpers.js";
+import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
-import {
-    getResponseElements,
-    getParameters,
-    setupIntegrationTest,
-    validateAutoConnectBehavior,
-} from "../../../helpers.js";
-import { toIncludeSameMembers } from "jest-extended";
+import { getResponseElements, getParameters } from "../../../helpers.js";
 
 describeWithMongoDB("listDatabases tool", (integration) => {
     const defaultDatabases = ["admin", "config", "local"];

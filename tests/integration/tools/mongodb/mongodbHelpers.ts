@@ -2,7 +2,7 @@ import runner, { MongoCluster } from "mongodb-runner";
 import path from "path";
 import fs from "fs/promises";
 import { MongoClient, ObjectId } from "mongodb";
-import { IntegrationTest, setupIntegrationTest } from "../../helpers.js";
+import { getResponseContent, IntegrationTest, setupIntegrationTest } from "../../helpers.js";
 import { UserConfig, config } from "../../../../src/config.js";
 
 interface MongoDBIntegrationTest {
@@ -110,4 +110,50 @@ export function setupMongoDBIntegrationTest(
         },
         randomDbName: () => randomDbName,
     };
+}
+
+export function validateAutoConnectBehavior(
+    integration: IntegrationTest & MongoDBIntegrationTest,
+    name: string,
+    validation: () => {
+        args: { [x: string]: unknown };
+        expectedResponse?: string;
+        validate?: (content: unknown) => void;
+    },
+    beforeEachImpl?: () => Promise<void>
+): void {
+    describe("when not connected", () => {
+        if (beforeEachImpl) {
+            beforeEach(() => beforeEachImpl());
+        }
+
+        it("connects automatically if connection string is configured", async () => {
+            config.connectionString = integration.connectionString();
+
+            const validationInfo = validation();
+
+            const response = await integration.mcpClient().callTool({
+                name,
+                arguments: validationInfo.args,
+            });
+
+            if (validationInfo.expectedResponse) {
+                const content = getResponseContent(response.content);
+                expect(content).toContain(validationInfo.expectedResponse);
+            }
+
+            if (validationInfo.validate) {
+                validationInfo.validate(response.content);
+            }
+        });
+
+        it("throws an error if connection string is not configured", async () => {
+            const response = await integration.mcpClient().callTool({
+                name,
+                arguments: validation().args,
+            });
+            const content = getResponseContent(response.content);
+            expect(content).toContain("You need to connect to a MongoDB instance before you can access its data.");
+        });
+    });
 }
