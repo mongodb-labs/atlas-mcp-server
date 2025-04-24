@@ -47,14 +47,7 @@ export class ExplainTool extends MongoDBToolBase {
         const method = methods[0];
 
         if (!method) {
-            return {
-                content: [
-                    {
-                        text: "No method provided. Expected one of the following: `aggregate`, `find`, or `count`",
-                        type: "text",
-                    },
-                ],
-            };
+            throw new Error("No method provided. Expected one of the following: `aggregate`, `find`, or `count`");
         }
 
         let result: Document;
