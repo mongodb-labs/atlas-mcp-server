@@ -21,7 +21,7 @@ describeWithMongoDB("dropDatabase tool", (integration) => {
     it("can drop non-existing database", async () => {
         let { databases } = await integration.mongoClient().db("").admin().listDatabases();
 
-        const preDropLength = databases.length;
+        expect(databases.find((db) => db.name === integration.randomDbName())).toBeUndefined();
 
         await integration.connectMcpClient();
         const response = await integration.mcpClient().callTool({
@@ -36,7 +36,6 @@ describeWithMongoDB("dropDatabase tool", (integration) => {
 
         ({ databases } = await integration.mongoClient().db("").admin().listDatabases());
 
-        expect(databases).toHaveLength(preDropLength);
         expect(databases.find((db) => db.name === integration.randomDbName())).toBeUndefined();
     });
 

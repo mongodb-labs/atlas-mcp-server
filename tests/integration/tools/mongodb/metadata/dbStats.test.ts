@@ -82,15 +82,13 @@ describeWithMongoDB("dbStats tool", (integration) => {
         }
     });
 
-    describe("when not connected", () => {
-        validateAutoConnectBehavior(integration, "db-stats", () => {
-            return {
-                args: {
-                    database: integration.randomDbName(),
-                    collection: "foo",
-                },
-                expectedResponse: `Statistics for database ${integration.randomDbName()}`,
-            };
-        });
+    validateAutoConnectBehavior(integration, "db-stats", () => {
+        return {
+            args: {
+                database: integration.randomDbName(),
+                collection: "foo",
+            },
+            expectedResponse: `Statistics for database ${integration.randomDbName()}`,
+        };
     });
 });
