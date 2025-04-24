@@ -1,8 +1,8 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { setupIntegrationTest } from "../../helpers.js";
-import { parseTable, describeAtlas } from "./atlasHelpers.js";
+import { parseTable, describeWithAtlas } from "./atlasHelpers.js";
 
-describeAtlas("orgs", (integration) => {
+describeWithAtlas("orgs", (integration) => {
     describe("atlas-list-orgs", () => {
         it("should have correct metadata", async () => {
             const { tools } = await integration.mcpClient().listTools();
