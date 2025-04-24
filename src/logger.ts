@@ -143,6 +143,9 @@ class CompositeLogger extends LoggerBase {
     }
 
     setLoggers(...loggers: LoggerBase[]): void {
+        if (loggers.length === 0) {
+            throw new Error("At least one logger must be provided");
+        }
         this.loggers = [...loggers];
     }
 
