@@ -12,7 +12,7 @@ interface MongoDBIntegrationTest {
     randomDbName: () => string;
 }
 
-export function describeMongoDB(
+export function describeWithMongoDB(
     name: number | string | Function | jest.FunctionLike,
     fn: (integration: IntegrationTest & MongoDBIntegrationTest) => void
 ): void {
