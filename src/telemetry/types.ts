@@ -3,7 +3,7 @@
  */
 export type TelemetryResult = "success" | "failure";
 export type ServerCommand = "start" | "stop";
-export type TelemetryConfigSet = "true" | "false";
+export type TelemetryBoolSet = "true" | "false";
 
 /**
  * Base interface for all events
@@ -69,7 +69,7 @@ export type CommonStaticProperties = {
 export type CommonProperties = {
     mcp_client_version?: string;
     mcp_client_name?: string;
-    config_atlas_auth?: TelemetryConfigSet;
-    config_connection_string?: TelemetryConfigSet;
+    config_atlas_auth?: TelemetryBoolSet;
+    config_connection_string?: TelemetryBoolSet;
     session_id?: string;
 } & CommonStaticProperties;
