@@ -7,10 +7,6 @@ import { LoggingMessageNotification } from "@modelcontextprotocol/sdk/types.js";
 export type LogLevel = LoggingMessageNotification["params"]["level"];
 
 abstract class LoggerBase {
-    async initialize(): Promise<void> {
-        return Promise.resolve();
-    }
-
     abstract log(level: LogLevel, id: MongoLogId, context: string, message: string): void;
 
     info(id: MongoLogId, context: string, message: string): void {
@@ -53,17 +49,15 @@ class ConsoleLogger extends LoggerBase {
 }
 
 class DiskLogger extends LoggerBase {
-    private logWriter?: MongoLogWriter;
-
-    constructor(private logPath: string) {
+    private constructor(private logWriter: MongoLogWriter) {
         super();
     }
 
-    async initialize(): Promise<void> {
-        await fs.mkdir(this.logPath, { recursive: true });
+    static async fromPath(logPath: string): Promise<DiskLogger> {
+        await fs.mkdir(logPath, { recursive: true });
 
         const manager = new MongoLogManager({
-            directory: this.logPath,
+            directory: logPath,
             retentionDays: 30,
             onwarn: console.warn,
             onerror: console.error,
@@ -73,16 +67,14 @@ class DiskLogger extends LoggerBase {
 
         await manager.cleanupOldLogFiles();
 
-        this.logWriter = await manager.createLogWriter();
+        const logWriter = await manager.createLogWriter();
+
+        return new DiskLogger(logWriter);
     }
 
     log(level: LogLevel, id: MongoLogId, context: string, message: string): void {
         message = redact(message);
         const mongoDBLevel = this.mapToMongoDBLogLevel(level);
-
-        if (!this.logWriter) {
-            throw new Error("DiskLogger is not initialized");
-        }
 
         this.logWriter[mongoDBLevel]("MONGODB-MCP", id, context, message);
     }
@@ -136,12 +128,6 @@ class CompositeLogger extends LoggerBase {
         this.loggers = [...loggers];
     }
 
-    async initialize(): Promise<void> {
-        for (const logger of this.loggers) {
-            await logger.initialize();
-        }
-    }
-
     setLoggers(...loggers: LoggerBase[]): void {
         if (loggers.length === 0) {
             throw new Error("At least one logger must be provided");
@@ -159,7 +145,11 @@ class CompositeLogger extends LoggerBase {
 const logger = new CompositeLogger();
 export default logger;
 
-export async function initializeLogger(server: McpServer, logPath: string): Promise<void> {
-    logger.setLoggers(new McpLogger(server), new DiskLogger(logPath));
-    await logger.initialize();
+export async function initializeLogger(server: McpServer, logPath: string): Promise<LoggerBase> {
+    const diskLogger = await DiskLogger.fromPath(logPath);
+    const mcpLogger = new McpLogger(server);
+
+    logger.setLoggers(mcpLogger, diskLogger);
+
+    return logger;
 }
