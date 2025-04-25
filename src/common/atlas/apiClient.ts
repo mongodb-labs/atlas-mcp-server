@@ -98,11 +98,6 @@ export class ApiClient {
     }
 
     public hasCredentials(): boolean {
-        logger.info(
-            mongoLogId(1_000_000),
-            "api-client",
-            `Checking if API client has credentials: ${!!(this.oauth2Client && this.accessToken)}`
-        );
         return !!(this.oauth2Client && this.accessToken);
     }
 
