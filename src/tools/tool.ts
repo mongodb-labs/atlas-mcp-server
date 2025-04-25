@@ -88,7 +88,7 @@ export abstract class ToolBase {
         let errorClarification: string | undefined;
 
         // Check read-only mode first
-        if (this.config.readOnlyMode && !["read", "metadata"].includes(this.operationType)) {
+        if (this.config.readOnly && !["read", "metadata"].includes(this.operationType)) {
             logger.debug(
                 mongoLogId(1_000_010),
                 "tool",

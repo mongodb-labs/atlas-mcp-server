@@ -20,7 +20,7 @@ export interface UserConfig {
         timeoutMS: number;
     };
     disabledTools: Array<string>;
-    readOnlyMode?: boolean;
+    readOnly?: boolean;
 }
 
 const defaults: UserConfig = {
@@ -33,7 +33,7 @@ const defaults: UserConfig = {
     },
     disabledTools: [],
     telemetry: "disabled",
-    readOnlyMode: false,
+    readOnly: false,
 };
 
 export const config = {

@@ -62,7 +62,9 @@ describe("Server integration test", () => {
     describe("with read-only mode", () => {
         const integration = setupIntegrationTest({
             ...config,
-            readOnlyMode: true,
+            readOnly: true,
+            apiClientId: "test",
+            apiClientSecret: "test",
         });
 
         it("should only register read and metadata operation tools when read-only mode is enabled", async () => {
@@ -74,6 +76,8 @@ describe("Server integration test", () => {
             expect(tools.tools.some((tool) => tool.name === "find")).toBe(true);
             expect(tools.tools.some((tool) => tool.name === "collection-schema")).toBe(true);
             expect(tools.tools.some((tool) => tool.name === "list-databases")).toBe(true);
+            expect(tools.tools.some((tool) => tool.name === "atlas-list-orgs")).toBe(true);
+            expect(tools.tools.some((tool) => tool.name === "atlas-list-projects")).toBe(true);
 
             // Check that non-read tools are NOT available
             expect(tools.tools.some((tool) => tool.name === "insert-one")).toBe(false);

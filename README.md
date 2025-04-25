@@ -150,7 +150,7 @@ The MongoDB MCP Server can be configured using multiple methods, with the follow
 | `connectionString` | MongoDB connection string for direct database connections (optional users may choose to inform it on every tool call) |
 | `logPath`          | Folder to store logs                                                                                                  |
 | `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled.                            |
-| `readOnlyMode`     | When set to true, only allows read and metadata operation types, disabling create/update/delete operations            |
+| `readOnly`         | When set to true, only allows read and metadata operation types, disabling create/update/delete operations            |
 
 #### `logPath`
 
@@ -184,14 +184,14 @@ Operation types:
 
 #### Read-Only Mode
 
-The `readOnlyMode` configuration option allows you to restrict the MCP server to only use tools with "read" and "metadata" operation types. When enabled, all tools that have "create", "update", "delete", or "cluster" operation types will not be registered with the server.
+The `readOnly` configuration option allows you to restrict the MCP server to only use tools with "read" and "metadata" operation types. When enabled, all tools that have "create", "update", "delete", or "cluster" operation types will not be registered with the server.
 
 This is useful for scenarios where you want to provide access to MongoDB data for analysis without allowing any modifications to the data or infrastructure.
 
 You can enable read-only mode using:
 
 - **Environment variable**: `export MDB_MCP_READ_ONLY_MODE=true`
-- **Command-line argument**: `--readOnlyMode=true`
+- **Command-line argument**: `--readOnly=true`
 
 When read-only mode is active, you'll see a message in the server logs indicating which tools were prevented from registering due to this restriction.
 

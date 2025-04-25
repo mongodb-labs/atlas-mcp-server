@@ -38,7 +38,7 @@ export class Server {
         this.mcpServer.server.registerCapabilities({ logging: {} });
 
         // Log read-only mode status if enabled
-        if (this.userConfig.readOnlyMode) {
+        if (this.userConfig.readOnly) {
             logger.info(
                 mongoLogId(1_000_005),
                 "server",
@@ -126,7 +126,7 @@ export class Server {
 
         if (command === "start") {
             event.properties.startup_time_ms = commandDuration;
-            event.properties.read_only_mode = this.userConfig.readOnlyMode || false;
+            event.properties.read_only_mode = this.userConfig.readOnly || false;
         }
         if (command === "stop") {
             event.properties.runtime_duration_ms = Date.now() - this.startTime;
