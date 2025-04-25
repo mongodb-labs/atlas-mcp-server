@@ -113,7 +113,7 @@ export abstract class ToolBase {
         // Check read-only mode first
         if (this.config.readOnly && !["read", "metadata"].includes(this.operationType)) {
             logger.debug(
-                mongoLogId(1_000_010),
+                LogId.toolDisabled,
                 "tool",
                 `Prevented registration of ${this.name} because it has operation type \`${this.operationType}\` and read-only mode is enabled`
             );

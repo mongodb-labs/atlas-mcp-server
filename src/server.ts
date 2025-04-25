@@ -36,15 +36,6 @@ export class Server {
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
 
-        // Log read-only mode status if enabled
-        if (this.userConfig.readOnly) {
-            logger.info(
-                mongoLogId(1_000_005),
-                "server",
-                "Server starting in READ-ONLY mode. Only read and metadata operations will be available."
-            );
-        }
-
         this.registerTools();
         this.registerResources();
 
