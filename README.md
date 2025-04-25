@@ -191,7 +191,7 @@ This is useful for scenarios where you want to provide access to MongoDB data fo
 You can enable read-only mode using:
 
 - **Environment variable**: `export MDB_MCP_READ_ONLY=true`
-- **Command-line argument**: `--readOnly=true`
+- **Command-line argument**: `--readOnly`
 
 When read-only mode is active, you'll see a message in the server logs indicating which tools were prevented from registering due to this restriction.
 
@@ -235,6 +235,7 @@ export MDB_MCP_API_CLIENT_SECRET="your-atlas-client-secret"
 export MDB_MCP_CONNECTION_STRING="mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
 
 export MDB_MCP_LOG_PATH="/path/to/logs"
+
 ```
 
 #### Command-Line Arguments
