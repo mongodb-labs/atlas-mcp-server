@@ -107,7 +107,7 @@ class McpLogger extends LoggerBase {
 
     log(level: LogLevel, _: MongoLogId, context: string, message: string): void {
         // Only log if the server is connected
-        if (this.server?.isConnected() === false) {
+        if (!this.server?.isConnected()) {
             return;
         }
 
