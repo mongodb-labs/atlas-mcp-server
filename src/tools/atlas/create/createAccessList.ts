@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { AtlasToolBase } from "./atlasTool.js";
-import { ToolArgs, OperationType } from "../tool.js";
+import { AtlasToolBase } from "../atlasTool.js";
+import { ToolArgs, OperationType } from "../../tool.js";
 
 const DEFAULT_COMMENT = "Added by Atlas MCP";
 

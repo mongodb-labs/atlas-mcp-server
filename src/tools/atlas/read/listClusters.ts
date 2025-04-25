@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { AtlasToolBase } from "./atlasTool.js";
-import { ToolArgs, OperationType } from "../tool.js";
-import { PaginatedClusterDescription20240805, PaginatedOrgGroupView, Group } from "../../common/atlas/openapi.js";
+import { AtlasToolBase } from "../atlasTool.js";
+import { ToolArgs, OperationType } from "../../tool.js";
+import { PaginatedClusterDescription20240805, PaginatedOrgGroupView, Group } from "../../../common/atlas/openapi.js";
 
 export class ListClustersTool extends AtlasToolBase {
     protected name = "atlas-list-clusters";
