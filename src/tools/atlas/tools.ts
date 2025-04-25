@@ -1,13 +1,13 @@
-import { ListClustersTool } from "./listClusters.js";
-import { ListProjectsTool } from "./listProjects.js";
-import { InspectClusterTool } from "./inspectCluster.js";
-import { CreateFreeClusterTool } from "./createFreeCluster.js";
-import { CreateAccessListTool } from "./createAccessList.js";
-import { InspectAccessListTool } from "./inspectAccessList.js";
-import { ListDBUsersTool } from "./listDBUsers.js";
-import { CreateDBUserTool } from "./createDBUser.js";
-import { CreateProjectTool } from "./createProject.js";
-import { ListOrganizationsTool } from "./listOrgs.js";
+import { ListClustersTool } from "./read/listClusters.js";
+import { ListProjectsTool } from "./read/listProjects.js";
+import { InspectClusterTool } from "./read/inspectCluster.js";
+import { CreateFreeClusterTool } from "./create/createFreeCluster.js";
+import { CreateAccessListTool } from "./create/createAccessList.js";
+import { InspectAccessListTool } from "./read/inspectAccessList.js";
+import { ListDBUsersTool } from "./read/listDBUsers.js";
+import { CreateDBUserTool } from "./create/createDBUser.js";
+import { CreateProjectTool } from "./create/createProject.js";
+import { ListOrganizationsTool } from "./read/listOrgs.js";
 
 export const AtlasTools = [
     ListClustersTool,

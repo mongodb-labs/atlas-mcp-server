@@ -4,7 +4,6 @@ import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
 import { BaseEvent } from "../../telemetry/types.js";
-import logger, { LogId } from "../../logger.js";
 import { packageInfo } from "../../packageInfo.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
@@ -97,11 +96,6 @@ export class ApiClient {
     }
 
     public hasCredentials(): boolean {
-        logger.info(
-            LogId.atlasCheckCredentials,
-            "api-client",
-            `Checking if API client has credentials: ${!!(this.oauth2Client && this.accessToken)}`
-        );
         return !!(this.oauth2Client && this.accessToken);
     }
 

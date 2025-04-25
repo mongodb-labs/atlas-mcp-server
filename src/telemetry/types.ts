@@ -3,6 +3,7 @@
  */
 export type TelemetryResult = "success" | "failure";
 export type ServerCommand = "start" | "stop";
+export type TelemetryBoolSet = "true" | "false";
 
 /**
  * Base interface for all events
@@ -14,21 +15,11 @@ export interface Event {
 }
 
 export interface BaseEvent extends Event {
-    properties: {
-        device_id?: string;
-        mcp_server_version: string;
-        mcp_server_name: string;
-        mcp_client_version?: string;
-        mcp_client_name?: string;
-        platform: string;
-        arch: string;
-        os_type: string;
+    properties: CommonProperties & {
         component: string;
         duration_ms: number;
         result: TelemetryResult;
         category: string;
-        os_version?: string;
-        session_id?: string;
     } & Event["properties"];
 }
 
@@ -58,3 +49,27 @@ export interface ServerEvent extends BaseEvent {
         runtime_duration_ms?: number;
     } & BaseEvent["properties"];
 }
+
+/**
+ * Interface for static properties, they can be fetched once and reused.
+ */
+export type CommonStaticProperties = {
+    device_id?: string;
+    mcp_server_version: string;
+    mcp_server_name: string;
+    platform: string;
+    arch: string;
+    os_type: string;
+    os_version?: string;
+};
+
+/**
+ * Common properties for all events that might change.
+ */
+export type CommonProperties = {
+    mcp_client_version?: string;
+    mcp_client_name?: string;
+    config_atlas_auth?: TelemetryBoolSet;
+    config_connection_string?: TelemetryBoolSet;
+    session_id?: string;
+} & CommonStaticProperties;

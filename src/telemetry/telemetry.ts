@@ -1,5 +1,5 @@
 import { Session } from "../session.js";
-import { BaseEvent } from "./types.js";
+import { BaseEvent, CommonProperties } from "./types.js";
 import { config } from "../config.js";
 import logger, { LogId } from "../logger.js";
 import { ApiClient } from "../common/atlas/apiClient.js";
@@ -9,19 +9,6 @@ import { EventCache } from "./eventCache.js";
 type EventResult = {
     success: boolean;
     error?: Error;
-};
-
-type CommonProperties = {
-    device_id?: string;
-    mcp_server_version: string;
-    mcp_server_name: string;
-    mcp_client_version?: string;
-    mcp_client_name?: string;
-    platform: string;
-    arch: string;
-    os_type: string;
-    os_version?: string;
-    session_id?: string;
 };
 
 export class Telemetry {
@@ -87,6 +74,8 @@ export class Telemetry {
             mcp_client_version: this.session.agentRunner?.version,
             mcp_client_name: this.session.agentRunner?.name,
             session_id: this.session.sessionId,
+            config_atlas_auth: this.session.apiClient.hasCredentials() ? "true" : "false",
+            config_connection_string: config.connectionString ? "true" : "false",
         };
     }
 
