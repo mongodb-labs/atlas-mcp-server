@@ -54,12 +54,12 @@ describe("Server integration test", () => {
     });
 
     describe("with read-only mode", () => {
-        const integration = setupIntegrationTest({
+        const integration = setupIntegrationTest(() => ({
             ...config,
             readOnly: true,
             apiClientId: "test",
             apiClientSecret: "test",
-        });
+        }));
 
         it("should only register read and metadata operation tools when read-only mode is enabled", async () => {
             const tools = await integration.mcpClient().listTools();
