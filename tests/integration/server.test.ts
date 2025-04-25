@@ -58,4 +58,28 @@ describe("Server integration test", () => {
             });
         });
     });
+
+    describe("with read-only mode", () => {
+        const integration = setupIntegrationTest({
+            ...config,
+            readOnlyMode: true,
+        });
+
+        it("should only register read and metadata operation tools when read-only mode is enabled", async () => {
+            const tools = await integration.mcpClient().listTools();
+            expectDefined(tools);
+            expect(tools.tools.length).toBeGreaterThan(0);
+
+            // Check that we have some tools available (the read and metadata ones)
+            expect(tools.tools.some((tool) => tool.name === "find")).toBe(true);
+            expect(tools.tools.some((tool) => tool.name === "collection-schema")).toBe(true);
+            expect(tools.tools.some((tool) => tool.name === "list-databases")).toBe(true);
+
+            // Check that non-read tools are NOT available
+            expect(tools.tools.some((tool) => tool.name === "insert-one")).toBe(false);
+            expect(tools.tools.some((tool) => tool.name === "update-many")).toBe(false);
+            expect(tools.tools.some((tool) => tool.name === "delete-one")).toBe(false);
+            expect(tools.tools.some((tool) => tool.name === "drop-collection")).toBe(false);
+        });
+    });
 });

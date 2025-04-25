@@ -36,6 +36,16 @@ export class Server {
 
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
+
+        // Log read-only mode status if enabled
+        if (this.userConfig.readOnlyMode) {
+            logger.info(
+                mongoLogId(1_000_005),
+                "server",
+                "Server starting in READ-ONLY mode. Only read and metadata operations will be available."
+            );
+        }
+
         this.registerTools();
         this.registerResources();
 
@@ -116,6 +126,7 @@ export class Server {
 
         if (command === "start") {
             event.properties.startup_time_ms = commandDuration;
+            event.properties.read_only_mode = this.userConfig.readOnlyMode || false;
         }
         if (command === "stop") {
             event.properties.runtime_duration_ms = Date.now() - this.startTime;

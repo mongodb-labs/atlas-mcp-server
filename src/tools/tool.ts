@@ -86,6 +86,17 @@ export abstract class ToolBase {
     // Checks if a tool is allowed to run based on the config
     protected verifyAllowed(): boolean {
         let errorClarification: string | undefined;
+
+        // Check read-only mode first
+        if (this.config.readOnlyMode && !["read", "metadata"].includes(this.operationType)) {
+            logger.debug(
+                mongoLogId(1_000_010),
+                "tool",
+                `Prevented registration of ${this.name} because it has operation type \`${this.operationType}\` and read-only mode is enabled`
+            );
+            return false;
+        }
+
         if (this.config.disabledTools.includes(this.category)) {
             errorClarification = `its category, \`${this.category}\`,`;
         } else if (this.config.disabledTools.includes(this.operationType)) {
