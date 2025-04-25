@@ -19,7 +19,9 @@ export class ListProjectsTool extends AtlasToolBase {
             throw new Error("No organizations found in your MongoDB Atlas account.");
         }
 
-        const orgs: Record<string, string> = orgData.results.map((org) => [org.id || "", org.name]).reduce((acc, [id, name]) => ({ ...acc, [id]: name }), {});
+        const orgs: Record<string, string> = orgData.results
+            .map((org) => [org.id || "", org.name])
+            .reduce((acc, [id, name]) => ({ ...acc, [id]: name }), {});
 
         const data = orgId
             ? await this.session.apiClient.listOrganizationProjects({
