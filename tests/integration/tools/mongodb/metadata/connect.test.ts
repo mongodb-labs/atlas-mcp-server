@@ -75,7 +75,7 @@ describeWithMongoDB("Connect tool", (integration) => {
     });
 
     describe("with connection string in config", () => {
-        beforeEach(async () => {
+        beforeEach(() => {
             config.connectionString = integration.connectionString();
         });
 

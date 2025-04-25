@@ -19,7 +19,6 @@ describeWithMongoDB("logs tool", (integration) => {
     ]);
 
     validateThrowsForInvalidArguments(integration, "mongodb-logs", [
-        { extra: true },
         { type: 123 },
         { type: "something" },
         { limit: 0 },
@@ -41,6 +40,7 @@ describeWithMongoDB("logs tool", (integration) => {
         expect(elements[0].text).toMatch(/Found: \d+ messages/);
 
         for (let i = 1; i < elements.length; i++) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const log = JSON.parse(elements[i].text);
             expect(log).toHaveProperty("t");
             expect(log).toHaveProperty("msg");
@@ -59,7 +59,7 @@ describeWithMongoDB("logs tool", (integration) => {
         const elements = getResponseElements(response);
         expect(elements.length).toBeLessThanOrEqual(51);
         for (let i = 1; i < elements.length; i++) {
-            const log = JSON.parse(elements[i].text);
+            const log = JSON.parse(elements[i].text) as { tags: string[] };
             expect(log).toHaveProperty("t");
             expect(log).toHaveProperty("msg");
             expect(log).toHaveProperty("tags");

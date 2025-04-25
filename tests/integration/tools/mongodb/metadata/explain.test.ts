@@ -1,6 +1,5 @@
 import {
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
     validateThrowsForInvalidArguments,
     getResponseElements,

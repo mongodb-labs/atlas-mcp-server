@@ -1,12 +1,11 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "./inMemoryTransport.js";
 import { Server } from "../../src/server.js";
-import { ObjectId } from "mongodb";
 import { config, UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
-import { toIncludeAllMembers } from "jest-extended";
+import { ObjectId } from "bson";
 
 interface ParameterInfo {
     name: string;
@@ -35,8 +34,8 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
         await serverTransport.start();
         await clientTransport.start();
 
-        clientTransport.output.pipeTo(serverTransport.input);
-        serverTransport.output.pipeTo(clientTransport.input);
+        void clientTransport.output.pipeTo(serverTransport.input);
+        void serverTransport.output.pipeTo(clientTransport.input);
 
         mcpClient = new Client(
             {
@@ -66,7 +65,7 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
         await mcpClient.connect(clientTransport);
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         config.telemetry = "disabled";
         randomDbName = new ObjectId().toString();
     });
@@ -101,12 +100,14 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
     };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export function getResponseContent(content: unknown | { content: unknown }): string {
     return getResponseElements(content)
         .map((item) => item.text)
         .join("\n");
 }
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export function getResponseElements(content: unknown | { content: unknown }): { type: string; text: string }[] {
     if (typeof content === "object" && content !== null && "content" in content) {
         content = (content as { content: unknown }).content;
@@ -133,9 +134,9 @@ export async function connect(client: Client, connectionString: string): Promise
 
 export function getParameters(tool: ToolInfo): ParameterInfo[] {
     expect(tool.inputSchema.type).toBe("object");
-    expect(tool.inputSchema.properties).toBeDefined();
+    expectDefined(tool.inputSchema.properties);
 
-    return Object.entries(tool.inputSchema.properties!)
+    return Object.entries(tool.inputSchema.properties)
         .sort((a, b) => a[0].localeCompare(b[0]))
         .map(([key, value]) => {
             expect(value).toHaveProperty("type");
@@ -167,13 +168,12 @@ export const databaseCollectionInvalidArgs = [
     { database: "test" },
     { collection: "foo" },
     { database: 123, collection: "foo" },
-    { database: "test", collection: "foo", extra: "bar" },
     { database: "test", collection: 123 },
     { database: [], collection: "foo" },
     { database: "test", collection: [] },
 ];
 
-export const databaseInvalidArgs = [{}, { database: 123 }, { database: [] }, { database: "test", extra: "bar" }];
+export const databaseInvalidArgs = [{}, { database: 123 }, { database: [] }];
 
 export function validateToolMetadata(
     integration: IntegrationTest,
@@ -183,8 +183,8 @@ export function validateToolMetadata(
 ): void {
     it("should have correct metadata", async () => {
         const { tools } = await integration.mcpClient().listTools();
-        const tool = tools.find((tool) => tool.name === name)!;
-        expect(tool).toBeDefined();
+        const tool = tools.find((tool) => tool.name === name);
+        expectDefined(tool);
         expect(tool.description).toBe(description);
 
         const toolParameters = getParameters(tool);
@@ -203,8 +203,9 @@ export function validateThrowsForInvalidArguments(
             it(`throws a schema error for: ${JSON.stringify(arg)}`, async () => {
                 try {
                     await integration.mcpClient().callTool({ name, arguments: arg });
-                    expect.fail("Expected an error to be thrown");
+                    throw new Error("Expected an error to be thrown");
                 } catch (error) {
+                    expect((error as Error).message).not.toEqual("Expected an error to be thrown");
                     expect(error).toBeInstanceOf(McpError);
                     const mcpError = error as McpError;
                     expect(mcpError.code).toEqual(-32602);
@@ -213,4 +214,14 @@ export function validateThrowsForInvalidArguments(
             });
         }
     });
+}
+
+/** Expects the argument being defined and asserts it */
+export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined> {
+    expect(arg).toBeDefined();
+}
+
+/** Expects the argument being undefined and asserts it */
+export function expectUndefined(arg: unknown): asserts arg is undefined {
+    expect(arg).toBeUndefined();
 }

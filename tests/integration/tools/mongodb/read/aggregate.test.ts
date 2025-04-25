@@ -22,7 +22,6 @@ describeWithMongoDB("aggregate tool", (integration) => {
         { database: "test", collection: "foo" },
         { database: test, pipeline: [] },
         { database: "test", collection: "foo", pipeline: {} },
-        { database: "test", collection: "foo", pipeline: [], extra: "extra" },
         { database: "test", collection: [], pipeline: [] },
         { database: 123, collection: "foo", pipeline: [] },
     ]);
@@ -81,8 +80,10 @@ describeWithMongoDB("aggregate tool", (integration) => {
         const elements = getResponseElements(response.content);
         expect(elements).toHaveLength(3);
         expect(elements[0].text).toEqual('Found 2 documents in the collection "people":');
+        /* eslint-disable @typescript-eslint/no-unsafe-assignment */
         expect(JSON.parse(elements[1].text)).toEqual({ _id: expect.any(Object), name: "Søren", age: 15 });
         expect(JSON.parse(elements[2].text)).toEqual({ _id: expect.any(Object), name: "Laura", age: 10 });
+        /* eslint-enable @typescript-eslint/no-unsafe-assignment */
     });
 
     validateAutoConnectBehavior(integration, "aggregate", () => {

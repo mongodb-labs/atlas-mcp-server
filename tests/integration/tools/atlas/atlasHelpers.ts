@@ -9,7 +9,7 @@ export function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export function describeWithAtlas(name: number | string | Function | jest.FunctionLike, fn: IntegrationTestFunction) {
+export function describeWithAtlas(name: string, fn: IntegrationTestFunction) {
     const testDefinition = () => {
         const integration = setupIntegrationTest();
         describe(name, () => {

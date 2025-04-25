@@ -1,6 +1,7 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ObjectId } from "mongodb";
 import { parseTable, describeWithAtlas } from "./atlasHelpers.js";
+import { expectDefined } from "../../helpers.js";
 
 const randomId = new ObjectId().toString();
 
@@ -28,10 +29,10 @@ describeWithAtlas("projects", (integration) => {
     describe("atlas-create-project", () => {
         it("should have correct metadata", async () => {
             const { tools } = await integration.mcpClient().listTools();
-            const createProject = tools.find((tool) => tool.name === "atlas-create-project")!;
-            expect(createProject).toBeDefined();
+            const createProject = tools.find((tool) => tool.name === "atlas-create-project");
+            expectDefined(createProject);
             expect(createProject.inputSchema.type).toBe("object");
-            expect(createProject.inputSchema.properties).toBeDefined();
+            expectDefined(createProject.inputSchema.properties);
             expect(createProject.inputSchema.properties).toHaveProperty("projectName");
             expect(createProject.inputSchema.properties).toHaveProperty("organizationId");
         });
@@ -48,10 +49,10 @@ describeWithAtlas("projects", (integration) => {
     describe("atlas-list-projects", () => {
         it("should have correct metadata", async () => {
             const { tools } = await integration.mcpClient().listTools();
-            const listProjects = tools.find((tool) => tool.name === "atlas-list-projects")!;
-            expect(listProjects).toBeDefined();
+            const listProjects = tools.find((tool) => tool.name === "atlas-list-projects");
+            expectDefined(listProjects);
             expect(listProjects.inputSchema.type).toBe("object");
-            expect(listProjects.inputSchema.properties).toBeDefined();
+            expectDefined(listProjects.inputSchema.properties);
             expect(listProjects.inputSchema.properties).toHaveProperty("orgId");
         });
 

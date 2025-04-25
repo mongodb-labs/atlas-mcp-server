@@ -6,6 +6,7 @@ import {
     validateThrowsForInvalidArguments,
     databaseParameters,
     databaseInvalidArgs,
+    expectDefined,
 } from "../../../helpers.js";
 
 describeWithMongoDB("dropDatabase tool", (integration) => {
@@ -45,7 +46,7 @@ describeWithMongoDB("dropDatabase tool", (integration) => {
         await integration.mongoClient().db(integration.randomDbName()).createCollection("coll2");
 
         let { databases } = await integration.mongoClient().db("").admin().listDatabases();
-        expect(databases.find((db) => db.name === integration.randomDbName())).toBeDefined();
+        expectDefined(databases.find((db) => db.name === integration.randomDbName()));
 
         const response = await integration.mcpClient().callTool({
             name: "drop-database",

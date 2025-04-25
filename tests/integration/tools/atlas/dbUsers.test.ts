@@ -1,6 +1,7 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../../../../src/session.js";
 import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
+import { expectDefined } from "../../helpers.js";
 
 describeWithAtlas("db users", (integration) => {
     const userName = "testuser-" + randomId;
@@ -23,10 +24,10 @@ describeWithAtlas("db users", (integration) => {
         describe("atlas-create-db-user", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                const createDbUser = tools.find((tool) => tool.name === "atlas-create-db-user")!;
-                expect(createDbUser).toBeDefined();
+                const createDbUser = tools.find((tool) => tool.name === "atlas-create-db-user");
+                expectDefined(createDbUser);
                 expect(createDbUser.inputSchema.type).toBe("object");
-                expect(createDbUser.inputSchema.properties).toBeDefined();
+                expectDefined(createDbUser.inputSchema.properties);
                 expect(createDbUser.inputSchema.properties).toHaveProperty("projectId");
                 expect(createDbUser.inputSchema.properties).toHaveProperty("username");
                 expect(createDbUser.inputSchema.properties).toHaveProperty("password");
@@ -58,10 +59,10 @@ describeWithAtlas("db users", (integration) => {
         describe("atlas-list-db-users", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                const listDbUsers = tools.find((tool) => tool.name === "atlas-list-db-users")!;
-                expect(listDbUsers).toBeDefined();
+                const listDbUsers = tools.find((tool) => tool.name === "atlas-list-db-users");
+                expectDefined(listDbUsers);
                 expect(listDbUsers.inputSchema.type).toBe("object");
-                expect(listDbUsers.inputSchema.properties).toBeDefined();
+                expectDefined(listDbUsers.inputSchema.properties);
                 expect(listDbUsers.inputSchema.properties).toHaveProperty("projectId");
             });
             it("returns database users by project", async () => {

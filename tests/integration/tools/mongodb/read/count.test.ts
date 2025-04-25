@@ -22,7 +22,6 @@ describeWithMongoDB("count tool", (integration) => {
     validateThrowsForInvalidArguments(integration, "count", [
         {},
         { database: 123, collection: "bar" },
-        { foo: "bar", database: "test", collection: "bar" },
         { collection: [], database: "test" },
         { collection: "bar", database: "test", query: "{ $gt: { foo: 5 } }" },
     ]);

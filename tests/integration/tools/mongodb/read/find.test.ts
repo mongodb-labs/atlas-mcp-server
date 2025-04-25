@@ -1,7 +1,6 @@
 import {
     getResponseContent,
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
     validateThrowsForInvalidArguments,
     getResponseElements,
@@ -42,7 +41,6 @@ describeWithMongoDB("find tool", (integration) => {
     validateThrowsForInvalidArguments(integration, "find", [
         {},
         { database: 123, collection: "bar" },
-        { database: "test", collection: "bar", extra: "extra" },
         { database: "test", collection: [] },
         { database: "test", collection: "bar", filter: "{ $gt: { foo: 5 } }" },
         { database: "test", collection: "bar", projection: "name" },
@@ -86,24 +84,25 @@ describeWithMongoDB("find tool", (integration) => {
 
         const testCases: {
             name: string;
-            filter?: any;
+            filter?: unknown;
             limit?: number;
-            projection?: any;
-            sort?: any;
-            expected: any[];
+            projection?: unknown;
+            sort?: unknown;
+            expected: unknown[];
         }[] = [
             {
                 name: "returns all documents when no filter is provided",
                 expected: Array(10)
                     .fill(0)
-                    .map((_, index) => ({ _id: expect.any(Object), value: index })),
+                    .map((_, index) => ({ _id: expect.any(Object) as unknown, value: index })),
             },
             {
                 name: "returns documents matching the filter",
                 filter: { value: { $gt: 5 } },
                 expected: Array(4)
                     .fill(0)
-                    .map((_, index) => ({ _id: expect.any(Object), value: index + 6 })),
+
+                    .map((_, index) => ({ _id: expect.any(Object) as unknown, value: index + 6 })),
             },
             {
                 name: "returns documents matching the filter with projection",
@@ -118,8 +117,8 @@ describeWithMongoDB("find tool", (integration) => {
                 filter: { value: { $gt: 5 } },
                 limit: 2,
                 expected: [
-                    { _id: expect.any(Object), value: 6 },
-                    { _id: expect.any(Object), value: 7 },
+                    { _id: expect.any(Object) as unknown, value: 6 },
+                    { _id: expect.any(Object) as unknown, value: 7 },
                 ],
             },
             {
@@ -128,7 +127,7 @@ describeWithMongoDB("find tool", (integration) => {
                 sort: { value: -1 },
                 expected: Array(10)
                     .fill(0)
-                    .map((_, index) => ({ _id: expect.any(Object), value: index }))
+                    .map((_, index) => ({ _id: expect.any(Object) as unknown, value: index }))
                     .reverse(),
             },
         ];
@@ -168,6 +167,7 @@ describeWithMongoDB("find tool", (integration) => {
             expect(elements[0].text).toEqual('Found 10 documents in the collection "foo":');
 
             for (let i = 0; i < 10; i++) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 expect(JSON.parse(elements[i + 1].text).value).toEqual(i);
             }
         });

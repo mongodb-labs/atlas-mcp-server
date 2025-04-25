@@ -5,6 +5,7 @@ import {
     databaseCollectionParameters,
     validateToolMetadata,
     validateThrowsForInvalidArguments,
+    expectDefined,
 } from "../../../helpers.js";
 
 describeWithMongoDB("insertMany tool", (integration) => {
@@ -29,7 +30,7 @@ describeWithMongoDB("insertMany tool", (integration) => {
 
     const validateDocuments = async (collection: string, expectedDocuments: object[]) => {
         const collections = await integration.mongoClient().db(integration.randomDbName()).listCollections().toArray();
-        expect(collections.find((c) => c.name === collection)).toBeDefined();
+        expectDefined(collections.find((c) => c.name === collection));
 
         const docs = await integration
             .mongoClient()
