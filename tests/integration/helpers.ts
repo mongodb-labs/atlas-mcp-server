@@ -25,6 +25,8 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
+    // This gets used in the scope of tests.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let randomDbName: string;
 
     beforeAll(async () => {
