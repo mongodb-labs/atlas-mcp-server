@@ -13,6 +13,16 @@ export class ListProjectsTool extends AtlasToolBase {
     };
 
     protected async execute({ orgId }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
+        const orgData = await this.session.apiClient.listOrganizations();
+
+        if (!orgData?.results?.length) {
+            throw new Error("No organizations found in your MongoDB Atlas account.");
+        }
+
+        const orgs: Record<string, string> = orgData.results
+            .map((org) => [org.id || "", org.name])
+            .reduce((acc, [id, name]) => ({ ...acc, [id]: name }), {});
+
         const data = orgId
             ? await this.session.apiClient.listOrganizationProjects({
                   params: {
@@ -31,11 +41,11 @@ export class ListProjectsTool extends AtlasToolBase {
         const rows = data.results
             .map((project) => {
                 const createdAt = project.created ? new Date(project.created).toLocaleString() : "N/A";
-                return `${project.name} | ${project.id} | ${createdAt}`;
+                return `${project.name} | ${project.id} | ${orgs[project.orgId]} | ${project.orgId} | ${createdAt}`;
             })
             .join("\n");
-        const formattedProjects = `Project Name | Project ID | Created At
-----------------| ----------------| ----------------
+        const formattedProjects = `Project Name | Project ID | Organization Name | Organization ID | Created At
+----------------| ----------------| ----------------| ----------------| ----------------
 ${rows}`;
         return {
             content: [{ type: "text", text: formattedProjects }],

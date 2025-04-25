@@ -26,6 +26,7 @@ export const LogId = {
 
 abstract class LoggerBase {
     abstract log(level: LogLevel, id: MongoLogId, context: string, message: string): void;
+
     info(id: MongoLogId, context: string, message: string): void {
         this.log("info", id, context, message);
     }
@@ -65,22 +66,35 @@ class ConsoleLogger extends LoggerBase {
     }
 }
 
-class Logger extends LoggerBase {
-    constructor(
-        private logWriter: MongoLogWriter,
-        private server: McpServer
-    ) {
+class DiskLogger extends LoggerBase {
+    private constructor(private logWriter: MongoLogWriter) {
         super();
+    }
+
+    static async fromPath(logPath: string): Promise<DiskLogger> {
+        await fs.mkdir(logPath, { recursive: true });
+
+        const manager = new MongoLogManager({
+            directory: logPath,
+            retentionDays: 30,
+            onwarn: console.warn,
+            onerror: console.error,
+            gzip: false,
+            retentionGB: 1,
+        });
+
+        await manager.cleanupOldLogFiles();
+
+        const logWriter = await manager.createLogWriter();
+
+        return new DiskLogger(logWriter);
     }
 
     log(level: LogLevel, id: MongoLogId, context: string, message: string): void {
         message = redact(message);
         const mongoDBLevel = this.mapToMongoDBLogLevel(level);
+
         this.logWriter[mongoDBLevel]("MONGODB-MCP", id, context, message);
-        void this.server.server.sendLoggingMessage({
-            level,
-            data: `[${context}]: ${message}`,
-        });
     }
 
     private mapToMongoDBLogLevel(level: LogLevel): "info" | "warn" | "error" | "debug" | "fatal" {
@@ -104,31 +118,56 @@ class Logger extends LoggerBase {
     }
 }
 
-class ProxyingLogger extends LoggerBase {
-    private internalLogger: LoggerBase = new ConsoleLogger();
+class McpLogger extends LoggerBase {
+    constructor(private server: McpServer) {
+        super();
+    }
 
-    log(level: LogLevel, id: MongoLogId, context: string, message: string): void {
-        this.internalLogger.log(level, id, context, message);
+    log(level: LogLevel, _: MongoLogId, context: string, message: string): void {
+        void this.server.server.sendLoggingMessage({
+            level,
+            data: `[${context}]: ${message}`,
+        });
     }
 }
 
-const logger = new ProxyingLogger();
+class CompositeLogger extends LoggerBase {
+    private loggers: LoggerBase[];
+
+    constructor(...loggers: LoggerBase[]) {
+        super();
+
+        if (loggers.length === 0) {
+            // default to ConsoleLogger
+            this.loggers = [new ConsoleLogger()];
+            return;
+        }
+
+        this.loggers = [...loggers];
+    }
+
+    setLoggers(...loggers: LoggerBase[]): void {
+        if (loggers.length === 0) {
+            throw new Error("At least one logger must be provided");
+        }
+        this.loggers = [...loggers];
+    }
+
+    log(level: LogLevel, id: MongoLogId, context: string, message: string): void {
+        for (const logger of this.loggers) {
+            logger.log(level, id, context, message);
+        }
+    }
+}
+
+const logger = new CompositeLogger();
 export default logger;
 
-export async function initializeLogger(server: McpServer, logPath: string): Promise<void> {
-    await fs.mkdir(logPath, { recursive: true });
+export async function initializeLogger(server: McpServer, logPath: string): Promise<LoggerBase> {
+    const diskLogger = await DiskLogger.fromPath(logPath);
+    const mcpLogger = new McpLogger(server);
 
-    const manager = new MongoLogManager({
-        directory: logPath,
-        retentionDays: 30,
-        onwarn: console.warn,
-        onerror: console.error,
-        gzip: false,
-        retentionGB: 1,
-    });
+    logger.setLoggers(mcpLogger, diskLogger);
 
-    await manager.cleanupOldLogFiles();
-
-    const logWriter = await manager.createLogWriter();
-    logger["internalLogger"] = new Logger(logWriter, server);
+    return logger;
 }

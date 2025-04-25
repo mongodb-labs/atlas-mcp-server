@@ -7,6 +7,8 @@ import logger, { initializeLogger, LogId } from "./logger.js";
 import { ObjectId } from "mongodb";
 import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
+import { type ServerEvent } from "./telemetry/types.js";
+import { type ServerCommand } from "./telemetry/types.js";
 import { CallToolRequestSchema, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import assert from "assert";
 
@@ -21,8 +23,10 @@ export class Server {
     private readonly mcpServer: McpServer;
     private readonly telemetry: Telemetry;
     public readonly userConfig: UserConfig;
+    private readonly startTime: number;
 
     constructor({ session, mcpServer, userConfig }: ServerOptions) {
+        this.startTime = Date.now();
         this.session = session;
         this.telemetry = new Telemetry(session);
         this.mcpServer = mcpServer;
@@ -70,12 +74,57 @@ export class Server {
                 "server",
                 `Server started with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
             );
+
+            this.emitServerEvent("start", Date.now() - this.startTime);
+        };
+
+        this.mcpServer.server.onclose = () => {
+            const closeTime = Date.now();
+            this.emitServerEvent("stop", Date.now() - closeTime);
+        };
+
+        this.mcpServer.server.onerror = (error: Error) => {
+            const closeTime = Date.now();
+            this.emitServerEvent("stop", Date.now() - closeTime, error);
         };
     }
 
     async close(): Promise<void> {
         await this.session.close();
         await this.mcpServer.close();
+    }
+
+    /**
+     * Emits a server event
+     * @param command - The server command (e.g., "start", "stop", "register", "deregister")
+     * @param additionalProperties - Additional properties specific to the event
+     */
+    emitServerEvent(command: ServerCommand, commandDuration: number, error?: Error) {
+        const event: ServerEvent = {
+            timestamp: new Date().toISOString(),
+            source: "mdbmcp",
+            properties: {
+                ...this.telemetry.getCommonProperties(),
+                result: "success",
+                duration_ms: commandDuration,
+                component: "server",
+                category: "other",
+                command: command,
+            },
+        };
+
+        if (command === "start") {
+            event.properties.startup_time_ms = commandDuration;
+        }
+        if (command === "stop") {
+            event.properties.runtime_duration_ms = Date.now() - this.startTime;
+            if (error) {
+                event.properties.result = "failure";
+                event.properties.reason = error.message;
+            }
+        }
+
+        this.telemetry.emitEvents([event]).catch(() => {});
     }
 
     private registerTools() {
