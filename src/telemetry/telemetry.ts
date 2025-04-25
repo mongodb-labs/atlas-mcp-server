@@ -13,7 +13,7 @@ type EventResult = {
 };
 
 type CommonProperties = {
-    device_id: string;
+    device_id?: string;
     mcp_server_version: string;
     mcp_server_name: string;
     mcp_client_version?: string;

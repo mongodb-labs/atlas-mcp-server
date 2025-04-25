@@ -14,7 +14,7 @@ export interface Event {
 
 export interface BaseEvent extends Event {
     properties: {
-        device_id: string;
+        device_id?: string;
         mcp_server_version: string;
         mcp_server_name: string;
         mcp_client_version?: string;
