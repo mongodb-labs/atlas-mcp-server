@@ -46,7 +46,6 @@ async function waitClusterState(session: Session, projectId: string, clusterName
     }
 }
 
-
 describeWithAtlas("clusters", (integration) => {
     withProject(integration, ({ getProjectId }) => {
         const clusterName = "ClusterTest-" + randomId;
@@ -146,10 +145,13 @@ describeWithAtlas("clusters", (integration) => {
                             groupId: projectId,
                             clusterName: clusterName,
                         },
-                    }
+                    },
                 });
 
-                console.log("Cluster connection string: ", cluster?.connectionStrings?.standardSrv || cluster?.connectionStrings?.standard);
+                console.log(
+                    "Cluster connection string: ",
+                    cluster?.connectionStrings?.standardSrv || cluster?.connectionStrings?.standard
+                );
             });
 
             it("should have correct metadata", async () => {

@@ -3,7 +3,8 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
 
-function generateSecurePassword(): string { // TODO: use a better password generator
+function generateSecurePassword(): string {
+    // TODO: use a better password generator
     return `pwdMcp${Math.floor(Math.random() * 100000)}`;
 }
 
@@ -44,7 +45,7 @@ export class ConnectClusterTool extends AtlasToolBase {
             params: {
                 path: {
                     groupId: projectId,
-                }
+                },
             },
             body: {
                 databaseName: "admin",
@@ -55,7 +56,7 @@ export class ConnectClusterTool extends AtlasToolBase {
                         databaseName: "admin",
                     },
                 ],
-                scopes: [{type: "CLUSTER", name: clusterName}],
+                scopes: [{ type: "CLUSTER", name: clusterName }],
                 username,
                 password,
                 awsIAMType: "NONE",
@@ -63,17 +64,22 @@ export class ConnectClusterTool extends AtlasToolBase {
                 oidcAuthType: "NONE",
                 x509Type: "NONE",
                 deleteAfterDate: expiryDate.toISOString(),
-            }
+            },
         });
 
-        setTimeout(async () => { // disconnect after 12 hours
+        setTimeout(async () => {
+            // disconnect after 12 hours
             if (this.session.serviceProvider) {
                 await this.session.serviceProvider?.close(true);
                 this.session.serviceProvider = undefined;
             }
         }, expiryMs);
 
-        const connectionString = (cluster.connectionStrings.standardSrv || cluster.connectionStrings.standard || "").replace('://', `://${username}:${password}@`) + `?authSource=admin`;
+        const connectionString =
+            (cluster.connectionStrings.standardSrv || cluster.connectionStrings.standard || "").replace(
+                "://",
+                `://${username}:${password}@`
+            ) + `?authSource=admin`;
 
         await this.connectToMongoDB(connectionString);
 
@@ -83,7 +89,7 @@ export class ConnectClusterTool extends AtlasToolBase {
                     type: "text",
                     text: `Connected to cluster "${clusterName}"`,
                 },
-            ]
+            ],
         };
     }
 }

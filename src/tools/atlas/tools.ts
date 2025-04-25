@@ -21,5 +21,5 @@ export const AtlasTools = [
     CreateDBUserTool,
     CreateProjectTool,
     ListOrganizationsTool,
-    ConnectClusterTool
+    ConnectClusterTool,
 ];
