@@ -47,6 +47,8 @@ export interface ServerEvent extends BaseEvent {
         reason?: string;
         startup_time_ms?: number;
         runtime_duration_ms?: number;
+        read_only_mode?: boolean;
+        disabled_tools?: string[];
     } & BaseEvent["properties"];
 }
 
