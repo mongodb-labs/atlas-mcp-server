@@ -8,7 +8,7 @@
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
     "sourceMap": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,

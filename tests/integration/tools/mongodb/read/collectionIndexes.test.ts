@@ -5,6 +5,7 @@ import {
     validateThrowsForInvalidArguments,
     getResponseElements,
     databaseCollectionInvalidArgs,
+    expectDefined,
 } from "../../../helpers.js";
 import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
@@ -78,14 +79,14 @@ describeWithMongoDB("collectionIndexes tool", (integration) => {
 
         for (const indexType of indexTypes) {
             const index = elements.find((element) => element.text.includes(`prop_${indexType}`));
-            expect(index).toBeDefined();
+            expectDefined(index);
 
             let expectedDefinition = JSON.stringify({ [`prop_${indexType}`]: indexType });
             if (indexType === "text") {
                 expectedDefinition = '{"_fts":"text"';
             }
 
-            expect(index!.text).toContain(`definition: ${expectedDefinition}`);
+            expect(index.text).toContain(`definition: ${expectedDefinition}`);
         }
     });
 

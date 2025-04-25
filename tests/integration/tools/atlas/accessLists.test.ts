@@ -1,5 +1,6 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { describeWithAtlas, withProject } from "./atlasHelpers.js";
+import { expectDefined } from "../../helpers.js";
 
 function generateRandomIp() {
     const randomIp: number[] = [192];
@@ -41,10 +42,10 @@ describeWithAtlas("ip access lists", (integration) => {
         describe("atlas-create-access-list", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                const createAccessList = tools.find((tool) => tool.name === "atlas-create-access-list")!;
-                expect(createAccessList).toBeDefined();
+                const createAccessList = tools.find((tool) => tool.name === "atlas-create-access-list");
+                expectDefined(createAccessList);
                 expect(createAccessList.inputSchema.type).toBe("object");
-                expect(createAccessList.inputSchema.properties).toBeDefined();
+                expectDefined(createAccessList.inputSchema.properties);
                 expect(createAccessList.inputSchema.properties).toHaveProperty("projectId");
                 expect(createAccessList.inputSchema.properties).toHaveProperty("ipAddresses");
                 expect(createAccessList.inputSchema.properties).toHaveProperty("cidrBlocks");
@@ -73,10 +74,10 @@ describeWithAtlas("ip access lists", (integration) => {
         describe("atlas-inspect-access-list", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                const inspectAccessList = tools.find((tool) => tool.name === "atlas-inspect-access-list")!;
-                expect(inspectAccessList).toBeDefined();
+                const inspectAccessList = tools.find((tool) => tool.name === "atlas-inspect-access-list");
+                expectDefined(inspectAccessList);
                 expect(inspectAccessList.inputSchema.type).toBe("object");
-                expect(inspectAccessList.inputSchema.properties).toBeDefined();
+                expectDefined(inspectAccessList.inputSchema.properties);
                 expect(inspectAccessList.inputSchema.properties).toHaveProperty("projectId");
             });
 

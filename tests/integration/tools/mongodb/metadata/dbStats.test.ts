@@ -30,7 +30,11 @@ describeWithMongoDB("dbStats tool", (integration) => {
             expect(elements).toHaveLength(2);
             expect(elements[0].text).toBe(`Statistics for database ${integration.randomDbName()}`);
 
-            const stats = JSON.parse(elements[1].text);
+            const stats = JSON.parse(elements[1].text) as {
+                db: string;
+                collections: number;
+                storageSize: number;
+            };
             expect(stats.db).toBe(integration.randomDbName());
             expect(stats.collections).toBe(0);
             expect(stats.storageSize).toBe(0);
@@ -73,10 +77,16 @@ describeWithMongoDB("dbStats tool", (integration) => {
                 expect(elements).toHaveLength(2);
                 expect(elements[0].text).toBe(`Statistics for database ${integration.randomDbName()}`);
 
-                const stats = JSON.parse(elements[1].text);
+                const stats = JSON.parse(elements[1].text) as {
+                    db: string;
+                    collections: unknown;
+                    storageSize: unknown;
+                    objects: unknown;
+                };
                 expect(stats.db).toBe(integration.randomDbName());
                 expect(stats.collections).toBe(Object.entries(test.collections).length);
                 expect(stats.storageSize).toBeGreaterThan(1024);
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 expect(stats.objects).toBe(Object.values(test.collections).reduce((a, b) => a + b, 0));
             });
         }

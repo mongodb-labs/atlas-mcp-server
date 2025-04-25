@@ -1,4 +1,4 @@
-import { setupIntegrationTest } from "./helpers";
+import { expectDefined, setupIntegrationTest } from "./helpers.js";
 import { config } from "../../src/config.js";
 
 describe("Server integration test", () => {
@@ -11,7 +11,7 @@ describe("Server integration test", () => {
 
         it("should return positive number of tools and have no atlas tools", async () => {
             const tools = await integration.mcpClient().listTools();
-            expect(tools).toBeDefined();
+            expectDefined(tools);
             expect(tools.tools.length).toBeGreaterThan(0);
 
             const atlasTools = tools.tools.filter((tool) => tool.name.startsWith("atlas-"));
@@ -28,7 +28,7 @@ describe("Server integration test", () => {
         describe("list capabilities", () => {
             it("should return positive number of tools and have some atlas tools", async () => {
                 const tools = await integration.mcpClient().listTools();
-                expect(tools).toBeDefined();
+                expectDefined(tools);
                 expect(tools.tools.length).toBeGreaterThan(0);
 
                 const atlasTools = tools.tools.filter((tool) => tool.name.startsWith("atlas-"));
@@ -41,13 +41,13 @@ describe("Server integration test", () => {
                 });
             });
 
-            it("should return capabilities", async () => {
+            it("should return capabilities", () => {
                 const capabilities = integration.mcpClient().getServerCapabilities();
-                expect(capabilities).toBeDefined();
-                expect(capabilities?.completions).toBeUndefined();
-                expect(capabilities?.experimental).toBeUndefined();
-                expect(capabilities?.tools).toBeDefined();
-                expect(capabilities?.logging).toBeDefined();
+                expectDefined(capabilities);
+                expect(capabilities.completions).toBeUndefined();
+                expect(capabilities.experimental).toBeUndefined();
+                expectDefined(capabilities?.tools);
+                expectDefined(capabilities?.logging);
                 expect(capabilities?.prompts).toBeUndefined();
             });
         });

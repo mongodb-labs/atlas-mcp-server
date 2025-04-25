@@ -1,13 +1,13 @@
 import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
-import { getResponseElements, getParameters } from "../../../helpers.js";
+import { getResponseElements, getParameters, expectDefined } from "../../../helpers.js";
 
 describeWithMongoDB("listDatabases tool", (integration) => {
     const defaultDatabases = ["admin", "config", "local"];
 
     it("should have correct metadata", async () => {
         const { tools } = await integration.mcpClient().listTools();
-        const listDatabases = tools.find((tool) => tool.name === "list-databases")!;
-        expect(listDatabases).toBeDefined();
+        const listDatabases = tools.find((tool) => tool.name === "list-databases");
+        expectDefined(listDatabases);
         expect(listDatabases.description).toBe("List all databases for a MongoDB connection");
 
         const parameters = getParameters(listDatabases);
@@ -54,7 +54,7 @@ describeWithMongoDB("listDatabases tool", (integration) => {
         async () => {
             const mongoClient = integration.mongoClient();
             const { databases } = await mongoClient.db("admin").command({ listDatabases: 1, nameOnly: true });
-            for (const db of databases) {
+            for (const db of databases as { name: string }[]) {
                 if (!defaultDatabases.includes(db.name)) {
                     await mongoClient.db(db.name).dropDatabase();
                 }

@@ -1,9 +1,9 @@
-import runner, { MongoCluster } from "mongodb-runner";
+import { MongoCluster } from "mongodb-runner";
 import path from "path";
 import fs from "fs/promises";
 import { MongoClient, ObjectId } from "mongodb";
 import { getResponseContent, IntegrationTest, setupIntegrationTest } from "../../helpers.js";
-import { UserConfig, config } from "../../../../src/config.js";
+import { config, UserConfig } from "../../../../src/config.js";
 
 interface MongoDBIntegrationTest {
     mongoClient: () => MongoClient;
@@ -37,12 +37,17 @@ export function describeWithMongoDB(
     });
 }
 
-export function setupMongoDBIntegrationTest(userConfig: UserConfig = config): MongoDBIntegrationTest {
-    let mongoCluster: runner.MongoCluster | undefined;
+export function setupMongoDBIntegrationTest(): MongoDBIntegrationTest {
+    let mongoCluster: // TODO: Fix this type once mongodb-runner is updated.
+    | {
+              connectionString: string;
+              close: () => Promise<void>;
+          }
+        | undefined;
     let mongoClient: MongoClient | undefined;
     let randomDbName: string;
 
-    beforeEach(async () => {
+    beforeEach(() => {
         randomDbName = new ObjectId().toString();
     });
 
@@ -62,6 +67,8 @@ export function setupMongoDBIntegrationTest(userConfig: UserConfig = config): Mo
         let dbsDir = path.join(tmpDir, "mongodb-runner", "dbs");
         for (let i = 0; i < 10; i++) {
             try {
+                // TODO: Fix this type once mongodb-runner is updated.
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 mongoCluster = await MongoCluster.start({
                     tmpDir: dbsDir,
                     logDir: path.join(tmpDir, "mongodb-runner", "logs"),
@@ -72,11 +79,13 @@ export function setupMongoDBIntegrationTest(userConfig: UserConfig = config): Mo
             } catch (err) {
                 if (i < 5) {
                     // Just wait a little bit and retry
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                     console.error(`Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}`);
                     await new Promise((resolve) => setTimeout(resolve, 1000));
                 } else {
                     // If we still fail after 5 seconds, try another db dir
                     console.error(
+                        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
                         `Failed to start cluster in ${dbsDir}, attempt ${i}: ${err}. Retrying with a new db dir.`
                     );
                     dbsDir = path.join(tmpDir, "mongodb-runner", `dbs${i - 5}`);

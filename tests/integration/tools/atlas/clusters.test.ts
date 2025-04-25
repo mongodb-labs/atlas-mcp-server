@@ -1,4 +1,5 @@
 import { Session } from "../../../../src/session.js";
+import { expectDefined } from "../../helpers.js";
 import { describeWithAtlas, withProject, sleep, randomId } from "./atlasHelpers.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
@@ -43,11 +44,11 @@ describeWithAtlas("clusters", (integration) => {
         describe("atlas-create-free-cluster", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                const createFreeCluster = tools.find((tool) => tool.name === "atlas-create-free-cluster")!;
+                const createFreeCluster = tools.find((tool) => tool.name === "atlas-create-free-cluster");
 
-                expect(createFreeCluster).toBeDefined();
+                expectDefined(createFreeCluster);
                 expect(createFreeCluster.inputSchema.type).toBe("object");
-                expect(createFreeCluster.inputSchema.properties).toBeDefined();
+                expectDefined(createFreeCluster.inputSchema.properties);
                 expect(createFreeCluster.inputSchema.properties).toHaveProperty("projectId");
                 expect(createFreeCluster.inputSchema.properties).toHaveProperty("name");
                 expect(createFreeCluster.inputSchema.properties).toHaveProperty("region");
@@ -73,11 +74,11 @@ describeWithAtlas("clusters", (integration) => {
         describe("atlas-inspect-cluster", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                const inspectCluster = tools.find((tool) => tool.name === "atlas-inspect-cluster")!;
+                const inspectCluster = tools.find((tool) => tool.name === "atlas-inspect-cluster");
 
-                expect(inspectCluster).toBeDefined();
+                expectDefined(inspectCluster);
                 expect(inspectCluster.inputSchema.type).toBe("object");
-                expect(inspectCluster.inputSchema.properties).toBeDefined();
+                expectDefined(inspectCluster.inputSchema.properties);
                 expect(inspectCluster.inputSchema.properties).toHaveProperty("projectId");
                 expect(inspectCluster.inputSchema.properties).toHaveProperty("clusterName");
             });
@@ -98,10 +99,10 @@ describeWithAtlas("clusters", (integration) => {
         describe("atlas-list-clusters", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();
-                const listClusters = tools.find((tool) => tool.name === "atlas-list-clusters")!;
-                expect(listClusters).toBeDefined();
+                const listClusters = tools.find((tool) => tool.name === "atlas-list-clusters");
+                expectDefined(listClusters);
                 expect(listClusters.inputSchema.type).toBe("object");
-                expect(listClusters.inputSchema.properties).toBeDefined();
+                expectDefined(listClusters.inputSchema.properties);
                 expect(listClusters.inputSchema.properties).toHaveProperty("projectId");
             });
 

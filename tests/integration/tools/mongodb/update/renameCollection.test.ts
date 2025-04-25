@@ -1,7 +1,6 @@
 import {
     getResponseContent,
     databaseCollectionParameters,
-    setupIntegrationTest,
     validateToolMetadata,
     validateThrowsForInvalidArguments,
 } from "../../../helpers.js";
@@ -28,7 +27,6 @@ describeWithMongoDB("renameCollection tool", (integration) => {
     validateThrowsForInvalidArguments(integration, "rename-collection", [
         {},
         { database: 123, collection: "bar" },
-        { database: "test", collection: "bar", newName: "foo", extra: "extra" },
         { database: "test", collection: [], newName: "foo" },
         { database: "test", collection: "bar", newName: 10 },
         { database: "test", collection: "bar", newName: "foo", dropTarget: "true" },

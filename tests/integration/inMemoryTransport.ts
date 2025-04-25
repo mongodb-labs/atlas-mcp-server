@@ -39,6 +39,7 @@ export class InMemoryTransport implements Transport {
         return Promise.resolve();
     }
 
+    // eslint-disable-next-line @typescript-eslint/require-await
     async close(): Promise<void> {
         this.outputController.close();
         this.onclose?.();
@@ -49,10 +50,10 @@ export class InMemoryTransport implements Transport {
     sessionId?: string | undefined;
 
     private static getPromise(): [Promise<void>, resolve: () => void] {
-        let resolve: () => void;
+        let resolve: () => void = () => {};
         const promise = new Promise<void>((res) => {
             resolve = res;
         });
-        return [promise, resolve!];
+        return [promise, resolve];
     }
 }

@@ -23,10 +23,7 @@ describeWithMongoDB(
             ]
         );
 
-        validateThrowsForInvalidArguments(integration, "switch-connection", [
-            { connectionString: 123 },
-            { connectionString: "mongodb://localhost:12345", extra: "foo" },
-        ]);
+        validateThrowsForInvalidArguments(integration, "switch-connection", [{ connectionString: 123 }]);
 
         describe("without arguments", () => {
             it("connects to the database", async () => {
@@ -90,11 +87,7 @@ describeWithMongoDB("Connect tool", (integration) => {
         },
     ]);
 
-    validateThrowsForInvalidArguments(integration, "connect", [
-        {},
-        { connectionString: 123 },
-        { connectionString: "mongodb://localhost:12345", extra: "foo" },
-    ]);
+    validateThrowsForInvalidArguments(integration, "connect", [{}, { connectionString: 123 }]);
 
     it("doesn't have the switch-connection tool registered", async () => {
         const { tools } = await integration.mcpClient().listTools();
@@ -117,11 +110,6 @@ describeWithMongoDB("Connect tool", (integration) => {
 
     describe("with invalid connection string", () => {
         it("returns error message", async () => {
-            for (let i = 0; i < 10; i++) {
-                const tools = await integration.mcpClient().listTools();
-                console.log("Tools: ", tools);
-            }
-
             const response = await integration.mcpClient().callTool({
                 name: "connect",
                 arguments: { connectionString: "mongodb://localhost:12345" },

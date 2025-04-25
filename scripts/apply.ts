@@ -9,13 +9,15 @@ function findObjectFromRef<T>(obj: T | OpenAPIV3_1.ReferenceObject, openapi: Ope
     }
     const paramParts = ref.split("/");
     paramParts.shift(); // Remove the first part which is always '#'
-    let foundObj: any = openapi; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    let foundObj: Record<string, unknown> = openapi;
     while (true) {
         const part = paramParts.shift();
         if (!part) {
             break;
         }
-        foundObj = foundObj[part];
+
+        foundObj = foundObj[part] as Record<string, unknown>;
     }
     return foundObj as T;
 }
@@ -28,7 +30,7 @@ async function main() {
         process.exit(1);
     }
 
-    const specFile = (await fs.readFile(spec, "utf8")) as string;
+    const specFile = await fs.readFile(spec as string, "utf8");
 
     const operations: {
         path: string;
@@ -42,7 +44,7 @@ async function main() {
     const openapi = JSON.parse(specFile) as OpenAPIV3_1.Document;
     for (const path in openapi.paths) {
         for (const method in openapi.paths[path]) {
-            const operation: OpenAPIV3_1.OperationObject = openapi.paths[path][method];
+            const operation = openapi.paths[path][method] as OpenAPIV3_1.OperationObject;
 
             if (!operation.operationId || !operation.tags?.length) {
                 continue;
@@ -101,9 +103,9 @@ async function main() {
         })
         .join("\n");
 
-    const templateFile = (await fs.readFile(file, "utf8")) as string;
+    const templateFile = await fs.readFile(file as string, "utf8");
     const templateLines = templateFile.split("\n");
-    let outputLines: string[] = [];
+    const outputLines: string[] = [];
     let addLines = true;
     for (const line of templateLines) {
         if (line.includes("DO NOT EDIT. This is auto-generated code.")) {
@@ -120,7 +122,7 @@ async function main() {
     }
     const output = outputLines.join("\n");
 
-    await fs.writeFile(file, output, "utf8");
+    await fs.writeFile(file as string, output, "utf8");
 }
 
 main().catch((error) => {

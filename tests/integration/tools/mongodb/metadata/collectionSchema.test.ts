@@ -56,7 +56,8 @@ describeWithMongoDB("collectionSchema tool", (integration) => {
                         types: [{ bsonType: "String" }],
                     },
                     age: {
-                        types: [{ bsonType: "Number" as any }],
+                        //@ts-expect-error This is a workaround
+                        types: [{ bsonType: "Number" }],
                     },
                 },
             },
@@ -76,7 +77,8 @@ describeWithMongoDB("collectionSchema tool", (integration) => {
                         types: [{ bsonType: "String" }],
                     },
                     age: {
-                        types: [{ bsonType: "Number" as any }, { bsonType: "String" }],
+                        // @ts-expect-error This is a workaround
+                        types: [{ bsonType: "Number" }, { bsonType: "String" }],
                     },
                     country: {
                         types: [{ bsonType: "String" }, { bsonType: "Boolean" }],
@@ -109,7 +111,8 @@ describeWithMongoDB("collectionSchema tool", (integration) => {
                         ],
                     },
                     ageRange: {
-                        types: [{ bsonType: "Array", types: [{ bsonType: "Number" as any }] }, { bsonType: "String" }],
+                        // @ts-expect-error This is a workaround
+                        types: [{ bsonType: "Array", types: [{ bsonType: "Number" }] }, { bsonType: "String" }],
                     },
                 },
             },

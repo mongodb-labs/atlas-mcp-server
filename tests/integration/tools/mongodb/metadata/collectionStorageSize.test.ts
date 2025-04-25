@@ -6,6 +6,7 @@ import {
     databaseCollectionInvalidArgs,
     validateToolMetadata,
     validateThrowsForInvalidArguments,
+    expectDefined,
 } from "../../../helpers.js";
 import * as crypto from "crypto";
 
@@ -65,8 +66,8 @@ describeWithMongoDB("collectionStorageSize tool", (integration) => {
                 expect(content).toContain(`The size of "${integration.randomDbName()}.foo" is`);
                 const size = /is `(\d+\.\d+) ([a-zA-Z]*)`/.exec(content);
 
-                expect(size?.[1]).toBeDefined();
-                expect(size?.[2]).toBeDefined();
+                expectDefined(size?.[1]);
+                expectDefined(size?.[2]);
                 expect(parseFloat(size?.[1] || "")).toBeGreaterThan(0);
                 expect(size?.[2]).toBe(test.expectedScale);
             });

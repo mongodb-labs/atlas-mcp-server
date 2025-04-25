@@ -1,5 +1,5 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { setupIntegrationTest } from "../../helpers.js";
+import { expectDefined } from "../../helpers.js";
 import { parseTable, describeWithAtlas } from "./atlasHelpers.js";
 
 describeWithAtlas("orgs", (integration) => {
@@ -7,7 +7,7 @@ describeWithAtlas("orgs", (integration) => {
         it("should have correct metadata", async () => {
             const { tools } = await integration.mcpClient().listTools();
             const listOrgs = tools.find((tool) => tool.name === "atlas-list-orgs");
-            expect(listOrgs).toBeDefined();
+            expectDefined(listOrgs);
         });
 
         it("returns org names", async () => {

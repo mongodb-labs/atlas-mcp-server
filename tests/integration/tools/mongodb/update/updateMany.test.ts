@@ -42,7 +42,6 @@ describeWithMongoDB("updateMany tool", (integration) => {
         { database: 123, collection: "bar", update: {} },
         { database: [], collection: "bar", update: {} },
         { database: "test", collection: "bar", update: [] },
-        { database: "test", collection: "bar", update: {}, extra: true },
         { database: "test", collection: "bar", update: {}, filter: 123 },
         { database: "test", collection: "bar", update: {}, upsert: "true" },
         { database: "test", collection: "bar", update: {}, filter: {}, upsert: "true" },

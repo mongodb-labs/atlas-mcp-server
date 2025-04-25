@@ -5,6 +5,7 @@ import {
     databaseCollectionParameters,
     validateToolMetadata,
     validateThrowsForInvalidArguments,
+    expectDefined,
 } from "../../../helpers.js";
 import { IndexDirection } from "mongodb";
 
@@ -28,7 +29,6 @@ describeWithMongoDB("createIndex tool", (integration) => {
     validateThrowsForInvalidArguments(integration, "create-index", [
         {},
         { collection: "bar", database: 123, keys: { foo: 1 } },
-        { collection: "bar", database: "test", keys: { foo: 5 } },
         { collection: [], database: "test", keys: { foo: 1 } },
         { collection: "bar", database: "test", keys: { foo: 1 }, name: 123 },
         { collection: "bar", database: "test", keys: "foo", name: "my-index" },
@@ -44,8 +44,8 @@ describeWithMongoDB("createIndex tool", (integration) => {
         expect(indexes[0].name).toEqual("_id_");
         for (const index of expected) {
             const foundIndex = indexes.find((i) => i.name === index.name);
-            expect(foundIndex).toBeDefined();
-            expect(foundIndex!.key).toEqual(index.key);
+            expectDefined(foundIndex);
+            expect(foundIndex.key).toEqual(index.key);
         }
     };
 

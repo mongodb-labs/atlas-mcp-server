@@ -8,6 +8,7 @@ async function readStdin() {
             reject(err);
         });
         process.stdin.on("data", (chunk) => {
+            // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
             data += chunk;
         });
         process.stdin.on("end", () => {
@@ -42,8 +43,8 @@ function filterOpenapi(openapi: OpenAPIV3_1.Document): OpenAPIV3_1.Document {
     for (const path in openapi.paths) {
         const filteredMethods = {} as OpenAPIV3_1.PathItemObject;
         for (const method in openapi.paths[path]) {
-            if (allowedOperations.includes(openapi.paths[path][method].operationId)) {
-                filteredMethods[method] = openapi.paths[path][method];
+            if (allowedOperations.includes((openapi.paths[path][method] as { operationId: string }).operationId)) {
+                filteredMethods[method] = openapi.paths[path][method] as OpenAPIV3_1.OperationObject;
             }
         }
         if (Object.keys(filteredMethods).length > 0) {

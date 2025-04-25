@@ -4,7 +4,8 @@
     "module": "esnext",
     "target": "esnext",
     "isolatedModules": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["jest", "jest-extended"]
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"]
 }
