@@ -190,7 +190,7 @@ This is useful for scenarios where you want to provide access to MongoDB data fo
 
 You can enable read-only mode using:
 
-- **Environment variable**: `export MDB_MCP_READ_ONLY_MODE=true`
+- **Environment variable**: `export MDB_MCP_READ_ONLY=true`
 - **Command-line argument**: `--readOnly=true`
 
 When read-only mode is active, you'll see a message in the server logs indicating which tools were prevented from registering due to this restriction.
