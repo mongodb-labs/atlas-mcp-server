@@ -74,7 +74,7 @@ export class Telemetry {
             ...this.commonProperties,
             mcp_client_version: this.session.agentRunner?.version,
             mcp_client_name: this.session.agentRunner?.name,
-            session_id: this.session.sessionId, 
+            session_id: this.session.sessionId,
             config_atlas_auth: this.session.apiClient.hasCredentials() ? "true" : "false",
             config_connection_string: config.connectionString ? "true" : "false",
         };

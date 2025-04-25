@@ -61,7 +61,7 @@ export type CommonStaticProperties = {
     arch: string;
     os_type: string;
     os_version?: string;
-}
+};
 
 /**
  * Common properties for all events that might change.
