@@ -112,15 +112,8 @@ export abstract class ToolBase {
 
         // Check read-only mode first
         if (this.config.readOnly && !["read", "metadata"].includes(this.operationType)) {
-            logger.debug(
-                LogId.toolDisabled,
-                "tool",
-                `Prevented registration of ${this.name} because it has operation type \`${this.operationType}\` and read-only mode is enabled`
-            );
-            return false;
-        }
-
-        if (this.config.disabledTools.includes(this.category)) {
+            errorClarification = `read-only mode is enabled, its operation type, \`${this.operationType}\`,`;
+        } else if (this.config.disabledTools.includes(this.category)) {
             errorClarification = `its category, \`${this.category}\`,`;
         } else if (this.config.disabledTools.includes(this.operationType)) {
             errorClarification = `its operation type, \`${this.operationType}\`,`;
