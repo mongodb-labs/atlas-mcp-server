@@ -25,10 +25,6 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
-    // This gets used in the scope of tests.
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let randomDbName: string;
-
     beforeAll(async () => {
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
@@ -69,7 +65,6 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
 
     beforeEach(() => {
         config.telemetry = "disabled";
-        randomDbName = new ObjectId().toString();
     });
 
     afterAll(async () => {
@@ -221,9 +216,4 @@ export function validateThrowsForInvalidArguments(
 /** Expects the argument being defined and asserts it */
 export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined> {
     expect(arg).toBeDefined();
-}
-
-/** Expects the argument being undefined and asserts it */
-export function expectUndefined(arg: unknown): asserts arg is undefined {
-    expect(arg).toBeUndefined();
 }

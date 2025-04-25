@@ -50,8 +50,8 @@ describe("Server integration test", () => {
             it("should return capabilities", () => {
                 const capabilities = integration.mcpClient().getServerCapabilities();
                 expectDefined(capabilities);
-                expect(capabilities?.completions).toBeUndefined();
-                expect(capabilities?.experimental).toBeUndefined();
+                expect(capabilities.completions).toBeUndefined();
+                expect(capabilities.experimental).toBeUndefined();
                 expectDefined(capabilities?.tools);
                 expectDefined(capabilities?.logging);
                 expect(capabilities?.prompts).toBeUndefined();
