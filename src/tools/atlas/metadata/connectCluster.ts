@@ -2,6 +2,7 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
+import { sleep } from "../../../common/utils.js";
 
 function generateSecurePassword(): string {
     // TODO: use a better password generator
@@ -67,13 +68,13 @@ export class ConnectClusterTool extends AtlasToolBase {
             },
         });
 
-        setTimeout(async () => {
+        void sleep(expiryMs).then(async () => {
             // disconnect after 12 hours
             if (this.session.serviceProvider) {
-                await this.session.serviceProvider?.close(true);
+                await this.session.serviceProvider.close(true);
                 this.session.serviceProvider = undefined;
             }
-        }, expiryMs);
+        });
 
         const connectionString =
             (cluster.connectionStrings.standardSrv || cluster.connectionStrings.standard || "").replace(

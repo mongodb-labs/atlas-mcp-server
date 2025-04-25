@@ -1,7 +1,8 @@
 import { Session } from "../../../../src/session.js";
 import { expectDefined } from "../../helpers.js";
-import { describeWithAtlas, withProject, sleep, randomId } from "./atlasHelpers.js";
+import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { sleep } from "../../../../src/common/utils.js";
 
 async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
     await session.apiClient.deleteCluster({
@@ -145,10 +146,12 @@ describeWithAtlas("clusters", (integration) => {
                             groupId: projectId,
                         },
                     },
-                    body: [{
-                        comment: "MCP test",
-                        cidrBlock: "0.0.0.0/0"
-                    }]
+                    body: [
+                        {
+                            comment: "MCP test",
+                            cidrBlock: "0.0.0.0/0",
+                        },
+                    ],
                 });
             });
 
