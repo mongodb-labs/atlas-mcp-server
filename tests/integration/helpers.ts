@@ -5,7 +5,6 @@ import { config, UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
-import { ObjectId } from "bson";
 
 interface ParameterInfo {
     name: string;
