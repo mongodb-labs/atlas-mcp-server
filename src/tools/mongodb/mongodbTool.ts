@@ -3,6 +3,7 @@ import { ToolArgs, ToolBase, ToolCategory } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
+import logger, { LogId } from "../../logger.js";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
@@ -14,7 +15,16 @@ export abstract class MongoDBToolBase extends ToolBase {
 
     protected async ensureConnected(): Promise<NodeDriverServiceProvider> {
         if (!this.session.serviceProvider && this.config.connectionString) {
-            await this.connectToMongoDB(this.config.connectionString);
+            try {
+                await this.connectToMongoDB(this.config.connectionString);
+            } catch (error) {
+                logger.error(
+                    LogId.mongodbConnectFailure,
+                    "mongodbTool",
+                    `Failed to connect to MongoDB instance using the connection string from the config: ${error as string}`
+                );
+                throw new MongoDBError(ErrorCodes.MisconfiguredConnectionString, "Not connected to MongoDB.");
+            }
         }
 
         if (!this.session.serviceProvider) {
@@ -28,20 +38,33 @@ export abstract class MongoDBToolBase extends ToolBase {
         error: unknown,
         args: ToolArgs<typeof this.argsShape>
     ): Promise<CallToolResult> | CallToolResult {
-        if (error instanceof MongoDBError && error.code === ErrorCodes.NotConnectedToMongoDB) {
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: "You need to connect to a MongoDB instance before you can access its data.",
-                    },
-                    {
-                        type: "text",
-                        text: "Please use the 'connect' tool to connect to a MongoDB instance.",
-                    },
-                ],
-                isError: true,
-            };
+        if (error instanceof MongoDBError) {
+            switch (error.code) {
+                case ErrorCodes.NotConnectedToMongoDB:
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: "You need to connect to a MongoDB instance before you can access its data.",
+                            },
+                            {
+                                type: "text",
+                                text: "Please use the 'connect' or 'switch-connection' tool to connect to a MongoDB instance.",
+                            },
+                        ],
+                        isError: true,
+                    };
+                case ErrorCodes.MisconfiguredConnectionString:
+                    return {
+                        content: [
+                            {
+                                type: "text",
+                                text: "The configured connection string is not valid. Please check the connection string and confirm it points to a valid MongoDB instance. Alternatively, use the 'switch-connection' tool to connect to a different instance.",
+                            },
+                        ],
+                        isError: true,
+                    };
+            }
         }
 
         return super.handleError(error, args);
