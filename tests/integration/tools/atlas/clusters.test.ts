@@ -139,19 +139,17 @@ describeWithAtlas("clusters", (integration) => {
             beforeAll(async () => {
                 const projectId = getProjectId();
                 await waitClusterState(integration.mcpServer().session, projectId, clusterName, "IDLE");
-                const cluster = await integration.mcpServer().session.apiClient.getCluster({
+                await integration.mcpServer().session.apiClient.createProjectIpAccessList({
                     params: {
                         path: {
                             groupId: projectId,
-                            clusterName: clusterName,
                         },
                     },
+                    body: [{
+                        comment: "MCP test",
+                        cidrBlock: "0.0.0.0/0"
+                    }]
                 });
-
-                console.log(
-                    "Cluster connection string: ",
-                    cluster?.connectionStrings?.standardSrv || cluster?.connectionStrings?.standard
-                );
             });
 
             it("should have correct metadata", async () => {
