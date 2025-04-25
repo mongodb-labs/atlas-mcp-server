@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-permissions:
-  contents: write
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions: {}
     outputs:
       VERSION_EXISTS: ${{ steps.check-version.outputs.VERSION_EXISTS }}
       VERSION: ${{ steps.get-version.outputs.VERSION }}
@@ -45,7 +45,10 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment: Production
-    needs: check
+    permissions:
+      contents: write
+    needs:
+      - check
     if: needs.check.outputs.VERSION_EXISTS == 'false'
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1

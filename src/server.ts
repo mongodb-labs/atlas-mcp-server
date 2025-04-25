@@ -3,8 +3,7 @@ import { Session } from "./session.js";
 import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { AtlasTools } from "./tools/atlas/tools.js";
 import { MongoDbTools } from "./tools/mongodb/tools.js";
-import logger, { initializeLogger } from "./logger.js";
-import { mongoLogId } from "mongodb-log-writer";
+import logger, { initializeLogger, LogId } from "./logger.js";
 import { ObjectId } from "mongodb";
 import { Telemetry } from "./telemetry/telemetry.js";
 import { UserConfig } from "./config.js";
@@ -23,7 +22,7 @@ export class Server {
     public readonly session: Session;
     private readonly mcpServer: McpServer;
     private readonly telemetry: Telemetry;
-    private readonly userConfig: UserConfig;
+    public readonly userConfig: UserConfig;
     private readonly startTime: number;
 
     constructor({ session, mcpServer, userConfig }: ServerOptions) {
@@ -36,6 +35,7 @@ export class Server {
 
     async connect(transport: Transport) {
         this.mcpServer.server.registerCapabilities({ logging: {} });
+
         this.registerTools();
         this.registerResources();
 
@@ -71,7 +71,7 @@ export class Server {
             this.session.sessionId = new ObjectId().toString();
 
             logger.info(
-                mongoLogId(1_000_004),
+                LogId.serverInitialized,
                 "server",
                 `Server started with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
             );
@@ -116,6 +116,8 @@ export class Server {
 
         if (command === "start") {
             event.properties.startup_time_ms = commandDuration;
+            event.properties.read_only_mode = this.userConfig.readOnly || false;
+            event.properties.disallowed_tools = this.userConfig.disabledTools || [];
         }
         if (command === "stop") {
             event.properties.runtime_duration_ms = Date.now() - this.startTime;
@@ -135,6 +137,32 @@ export class Server {
     }
 
     private registerResources() {
+        this.mcpServer.resource(
+            "config",
+            "config://config",
+            {
+                description:
+                    "Server configuration, supplied by the user either as environment variables or as startup arguments",
+            },
+            (uri) => {
+                const result = {
+                    telemetry: this.userConfig.telemetry,
+                    logPath: this.userConfig.logPath,
+                    connectionString: this.userConfig.connectionString
+                        ? "set; no explicit connect needed, use switch-connection tool to connect to a different connection if necessary"
+                        : "not set; before using any mongodb tool, you need to call the connect tool with a connection string",
+                    connectOptions: this.userConfig.connectOptions,
+                };
+                return {
+                    contents: [
+                        {
+                            text: JSON.stringify(result),
+                            uri: uri.href,
+                        },
+                    ],
+                };
+            }
+        );
         if (this.userConfig.connectionString) {
             this.mcpServer.resource(
                 "connection-string",

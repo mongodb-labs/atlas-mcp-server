@@ -10,6 +10,8 @@ on:
         required: true
         default: "patch"
 
+permissions: {}
+
 jobs:
   create-pr:
     runs-on: ubuntu-latest

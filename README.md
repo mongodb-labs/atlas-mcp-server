@@ -150,6 +150,7 @@ The MongoDB MCP Server can be configured using multiple methods, with the follow
 | `connectionString` | MongoDB connection string for direct database connections (optional users may choose to inform it on every tool call) |
 | `logPath`          | Folder to store logs                                                                                                  |
 | `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled.                            |
+| `readOnly`         | When set to true, only allows read and metadata operation types, disabling create/update/delete operations            |
 
 #### `logPath`
 
@@ -180,6 +181,19 @@ Operation types:
 - `delete` - Tools that delete resources, such as delete document, drop collection, etc.
 - `read` - Tools that read resources, such as find, aggregate, list clusters, etc.
 - `metadata` - Tools that read metadata, such as list databases, list collections, collection schema, etc.
+
+#### Read-Only Mode
+
+The `readOnly` configuration option allows you to restrict the MCP server to only use tools with "read" and "metadata" operation types. When enabled, all tools that have "create", "update" or "delete" operation types will not be registered with the server.
+
+This is useful for scenarios where you want to provide access to MongoDB data for analysis without allowing any modifications to the data or infrastructure.
+
+You can enable read-only mode using:
+
+- **Environment variable**: `export MDB_MCP_READ_ONLY=true`
+- **Command-line argument**: `--readOnly`
+
+When read-only mode is active, you'll see a message in the server logs indicating which tools were prevented from registering due to this restriction.
 
 ### Atlas API Access
 
@@ -221,6 +235,7 @@ export MDB_MCP_API_CLIENT_SECRET="your-atlas-client-secret"
 export MDB_MCP_CONNECTION_STRING="mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
 
 export MDB_MCP_LOG_PATH="/path/to/logs"
+
 ```
 
 #### Command-Line Arguments

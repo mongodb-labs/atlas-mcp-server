@@ -20,11 +20,12 @@ export interface IntegrationTest {
     mcpServer: () => Server;
 }
 
-export function setupIntegrationTest(userConfig: UserConfig = config): IntegrationTest {
+export function setupIntegrationTest(getUserConfig: () => UserConfig = () => config): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
     beforeAll(async () => {
+        const userConfig = getUserConfig();
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
 
@@ -50,6 +51,7 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
             apiClientSecret: userConfig.apiClientSecret,
         });
 
+        userConfig.telemetry = "disabled";
         mcpServer = new Server({
             session,
             userConfig,
@@ -63,7 +65,15 @@ export function setupIntegrationTest(userConfig: UserConfig = config): Integrati
     });
 
     beforeEach(() => {
-        config.telemetry = "disabled";
+        if (mcpServer) {
+            mcpServer.userConfig.telemetry = "disabled";
+        }
+    });
+
+    afterEach(async () => {
+        if (mcpServer) {
+            await mcpServer.session.close();
+        }
     });
 
     afterAll(async () => {

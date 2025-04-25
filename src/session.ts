@@ -1,6 +1,7 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ApiClient, ApiClientCredentials } from "./common/atlas/apiClient.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
+import EventEmitter from "events";
 
 export interface SessionOptions {
     apiBaseUrl?: string;
@@ -8,7 +9,9 @@ export interface SessionOptions {
     apiClientSecret?: string;
 }
 
-export class Session {
+export class Session extends EventEmitter<{
+    close: [];
+}> {
     sessionId?: string;
     serviceProvider?: NodeDriverServiceProvider;
     apiClient: ApiClient;
@@ -18,6 +21,8 @@ export class Session {
     };
 
     constructor({ apiBaseUrl, apiClientId, apiClientSecret }: SessionOptions = {}) {
+        super();
+
         const credentials: ApiClientCredentials | undefined =
             apiClientId && apiClientSecret
                 ? {
@@ -49,6 +54,8 @@ export class Session {
                 console.error("Error closing service provider:", error);
             }
             this.serviceProvider = undefined;
+
+            this.emit("close");
         }
     }
 }
