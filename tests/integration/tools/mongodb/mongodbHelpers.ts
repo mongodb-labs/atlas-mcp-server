@@ -14,11 +14,11 @@ interface MongoDBIntegrationTest {
 export function describeWithMongoDB(
     name: string,
     fn: (integration: IntegrationTest & MongoDBIntegrationTest & { connectMcpClient: () => Promise<void> }) => void,
-    userConfigGetter: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => config
+    getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => config
 ) {
     describe(name, () => {
         const mdbIntegration = setupMongoDBIntegrationTest();
-        const integration = setupIntegrationTest(() => userConfigGetter(mdbIntegration));
+        const integration = setupIntegrationTest(() => getUserConfig(mdbIntegration));
 
         afterEach(() => {
             integration.mcpServer().userConfig.connectionString = undefined;

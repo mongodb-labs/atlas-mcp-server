@@ -20,12 +20,12 @@ export interface IntegrationTest {
     mcpServer: () => Server;
 }
 
-export function setupIntegrationTest(userConfigGetter: () => UserConfig = () => config): IntegrationTest {
+export function setupIntegrationTest(getUserConfig: () => UserConfig = () => config): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 
     beforeAll(async () => {
-        const userConfig = userConfigGetter();
+        const userConfig = getUserConfig();
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
 
