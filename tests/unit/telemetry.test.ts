@@ -94,7 +94,6 @@ describe("Telemetry", () => {
         // Create the telemetry instance with mocked dependencies
         telemetry = new Telemetry(session, mockEventCache);
 
-        // Set telemetry to enabled by default
         config.telemetry = "enabled";
     });
 
