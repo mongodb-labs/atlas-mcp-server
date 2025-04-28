@@ -6,7 +6,6 @@ import logger, { LogId } from "../logger.js";
 import { Telemetry } from "../telemetry/telemetry.js";
 import { type ToolEvent } from "../telemetry/types.js";
 import { UserConfig } from "../config.js";
-import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
 
@@ -150,22 +149,5 @@ export abstract class ToolBase {
                 },
             ],
         };
-    }
-
-    protected async connectToMongoDB(connectionString: string): Promise<void> {
-        const provider = await NodeDriverServiceProvider.connect(connectionString, {
-            productDocsLink: "https://docs.mongodb.com/todo-mcp",
-            productName: "MongoDB MCP",
-            readConcern: {
-                level: this.config.connectOptions.readConcern,
-            },
-            readPreference: this.config.connectOptions.readPreference,
-            writeConcern: {
-                w: this.config.connectOptions.writeConcern,
-            },
-            timeoutMS: this.config.connectOptions.timeoutMS,
-        });
-
-        this.session.serviceProvider = provider;
     }
 }

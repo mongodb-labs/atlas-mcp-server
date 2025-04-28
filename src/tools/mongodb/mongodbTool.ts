@@ -69,4 +69,8 @@ export abstract class MongoDBToolBase extends ToolBase {
 
         return super.handleError(error, args);
     }
+
+    protected connectToMongoDB(connectionString: string): Promise<void> {
+        return this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+    }
 }

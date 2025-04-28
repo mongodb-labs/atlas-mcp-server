@@ -33,7 +33,7 @@ export class Server {
         this.userConfig = userConfig;
     }
 
-    async connect(transport: Transport) {
+    async connect(transport: Transport): Promise<void> {
         this.mcpServer.server.registerCapabilities({ logging: {} });
 
         this.registerTools();
@@ -88,6 +88,8 @@ export class Server {
             const closeTime = Date.now();
             this.emitServerEvent("stop", Date.now() - closeTime, error);
         };
+
+        await this.validateConfig();
     }
 
     async close(): Promise<void> {
@@ -181,6 +183,31 @@ export class Server {
                     };
                 }
             );
+        }
+    }
+
+    private async validateConfig(): Promise<void> {
+        const isAtlasConfigured = this.userConfig.apiClientId && this.userConfig.apiClientSecret;
+        const isMongoDbConfigured = this.userConfig.connectionString;
+        if (!isAtlasConfigured && !isMongoDbConfigured) {
+            console.error(
+                "Either Atlas Client Id or a MongoDB connection string must be configured - you can provide them as environment variables or as startup arguments. \n" +
+                    "Provide the Atlas credentials as `MDB_MCP_API_CLIENT_ID` and `MDB_MCP_API_CLIENT_SECRET` environment variables or as `--apiClientId` and `--apiClientSecret` startup arguments. \n" +
+                    "Provide the MongoDB connection string as `MDB_MCP_CONNECTION_STRING` environment variable or as `--connectionString` startup argument."
+            );
+            throw new Error("Either Atlas Client Id or a MongoDB connection string must be configured");
+        }
+
+        if (this.userConfig.connectionString) {
+            try {
+                await this.session.connectToMongoDB(this.userConfig.connectionString, this.userConfig.connectOptions);
+            } catch (error) {
+                console.error(
+                    "Failed to connect to MongoDB instance using the connection string from the config: ",
+                    error
+                );
+                throw new Error("Failed to connect to MongoDB instance using the connection string from the config");
+            }
         }
     }
 }

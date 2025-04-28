@@ -2,12 +2,18 @@ import { ObjectId } from "mongodb";
 import { Group } from "../../../../src/common/atlas/openapi.js";
 import { ApiClient } from "../../../../src/common/atlas/apiClient.js";
 import { setupIntegrationTest, IntegrationTest } from "../../helpers.js";
+import { config } from "../../../../src/config.js";
 
 export type IntegrationTestFunction = (integration: IntegrationTest) => void;
 
 export function describeWithAtlas(name: string, fn: IntegrationTestFunction) {
     const testDefinition = () => {
-        const integration = setupIntegrationTest();
+        const integration = setupIntegrationTest(() => ({
+            ...config,
+            apiClientId: process.env.MDB_MCP_API_CLIENT_ID,
+            apiClientSecret: process.env.MDB_MCP_API_CLIENT_SECRET,
+        }));
+
         describe(name, () => {
             fn(integration);
         });

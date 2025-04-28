@@ -5,8 +5,7 @@ import { z } from "zod";
 
 export const CountArgs = {
     query: z
-        .object({})
-        .passthrough()
+        .record(z.string(), z.unknown())
         .optional()
         .describe(
             "The query filter to count documents. Matches the syntax of the filter argument of db.collection.count()"

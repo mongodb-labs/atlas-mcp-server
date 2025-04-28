@@ -9,15 +9,13 @@ export class UpdateManyTool extends MongoDBToolBase {
     protected argsShape = {
         ...DbOperationArgs,
         filter: z
-            .object({})
-            .passthrough()
+            .record(z.string(), z.unknown())
             .optional()
             .describe(
                 "The selection criteria for the update, matching the syntax of the filter argument of db.collection.updateOne()"
             ),
         update: z
-            .object({})
-            .passthrough()
+            .record(z.string(), z.unknown())
             .describe("An update document describing the modifications to apply using update operator expressions"),
         upsert: z
             .boolean()

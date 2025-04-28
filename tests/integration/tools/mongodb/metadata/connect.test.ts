@@ -2,6 +2,8 @@ import { describeWithMongoDB } from "../mongodbHelpers.js";
 import { getResponseContent, validateThrowsForInvalidArguments, validateToolMetadata } from "../../../helpers.js";
 import { config } from "../../../../../src/config.js";
 
+// These tests are temporarily skipped because the connect tool is disabled for the initial release.
+// TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when the connect tool is reenabled
 describeWithMongoDB(
     "switchConnection tool",
     (integration) => {
@@ -75,50 +77,56 @@ describeWithMongoDB(
     (mdbIntegration) => ({
         ...config,
         connectionString: mdbIntegration.connectionString(),
-    })
+    }),
+    describe.skip
 );
-describeWithMongoDB("Connect tool", (integration) => {
-    validateToolMetadata(integration, "connect", "Connect to a MongoDB instance", [
-        {
-            name: "connectionString",
-            description: "MongoDB connection string (in the mongodb:// or mongodb+srv:// format)",
-            type: "string",
-            required: true,
-        },
-    ]);
+describeWithMongoDB(
+    "Connect tool",
+    (integration) => {
+        validateToolMetadata(integration, "connect", "Connect to a MongoDB instance", [
+            {
+                name: "connectionString",
+                description: "MongoDB connection string (in the mongodb:// or mongodb+srv:// format)",
+                type: "string",
+                required: true,
+            },
+        ]);
 
-    validateThrowsForInvalidArguments(integration, "connect", [{}, { connectionString: 123 }]);
+        validateThrowsForInvalidArguments(integration, "connect", [{}, { connectionString: 123 }]);
 
-    it("doesn't have the switch-connection tool registered", async () => {
-        const { tools } = await integration.mcpClient().listTools();
-        const tool = tools.find((tool) => tool.name === "switch-connection");
-        expect(tool).toBeUndefined();
-    });
-
-    describe("with connection string", () => {
-        it("connects to the database", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "connect",
-                arguments: {
-                    connectionString: integration.connectionString(),
-                },
-            });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("Successfully connected");
+        it("doesn't have the switch-connection tool registered", async () => {
+            const { tools } = await integration.mcpClient().listTools();
+            const tool = tools.find((tool) => tool.name === "switch-connection");
+            expect(tool).toBeUndefined();
         });
-    });
 
-    describe("with invalid connection string", () => {
-        it("returns error message", async () => {
-            const response = await integration.mcpClient().callTool({
-                name: "connect",
-                arguments: { connectionString: "mongodb://localhost:12345" },
+        describe("with connection string", () => {
+            it("connects to the database", async () => {
+                const response = await integration.mcpClient().callTool({
+                    name: "connect",
+                    arguments: {
+                        connectionString: integration.connectionString(),
+                    },
+                });
+                const content = getResponseContent(response.content);
+                expect(content).toContain("Successfully connected");
             });
-            const content = getResponseContent(response.content);
-            expect(content).toContain("Error running connect");
-
-            // Should not suggest using the config connection string (because we don't have one)
-            expect(content).not.toContain("Your config lists a different connection string");
         });
-    });
-});
+
+        describe("with invalid connection string", () => {
+            it("returns error message", async () => {
+                const response = await integration.mcpClient().callTool({
+                    name: "connect",
+                    arguments: { connectionString: "mongodb://localhost:12345" },
+                });
+                const content = getResponseContent(response.content);
+                expect(content).toContain("Error running connect");
+
+                // Should not suggest using the config connection string (because we don't have one)
+                expect(content).not.toContain("Your config lists a different connection string");
+            });
+        });
+    },
+    () => config,
+    describe.skip
+);

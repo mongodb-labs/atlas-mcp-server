@@ -7,13 +7,11 @@ import { EJSON } from "bson";
 
 export const FindArgs = {
     filter: z
-        .object({})
-        .passthrough()
+        .record(z.string(), z.unknown())
         .optional()
         .describe("The query filter, matching the syntax of the query argument of db.collection.find()"),
     projection: z
-        .object({})
-        .passthrough()
+        .record(z.string(), z.unknown())
         .optional()
         .describe("The projection, matching the syntax of the projection argument of db.collection.find()"),
     limit: z.number().optional().default(10).describe("The maximum number of documents to return"),

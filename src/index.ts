@@ -18,6 +18,7 @@ try {
         name: packageInfo.mcpServerName,
         version: packageInfo.version,
     });
+
     const server = new Server({
         mcpServer,
         session,

@@ -1,7 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "./inMemoryTransport.js";
 import { Server } from "../../src/server.js";
-import { config, UserConfig } from "../../src/config.js";
+import { UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
@@ -20,7 +20,7 @@ export interface IntegrationTest {
     mcpServer: () => Server;
 }
 
-export function setupIntegrationTest(getUserConfig: () => UserConfig = () => config): IntegrationTest {
+export function setupIntegrationTest(getUserConfig: () => UserConfig): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 

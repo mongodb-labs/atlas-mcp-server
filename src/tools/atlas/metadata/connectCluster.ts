@@ -100,7 +100,7 @@ export class ConnectClusterTool extends AtlasToolBase {
         cn.searchParams.set("authSource", "admin");
         const connectionString = cn.toString();
 
-        await this.connectToMongoDB(connectionString);
+        await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
 
         return {
             content: [

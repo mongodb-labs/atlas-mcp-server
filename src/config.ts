@@ -4,26 +4,29 @@ import argv from "yargs-parser";
 
 import { ReadConcernLevel, ReadPreferenceMode, W } from "mongodb";
 
+export interface ConnectOptions {
+    readConcern: ReadConcernLevel;
+    readPreference: ReadPreferenceMode;
+    writeConcern: W;
+    timeoutMS: number;
+}
+
 // If we decide to support non-string config options, we'll need to extend the mechanism for parsing
 // env variables.
 export interface UserConfig {
-    apiBaseUrl?: string;
+    apiBaseUrl: string;
     apiClientId?: string;
     apiClientSecret?: string;
     telemetry?: "enabled" | "disabled";
     logPath: string;
     connectionString?: string;
-    connectOptions: {
-        readConcern: ReadConcernLevel;
-        readPreference: ReadPreferenceMode;
-        writeConcern: W;
-        timeoutMS: number;
-    };
+    connectOptions: ConnectOptions;
     disabledTools: Array<string>;
     readOnly?: boolean;
 }
 
 const defaults: UserConfig = {
+    apiBaseUrl: "https://cloud.mongodb.com/",
     logPath: getLogPath(),
     connectOptions: {
         readConcern: "local",
