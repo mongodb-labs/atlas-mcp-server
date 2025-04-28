@@ -20,7 +20,7 @@ body:
     attributes:
       label: "Bug Description"
       description: "Describe the bug in detail. Include the expected behavior and actual behavior."
-      placeholder: "e.g., When I open the app, it crashes with error XYZ."
+      placeholder: "e.g., When I ask for a complex aggregation, I get the following error..."
     validations:
       required: true
   - type: checkboxes
