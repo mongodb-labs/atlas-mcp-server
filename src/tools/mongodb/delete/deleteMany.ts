@@ -9,8 +9,7 @@ export class DeleteManyTool extends MongoDBToolBase {
     protected argsShape = {
         ...DbOperationArgs,
         filter: z
-            .object({})
-            .passthrough()
+            .record(z.string(), z.unknown())
             .optional()
             .describe(
                 "The query filter, specifying the deletion criteria. Matches the syntax of the filter argument of db.collection.deleteMany()"
