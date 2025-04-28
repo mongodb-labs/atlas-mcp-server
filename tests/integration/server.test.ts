@@ -3,16 +3,24 @@ import { config } from "../../src/config.js";
 import { describeWithMongoDB } from "./tools/mongodb/mongodbHelpers.js";
 
 describe("Server integration test", () => {
-    describeWithMongoDB("without atlas", (integration) => {
-        it("should return positive number of tools and have no atlas tools", async () => {
-            const tools = await integration.mcpClient().listTools();
-            expectDefined(tools);
-            expect(tools.tools.length).toBeGreaterThan(0);
+    describeWithMongoDB(
+        "without atlas",
+        (integration) => {
+            it("should return positive number of tools and have no atlas tools", async () => {
+                const tools = await integration.mcpClient().listTools();
+                expectDefined(tools);
+                expect(tools.tools.length).toBeGreaterThan(0);
 
-            const atlasTools = tools.tools.filter((tool) => tool.name.startsWith("atlas-"));
-            expect(atlasTools.length).toBeLessThanOrEqual(0);
-        });
-    });
+                const atlasTools = tools.tools.filter((tool) => tool.name.startsWith("atlas-"));
+                expect(atlasTools.length).toBeLessThanOrEqual(0);
+            });
+        },
+        () => ({
+            ...config,
+            apiClientId: undefined,
+            apiClientSecret: undefined,
+        })
+    );
 
     describe("with atlas", () => {
         const integration = setupIntegrationTest(() => ({
