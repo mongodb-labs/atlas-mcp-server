@@ -1,14 +1,9 @@
 import { expectDefined, setupIntegrationTest } from "./helpers.js";
 import { config } from "../../src/config.js";
+import { describeWithMongoDB } from "./tools/mongodb/mongodbHelpers.js";
 
 describe("Server integration test", () => {
-    describe("without atlas", () => {
-        const integration = setupIntegrationTest(() => ({
-            ...config,
-            apiClientId: undefined,
-            apiClientSecret: undefined,
-        }));
-
+    describeWithMongoDB("without atlas", (integration) => {
         it("should return positive number of tools and have no atlas tools", async () => {
             const tools = await integration.mcpClient().listTools();
             expectDefined(tools);
@@ -18,6 +13,7 @@ describe("Server integration test", () => {
             expect(atlasTools.length).toBeLessThanOrEqual(0);
         });
     });
+
     describe("with atlas", () => {
         const integration = setupIntegrationTest(() => ({
             ...config,

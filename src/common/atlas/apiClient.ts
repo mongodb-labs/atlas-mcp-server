@@ -15,7 +15,7 @@ export interface ApiClientCredentials {
 
 export interface ApiClientOptions {
     credentials?: ApiClientCredentials;
-    baseUrl?: string;
+    baseUrl: string;
     userAgent?: string;
 }
 
@@ -63,12 +63,11 @@ export class ApiClient {
         },
     };
 
-    constructor(options?: ApiClientOptions) {
+    constructor(options: ApiClientOptions) {
         this.options = {
             ...options,
-            baseUrl: options?.baseUrl || "https://cloud.mongodb.com/",
             userAgent:
-                options?.userAgent ||
+                options.userAgent ||
                 `AtlasMCP/${packageInfo.version} (${process.platform}; ${process.arch}; ${process.env.HOSTNAME || "unknown"})`,
         };
 

@@ -4,11 +4,30 @@ import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
 import logger, { LogId } from "../../logger.js";
+import { UserConfig } from "../../config.js";
+import { Session } from "../../session.js";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
     collection: z.string().describe("Collection name"),
 };
+
+export async function connectToMongoDB(connectionString: string, config: UserConfig, session: Session): Promise<void> {
+    const provider = await NodeDriverServiceProvider.connect(connectionString, {
+        productDocsLink: "https://docs.mongodb.com/todo-mcp",
+        productName: "MongoDB MCP",
+        readConcern: {
+            level: config.connectOptions.readConcern,
+        },
+        readPreference: config.connectOptions.readPreference,
+        writeConcern: {
+            w: config.connectOptions.writeConcern,
+        },
+        timeoutMS: config.connectOptions.timeoutMS,
+    });
+
+    session.serviceProvider = provider;
+}
 
 export abstract class MongoDBToolBase extends ToolBase {
     protected category: ToolCategory = "mongodb";
@@ -70,20 +89,7 @@ export abstract class MongoDBToolBase extends ToolBase {
         return super.handleError(error, args);
     }
 
-    protected async connectToMongoDB(connectionString: string): Promise<void> {
-        const provider = await NodeDriverServiceProvider.connect(connectionString, {
-            productDocsLink: "https://docs.mongodb.com/todo-mcp",
-            productName: "MongoDB MCP",
-            readConcern: {
-                level: this.config.connectOptions.readConcern,
-            },
-            readPreference: this.config.connectOptions.readPreference,
-            writeConcern: {
-                w: this.config.connectOptions.writeConcern,
-            },
-            timeoutMS: this.config.connectOptions.timeoutMS,
-        });
-
-        this.session.serviceProvider = provider;
+    protected connectToMongoDB(connectionString: string): Promise<void> {
+        return connectToMongoDB(connectionString, this.config, this.session);
     }
 }

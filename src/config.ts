@@ -7,7 +7,7 @@ import { ReadConcernLevel, ReadPreferenceMode, W } from "mongodb";
 // If we decide to support non-string config options, we'll need to extend the mechanism for parsing
 // env variables.
 export interface UserConfig {
-    apiBaseUrl?: string;
+    apiBaseUrl: string;
     apiClientId?: string;
     apiClientSecret?: string;
     telemetry?: "enabled" | "disabled";
@@ -24,6 +24,7 @@ export interface UserConfig {
 }
 
 const defaults: UserConfig = {
+    apiBaseUrl: "https://cloud.mongodb.com/",
     logPath: getLogPath(),
     connectOptions: {
         readConcern: "local",

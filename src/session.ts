@@ -4,7 +4,7 @@ import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import EventEmitter from "events";
 
 export interface SessionOptions {
-    apiBaseUrl?: string;
+    apiBaseUrl: string;
     apiClientId?: string;
     apiClientSecret?: string;
 }
@@ -20,7 +20,7 @@ export class Session extends EventEmitter<{
         version: string;
     };
 
-    constructor({ apiBaseUrl, apiClientId, apiClientSecret }: SessionOptions = {}) {
+    constructor({ apiBaseUrl, apiClientId, apiClientSecret }: SessionOptions) {
         super();
 
         const credentials: ApiClientCredentials | undefined =

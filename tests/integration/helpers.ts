@@ -20,7 +20,7 @@ export interface IntegrationTest {
     mcpServer: () => Server;
 }
 
-export function setupIntegrationTest(getUserConfig: () => UserConfig = () => config): IntegrationTest {
+export function setupIntegrationTest(getUserConfig: () => UserConfig): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
 

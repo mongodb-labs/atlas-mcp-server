@@ -14,24 +14,30 @@ interface MongoDBIntegrationTest {
 export function describeWithMongoDB(
     name: string,
     fn: (integration: IntegrationTest & MongoDBIntegrationTest & { connectMcpClient: () => Promise<void> }) => void,
-    getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => config
+    getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => config,
+    describeFn = describe
 ) {
-    describe(name, () => {
+    describeFn(name, () => {
         const mdbIntegration = setupMongoDBIntegrationTest();
-        const integration = setupIntegrationTest(() => getUserConfig(mdbIntegration));
+        const integration = setupIntegrationTest(() => ({
+            ...getUserConfig(mdbIntegration),
+            connectionString: mdbIntegration.connectionString(),
+        }));
 
-        afterEach(() => {
-            integration.mcpServer().userConfig.connectionString = undefined;
+        beforeEach(() => {
+            integration.mcpServer().userConfig.connectionString = mdbIntegration.connectionString();
         });
 
         fn({
             ...integration,
             ...mdbIntegration,
             connectMcpClient: async () => {
-                await integration.mcpClient().callTool({
-                    name: "connect",
-                    arguments: { connectionString: mdbIntegration.connectionString() },
-                });
+                // TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when
+                // the connect tool is reenabled
+                // await integration.mcpClient().callTool({
+                //     name: "connect",
+                //     arguments: { connectionString: mdbIntegration.connectionString() },
+                // });
             },
         });
     });
@@ -132,7 +138,8 @@ export function validateAutoConnectBehavior(
     },
     beforeEachImpl?: () => Promise<void>
 ): void {
-    describe("when not connected", () => {
+    // TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when the connect tool is reenabled
+    describe.skip("when not connected", () => {
         if (beforeEachImpl) {
             beforeEach(() => beforeEachImpl());
         }
