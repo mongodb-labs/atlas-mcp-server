@@ -18,10 +18,10 @@ A clear and concise description of what the bug is.
  - [ ] Claude Desktop
 
 **Affected Models (if applicable)**
-- [ ] Claude 3.5 Sonnet
-- [ ] Claude 3.7 Sonnet
-- [ ] GPT-4a
-- [ ] o4-mini
+ - [ ] Claude 3.5 Sonnet
+ - [ ] Claude 3.7 Sonnet
+ - [ ] GPT-4a
+ - [ ] o4-mini
 
 **To Reproduce**
 Steps to reproduce the behavior:
