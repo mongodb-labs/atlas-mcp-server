@@ -65,6 +65,7 @@ export class Session extends EventEmitter<{
             this.serviceProvider = undefined;
         }
         if (!this.connectedAtlasCluster) {
+            this.emit("disconnect");
             return;
         }
         try {
