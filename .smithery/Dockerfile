@@ -18,6 +18,5 @@ RUN npm ci
 
 RUN npm run build
 
-RUN mongod --fork --logpath /var/log/mongodb.log
 ENV MDB_MCP_CONNECTION_STRING mongodb://localhost:27017
 CMD ["sh", "-c", "mongod --fork --logpath /var/log/mongodb.log --dbpath /data/db && node dist/index.js"]
