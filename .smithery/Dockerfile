@@ -14,15 +14,17 @@ RUN apt-get update && \
 # Create a directory for the application
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY . .
+COPY ../ .
 
 # Install application dependencies
 RUN npm ci
 
 RUN npm run build
 
-RUN mongod --fork --logpath /var/log/mongodb.log
+# Copy the entrypoint script
+COPY ./.smithery/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Start MongoDB and the application
-CMD ["node", "dist/index.js --connectionString mongodb://localhost:27017"]
+CMD ["node", "dist/index.js", "--connectionString", "mongodb://localhost:27017"]
+
+ENTRYPOINT ["entrypoint.sh"]
