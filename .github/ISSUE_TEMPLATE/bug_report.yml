@@ -12,7 +12,7 @@ body:
     attributes:
       label: "Bug Title"
       description: "Provide a short and descriptive title for the bug."
-      placeholder: "e.g., App crashes on startup"
+      placeholder: "e.g., can't run an aggregation"
     validations:
       required: true
   - type: textarea
