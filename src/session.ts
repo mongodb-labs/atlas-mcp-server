@@ -1,9 +1,7 @@
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { ApiClient, ApiClientCredentials } from "./common/atlas/apiClient.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types.js";
-import logger from "./logger.js";
-import { mongoLogId } from "mongodb-log-writer";
-import { ErrorCodes } from "./errors.js";
+import logger, { LogId } from "./logger.js";
 import EventEmitter from "events";
 
 export interface SessionOptions {
@@ -62,11 +60,7 @@ export class Session extends EventEmitter<{
                 await this.serviceProvider.close(true);
             } catch (err: unknown) {
                 const error = err instanceof Error ? err : new Error(String(err));
-                logger.error(
-                    mongoLogId(ErrorCodes.CloseServiceProvider),
-                    "Error closing service provider:",
-                    error.message
-                );
+                logger.error(LogId.mongodbDisconnectFailure, "Error closing service provider:", error.message);
             }
             this.serviceProvider = undefined;
         }
@@ -87,7 +81,7 @@ export class Session extends EventEmitter<{
             const error = err instanceof Error ? err : new Error(String(err));
 
             logger.error(
-                mongoLogId(ErrorCodes.DeleteDatabaseUser),
+                LogId.atlasDeleteDatabaseUserFailure,
                 "atlas-connect-cluster",
                 `Error deleting previous database user: ${error.message}`
             );

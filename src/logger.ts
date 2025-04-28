@@ -11,6 +11,7 @@ export const LogId = {
     serverInitialized: mongoLogId(1_000_002),
 
     atlasCheckCredentials: mongoLogId(1_001_001),
+    atlasDeleteDatabaseUserFailure: mongoLogId(1_001_002),
 
     telemetryDisabled: mongoLogId(1_002_001),
     telemetryEmitFailure: mongoLogId(1_002_002),
@@ -22,6 +23,7 @@ export const LogId = {
     toolDisabled: mongoLogId(1_003_003),
 
     mongodbConnectFailure: mongoLogId(1_004_001),
+    mongodbDisconnectFailure: mongoLogId(1_004_002),
 } as const;
 
 abstract class LoggerBase {
