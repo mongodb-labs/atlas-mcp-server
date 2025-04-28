@@ -55,7 +55,7 @@ export class Session extends EventEmitter<{
         }
     }
 
-    async disconnect() {
+    async disconnect(): Promise<void> {
         if (this.serviceProvider) {
             try {
                 await this.serviceProvider.close(true);
