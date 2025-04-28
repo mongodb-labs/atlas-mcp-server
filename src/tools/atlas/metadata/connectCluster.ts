@@ -46,7 +46,7 @@ export class ConnectClusterTool extends AtlasToolBase {
             throw new Error("Connection string not available");
         }
 
-        const username = `usrMcp${Math.floor(Math.random() * 100000)}`;
+        const username = `mcpUser${Math.floor(Math.random() * 100000)}`;
         const password = await generateSecurePassword();
 
         const expiryDate = new Date(Date.now() + EXPIRY_MS);
