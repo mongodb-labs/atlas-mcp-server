@@ -3,11 +3,12 @@ startCommand:
   type: stdio
   configSchema:
     type: object
+    required:
+      - connectionString
     properties:
       connectionString:
         type: string
-      required:
-        - connectionString
+        description: The connection string to use to connect to MongoDB.
   commandFunction:
     # A function that produces the CLI command to start the MCP on stdio.
     |-
