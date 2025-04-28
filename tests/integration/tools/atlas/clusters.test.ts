@@ -84,7 +84,7 @@ describeWithAtlas("clusters", (integration) => {
                     },
                 })) as CallToolResult;
                 expect(response.content).toBeArray();
-                expect(response.content).toHaveLength(1);
+                expect(response.content).toHaveLength(2);
                 expect(response.content[0].text).toContain("has been created");
             });
         });

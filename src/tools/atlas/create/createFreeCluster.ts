@@ -47,7 +47,10 @@ export class CreateFreeClusterTool extends AtlasToolBase {
         });
 
         return {
-            content: [{ type: "text", text: `Cluster "${name}" has been created in region "${region}".` }],
+            content: [
+                { type: "text", text: `Cluster "${name}" has been created in region "${region}".` },
+                { type: "text", text: `Double check your access lists to enable your current IP.` },
+            ],
         };
     }
 }
