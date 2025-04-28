@@ -35,7 +35,7 @@ const defaults: UserConfig = {
         timeoutMS: 30_000,
     },
     disabledTools: [],
-    telemetry: "disabled",
+    telemetry: "enabled",
     readOnly: false,
 };
 
