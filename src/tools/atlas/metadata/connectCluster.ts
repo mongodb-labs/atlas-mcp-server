@@ -51,6 +51,16 @@ export class ConnectClusterTool extends AtlasToolBase {
 
         const expiryDate = new Date(Date.now() + EXPIRY_MS);
 
+        const readOnly =
+            this.config.readOnly ||
+            (this.config.disabledTools?.includes("create") &&
+                this.config.disabledTools?.includes("update") &&
+                this.config.disabledTools?.includes("delete") &&
+                !this.config.disabledTools?.includes("read") &&
+                !this.config.disabledTools?.includes("metadata"));
+
+        const roleName = readOnly ? "readAnyDatabase" : "readWriteAnyDatabase";
+
         await this.session.apiClient.createDatabaseUser({
             params: {
                 path: {
@@ -62,7 +72,7 @@ export class ConnectClusterTool extends AtlasToolBase {
                 groupId: projectId,
                 roles: [
                     {
-                        roleName: "readWriteAnyDatabase",
+                        roleName,
                         databaseName: "admin",
                     },
                 ],
