@@ -1,0 +1,79 @@
+---
+name: "Bug Report"
+description: "Report a bug to help us improve."
+title: "[Bug]: <title>"
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: "Please fill out the following details to help us address the issue."
+  - type: input
+    id: title
+    attributes:
+      label: "Bug Title"
+      description: "Provide a short and descriptive title for the bug."
+      placeholder: "e.g., App crashes on startup"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Bug Description"
+      description: "Describe the bug in detail. Include steps to reproduce, expected behavior, and actual behavior."
+      placeholder: "e.g., When I open the app, it crashes with error XYZ."
+    validations:
+      required: true
+  - type: checkboxes
+    id: app
+    attributes:
+      label: "App"
+      description: "Select the app where the bug occurred."
+      options:
+        - label: Cursor
+        - label: Windsurf
+        - label: VSCode
+        - label: VSCode Insiders
+        - label: Claude Desktop
+  - type: checkboxes
+    id: affected_models
+    attributes:
+      label: "Affected Models (if applicable)"
+      description: "Select the models affected by the bug."
+      options:
+        - label: "Claude 3.5 Sonnet"
+        - label: "Claude 3.7 Sonnet"
+        - label: "GPT-4a"
+        - label: "o4-mini"
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: "Steps to Reproduce"
+      description: "Provide the steps to reproduce the bug."
+      placeholder: "e.g., 1. Go to '...'; 2. Click on '...'; 3. See error."
+    validations:
+      required: true
+  - type: textarea
+    id: prompts
+    attributes:
+      label: "Prompts"
+      description: "Report on which prompts were used."
+      placeholder: "e.g., Prompt details or examples."
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots"
+      description: "If applicable, add links to screenshots to help explain your problem."
+      placeholder: "e.g., Screenshot URLs or descriptions."
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "Describe what you expected to happen."
+      placeholder: "e.g., The app should not crash and should display the dashboard."
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional Context"
+      description: "Add any other context or screenshots that might help us understand the issue."
+      placeholder: "e.g., Logs, screenshots, or related issues."
