@@ -11,7 +11,6 @@ import { type ServerEvent } from "./telemetry/types.js";
 import { type ServerCommand } from "./telemetry/types.js";
 import { CallToolRequestSchema, CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import assert from "assert";
-import { connectToMongoDB } from "./tools/mongodb/mongodbTool.js";
 
 export interface ServerOptions {
     session: Session;
@@ -201,7 +200,7 @@ export class Server {
 
         if (this.userConfig.connectionString) {
             try {
-                await connectToMongoDB(this.userConfig.connectionString, this.userConfig, this.session);
+                await this.session.connectToMongoDB(this.userConfig.connectionString, this.userConfig.connectOptions);
             } catch (error) {
                 console.error(
                     "Failed to connect to MongoDB instance using the connection string from the config: ",
