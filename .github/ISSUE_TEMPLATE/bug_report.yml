@@ -19,7 +19,7 @@ body:
     id: description
     attributes:
       label: "Bug Description"
-      description: "Describe the bug in detail. Include steps to reproduce, expected behavior, and actual behavior."
+      description: "Describe the bug in detail. Include the expected behavior and actual behavior."
       placeholder: "e.g., When I open the app, it crashes with error XYZ."
     validations:
       required: true
