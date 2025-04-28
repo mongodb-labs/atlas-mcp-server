@@ -1,0 +1,22 @@
+# Smithery.ai configuration
+startCommand:
+type: stdio
+configSchema:
+  type: object
+  properties:
+    connectionString:
+      type: string
+    required:
+      - connectionString
+commandFunction:
+  # A function that produces the CLI command to start the MCP on stdio.
+  |-
+  (config) => ({
+    "command": "node",
+    "args": [
+      "dist/index.js"
+    ],
+    "env": {
+      "MDB_MCP_CONNECTION_STRING": config.connectionString
+    }
+  })
