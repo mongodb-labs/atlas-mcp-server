@@ -2,14 +2,17 @@ import { Session } from "../../../../src/session.js";
 import { expectDefined } from "../../helpers.js";
 import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { sleep } from "../../../../src/common/utils.js";
+
+function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
     await session.apiClient.deleteCluster({
         params: {
             path: {
                 groupId: projectId,
-                clusterName: clusterName,
+                clusterName,
             },
         },
     });
@@ -19,7 +22,7 @@ async function deleteAndWaitCluster(session: Session, projectId: string, cluster
                 params: {
                     path: {
                         groupId: projectId,
-                        clusterName: clusterName,
+                        clusterName,
                     },
                 },
             });
@@ -36,7 +39,7 @@ async function waitClusterState(session: Session, projectId: string, clusterName
             params: {
                 path: {
                     groupId: projectId,
-                    clusterName: clusterName,
+                    clusterName,
                 },
             },
         });

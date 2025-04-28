@@ -2,11 +2,17 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { sleep } from "../../../common/utils.js";
+import { randomBytes } from "crypto";
+import { promisify } from "util";
 
-function generateSecurePassword(): string {
-    // TODO: use a better password generator
-    return `pwdMcp${Math.floor(Math.random() * 100000)}`;
+const EXPIRY_MS = 1000 * 60 * 60 * 12; // 12 hours
+
+const randomBytesAsync = promisify(randomBytes);
+
+async function generateSecurePassword(): Promise<string> {
+    const buf = await randomBytesAsync(16);
+    const pass = buf.toString("base64url");
+    return pass;
 }
 
 export class ConnectClusterTool extends AtlasToolBase {
@@ -19,6 +25,8 @@ export class ConnectClusterTool extends AtlasToolBase {
     };
 
     protected async execute({ projectId, clusterName }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
+        await this.session.disconnect();
+
         const cluster = await this.session.apiClient.getCluster({
             params: {
                 path: {
@@ -32,15 +40,16 @@ export class ConnectClusterTool extends AtlasToolBase {
             throw new Error("Cluster not found");
         }
 
-        if (!cluster.connectionStrings?.standardSrv || !cluster.connectionStrings?.standard) {
+        const baseConnectionString = cluster.connectionStrings?.standardSrv || cluster.connectionStrings?.standard;
+
+        if (!baseConnectionString) {
             throw new Error("Connection string not available");
         }
 
         const username = `usrMcp${Math.floor(Math.random() * 100000)}`;
-        const password = generateSecurePassword();
+        const password = await generateSecurePassword();
 
-        const expiryMs = 1000 * 60 * 60 * 12; // 12 hours
-        const expiryDate = new Date(Date.now() + expiryMs);
+        const expiryDate = new Date(Date.now() + EXPIRY_MS);
 
         await this.session.apiClient.createDatabaseUser({
             params: {
@@ -68,19 +77,18 @@ export class ConnectClusterTool extends AtlasToolBase {
             },
         });
 
-        void sleep(expiryMs).then(async () => {
-            // disconnect after 12 hours
-            if (this.session.serviceProvider) {
-                await this.session.serviceProvider.close(true);
-                this.session.serviceProvider = undefined;
-            }
-        });
+        this.session.connectedAtlasCluster = {
+            username,
+            projectId,
+            clusterName,
+            expiryDate,
+        };
 
-        const connectionString =
-            (cluster.connectionStrings.standardSrv || cluster.connectionStrings.standard || "").replace(
-                "://",
-                `://${username}:${password}@`
-            ) + `?authSource=admin`;
+        const cn = new URL(baseConnectionString);
+        cn.username = username;
+        cn.password = password;
+        cn.searchParams.set("authSource", "admin");
+        const connectionString = cn.toString();
 
         await this.connectToMongoDB(connectionString);
 
