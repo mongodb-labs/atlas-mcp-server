@@ -1,4 +1,3 @@
-# Use a base image with Node.js
 FROM node:23-bookworm-slim
 
 # Install MongoDB Community Edition
@@ -11,18 +10,14 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Create a directory for the application
 WORKDIR /app
 
 COPY ../ .
 
-# Install application dependencies
 RUN npm ci
 
 RUN npm run build
 
-# Copy the entrypoint script
-COPY ./.smithery/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-ENTRYPOINT ["entrypoint.sh"]
+RUN mongod --fork --logpath /var/log/mongodb.log
+ENV MDB_MCP_CONNECTION_STRING mongodb://localhost:27017
+CMD ["sh", "-c", "mongod --fork --logpath /var/log/mongodb.log --dbpath /data/db && node dist/index.js"]
