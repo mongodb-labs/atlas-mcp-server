@@ -1,8 +1,7 @@
 import { Session } from "../session.js";
-import { BaseEvent } from "./types.js";
+import { BaseEvent, CommonProperties } from "./types.js";
 import { config } from "../config.js";
-import logger from "../logger.js";
-import { mongoLogId } from "mongodb-log-writer";
+import logger, { LogId } from "../logger.js";
 import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
@@ -10,19 +9,6 @@ import { EventCache } from "./eventCache.js";
 type EventResult = {
     success: boolean;
     error?: Error;
-};
-
-type CommonProperties = {
-    device_id?: string;
-    mcp_server_version: string;
-    mcp_server_name: string;
-    mcp_client_version?: string;
-    mcp_client_name?: string;
-    platform: string;
-    arch: string;
-    os_type: string;
-    os_version?: string;
-    session_id?: string;
 };
 
 export class Telemetry {
@@ -74,7 +60,7 @@ export class Telemetry {
 
             await this.emit(events);
         } catch {
-            logger.debug(mongoLogId(1_000_002), "telemetry", `Error emitting telemetry events.`);
+            logger.debug(LogId.telemetryEmitFailure, "telemetry", `Error emitting telemetry events.`);
         }
     }
 
@@ -88,6 +74,8 @@ export class Telemetry {
             mcp_client_version: this.session.agentRunner?.version,
             mcp_client_name: this.session.agentRunner?.name,
             session_id: this.session.sessionId,
+            config_atlas_auth: this.session.apiClient.hasCredentials() ? "true" : "false",
+            config_connection_string: config.connectionString ? "true" : "false",
         };
     }
 
@@ -100,7 +88,7 @@ export class Telemetry {
         const allEvents = [...cachedEvents, ...events];
 
         logger.debug(
-            mongoLogId(1_000_003),
+            LogId.telemetryEmitStart,
             "telemetry",
             `Attempting to send ${allEvents.length} events (${cachedEvents.length} cached)`
         );
@@ -108,12 +96,12 @@ export class Telemetry {
         const result = await this.sendEvents(this.session.apiClient, allEvents);
         if (result.success) {
             this.eventCache.clearEvents();
-            logger.debug(mongoLogId(1_000_004), "telemetry", `Sent ${allEvents.length} events successfully`);
+            logger.debug(LogId.telemetryEmitSuccess, "telemetry", `Sent ${allEvents.length} events successfully`);
             return;
         }
 
-        logger.warning(
-            mongoLogId(1_000_005),
+        logger.debug(
+            LogId.telemetryEmitFailure,
             "telemetry",
             `Error sending event to client: ${result.error instanceof Error ? result.error.message : String(result.error)}`
         );

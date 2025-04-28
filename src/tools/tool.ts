@@ -1,9 +1,8 @@
-import { z, type ZodRawShape, type ZodNever } from "zod";
-import type { McpServer, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z, type ZodRawShape, type ZodNever, AnyZodObject } from "zod";
+import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
-import logger from "../logger.js";
-import { mongoLogId } from "mongodb-log-writer";
+import logger, { LogId } from "../logger.js";
 import { Telemetry } from "../telemetry/telemetry.js";
 import { type ToolEvent } from "../telemetry/types.js";
 import { UserConfig } from "../config.js";
@@ -11,7 +10,7 @@ import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
 
-export type OperationType = "metadata" | "read" | "create" | "delete" | "update" | "cluster";
+export type OperationType = "metadata" | "read" | "create" | "delete" | "update";
 export type ToolCategory = "mongodb" | "atlas";
 
 export abstract class ToolBase {
@@ -64,17 +63,13 @@ export abstract class ToolBase {
         const callback: ToolCallback<typeof this.argsShape> = async (...args) => {
             const startTime = Date.now();
             try {
-                logger.debug(
-                    mongoLogId(1_000_006),
-                    "tool",
-                    `Executing ${this.name} with args: ${JSON.stringify(args)}`
-                );
+                logger.debug(LogId.toolExecute, "tool", `Executing ${this.name} with args: ${JSON.stringify(args)}`);
 
                 const result = await this.execute(...args);
                 await this.emitToolEvent(startTime, result);
                 return result;
             } catch (error: unknown) {
-                logger.error(mongoLogId(1_000_000), "tool", `Error executing ${this.name}: ${error as string}`);
+                logger.error(LogId.toolExecuteFailure, "tool", `Error executing ${this.name}: ${error as string}`);
                 const toolResult = await this.handleError(error, args[0] as ToolArgs<typeof this.argsShape>);
                 await this.emitToolEvent(startTime, toolResult).catch(() => {});
                 return toolResult;
@@ -82,12 +77,44 @@ export abstract class ToolBase {
         };
 
         server.tool(this.name, this.description, this.argsShape, callback);
+
+        // This is very similar to RegisteredTool.update, but without the bugs around the name.
+        // In the upstream update method, the name is captured in the closure and not updated when
+        // the tool name changes. This means that you only get one name update before things end up
+        // in a broken state.
+        this.update = (updates: { name?: string; description?: string; inputSchema?: AnyZodObject }) => {
+            const tools = server["_registeredTools"] as { [toolName: string]: RegisteredTool };
+            const existingTool = tools[this.name];
+
+            if (updates.name && updates.name !== this.name) {
+                delete tools[this.name];
+                this.name = updates.name;
+                tools[this.name] = existingTool;
+            }
+
+            if (updates.description) {
+                existingTool.description = updates.description;
+                this.description = updates.description;
+            }
+
+            if (updates.inputSchema) {
+                existingTool.inputSchema = updates.inputSchema;
+            }
+
+            server.sendToolListChanged();
+        };
     }
+
+    protected update?: (updates: { name?: string; description?: string; inputSchema?: AnyZodObject }) => void;
 
     // Checks if a tool is allowed to run based on the config
     protected verifyAllowed(): boolean {
         let errorClarification: string | undefined;
-        if (this.config.disabledTools.includes(this.category)) {
+
+        // Check read-only mode first
+        if (this.config.readOnly && !["read", "metadata"].includes(this.operationType)) {
+            errorClarification = `read-only mode is enabled, its operation type, \`${this.operationType}\`,`;
+        } else if (this.config.disabledTools.includes(this.category)) {
             errorClarification = `its category, \`${this.category}\`,`;
         } else if (this.config.disabledTools.includes(this.operationType)) {
             errorClarification = `its operation type, \`${this.operationType}\`,`;
@@ -97,7 +124,7 @@ export abstract class ToolBase {
 
         if (errorClarification) {
             logger.debug(
-                mongoLogId(1_000_010),
+                LogId.toolDisabled,
                 "tool",
                 `Prevented registration of ${this.name} because ${errorClarification} is disabled in the config`
             );

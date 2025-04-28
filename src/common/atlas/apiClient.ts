@@ -4,8 +4,6 @@ import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
 import { BaseEvent } from "../../telemetry/types.js";
-import { mongoLogId } from "mongodb-log-writer";
-import logger from "../../logger.js";
 import { packageInfo } from "../../packageInfo.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
@@ -98,11 +96,6 @@ export class ApiClient {
     }
 
     public hasCredentials(): boolean {
-        logger.info(
-            mongoLogId(1_000_000),
-            "api-client",
-            `Checking if API client has credentials: ${!!(this.oauth2Client && this.accessToken)}`
-        );
         return !!(this.oauth2Client && this.accessToken);
     }
 

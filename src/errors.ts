@@ -3,6 +3,7 @@ export enum ErrorCodes {
     InvalidParams = 1_000_001,
     CloseServiceProvider = 1_000_007,
     DeleteDatabaseUser = 1_000_008,
+    MisconfiguredConnectionString = 1_000_001
 }
 
 export class MongoDBError extends Error {
