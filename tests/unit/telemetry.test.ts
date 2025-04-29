@@ -315,9 +315,9 @@ describe("Telemetry", () => {
             expect(telemetry.getCommonProperties().device_id).toBe("unknown");
             expect(telemetry["isBufferingEvents"]).toBe(false);
             expect(loggerSpy).toHaveBeenCalledWith(
-                LogId.telemetryDeviceIdFailure,
+                LogId.telemetryDeviceIdTimeout,
                 "telemetry",
-                "Error: Promise timed out"
+                "Device ID retrieval timed out"
             );
         });
     });

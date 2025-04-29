@@ -1,14 +1,19 @@
-type DeferredPromiseOptions = {
+type DeferredPromiseOptions<T> = {
     timeout?: number;
+    onTimeout?: (resolve: (value: T) => void, reject: (reason: Error) => void) => void;
 };
 
 /** Creates a promise and exposes its resolve and reject methods, with an optional timeout. */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export class DeferredPromise<T> extends Promise<T> {
     resolve!: (value: T) => void;
     reject!: (reason: unknown) => void;
     private timeoutId?: NodeJS.Timeout;
 
-    constructor(resolver: (resolve: (value: T) => void, reject: (reason: Error) => void) => void, timeout?: number) {
+    constructor(
+        executor: (resolve: (value: T) => void, reject: (reason: Error) => void) => void,
+        { timeout, onTimeout }: DeferredPromiseOptions<T> = {}
+    ) {
         let resolveFn: (value: T) => void;
         let rejectFn: (reason?: unknown) => void;
 
@@ -24,12 +29,12 @@ export class DeferredPromise<T> extends Promise<T> {
 
         if (timeout !== undefined) {
             this.timeoutId = setTimeout(() => {
-                this.reject(new Error("Promise timed out"));
+                onTimeout?.(this.resolve, this.reject);
             }, timeout);
         }
 
-        if (resolver) {
-            resolver(
+        if (executor) {
+            executor(
                 (value: T) => {
                     if (this.timeoutId) clearTimeout(this.timeoutId);
                     this.resolve(value);
@@ -42,7 +47,7 @@ export class DeferredPromise<T> extends Promise<T> {
         }
     }
 
-    static fromPromise<T>(promise: Promise<T>, options: DeferredPromiseOptions = {}): DeferredPromise<T> {
+    static fromPromise<T>(promise: Promise<T>, options: DeferredPromiseOptions<T> = {}): DeferredPromise<T> {
         return new DeferredPromise<T>((resolve, reject) => {
             promise
                 .then((value) => {
@@ -51,6 +56,6 @@ export class DeferredPromise<T> extends Promise<T> {
                 .catch((reason) => {
                     reject(reason as Error);
                 });
-        }, options.timeout);
+        }, options);
     }
 }

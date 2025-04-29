@@ -39,13 +39,14 @@ export class Telemetry {
     }
 
     private async start(): Promise<void> {
-        this.deviceIdPromise = DeferredPromise.fromPromise(this.getDeviceId());
-        try {
-            this.commonProperties.device_id = await this.deviceIdPromise;
-        } catch (error) {
-            logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
-            this.commonProperties.device_id = "unknown";
-        }
+        this.deviceIdPromise = DeferredPromise.fromPromise(this.getDeviceId(), {
+            timeout: DEVICE_ID_TIMEOUT,
+            onTimeout: (resolve) => {
+                resolve("unknown");
+                logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
+            },
+        });
+        this.commonProperties.device_id = await this.deviceIdPromise;
 
         this.isBufferingEvents = false;
     }
@@ -65,7 +66,7 @@ export class Telemetry {
                 return this.commonProperties.device_id;
             }
 
-            const originalId = await DeferredPromise.fromPromise(machineId(true), { timeout: DEVICE_ID_TIMEOUT });
+            const originalId = await machineId(true);
 
             // Create a hashed format from the all uppercase version of the machine ID
             // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.

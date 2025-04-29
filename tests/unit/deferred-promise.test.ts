@@ -1,6 +1,13 @@
 import { DeferredPromise } from "../../src/deferred-promise.js";
 
 describe("DeferredPromise", () => {
+    beforeEach(() => {
+        jest.useFakeTimers();
+    });
+    afterEach(() => {
+        jest.useRealTimers();
+    });
+
     it("should resolve with the correct value", async () => {
         const deferred = new DeferredPromise<string>((resolve) => {
             resolve("resolved value");
@@ -18,19 +25,25 @@ describe("DeferredPromise", () => {
     });
 
     it("should timeout if not resolved or rejected within the specified time", async () => {
-        const deferred = new DeferredPromise<string>(() => {
-            // Do not resolve or reject
-        }, 10);
+        const deferred = new DeferredPromise<string>(
+            () => {
+                // Do not resolve or reject
+            },
+            { timeout: 100, onTimeout: (resolve, reject) => reject(new Error("Promise timed out")) }
+        );
+
+        jest.advanceTimersByTime(100);
 
         await expect(deferred).rejects.toThrow("Promise timed out");
     });
 
     it("should clear the timeout when resolved", async () => {
-        jest.useFakeTimers();
-
-        const deferred = new DeferredPromise<string>((resolve) => {
-            setTimeout(() => resolve("resolved value"), 100);
-        }, 200);
+        const deferred = new DeferredPromise<string>(
+            (resolve) => {
+                setTimeout(() => resolve("resolved value"), 100);
+            },
+            { timeout: 200 }
+        );
 
         const promise = deferred.then((value) => {
             expect(value).toBe("resolved value");
@@ -38,16 +51,15 @@ describe("DeferredPromise", () => {
 
         jest.advanceTimersByTime(100);
         await promise;
-
-        jest.useRealTimers();
     });
 
     it("should clear the timeout when rejected", async () => {
-        jest.useFakeTimers();
-
-        const deferred = new DeferredPromise<string>((_, reject) => {
-            setTimeout(() => reject(new Error("rejected error")), 100);
-        }, 200);
+        const deferred = new DeferredPromise<string>(
+            (_, reject) => {
+                setTimeout(() => reject(new Error("rejected error")), 100);
+            },
+            { timeout: 200, onTimeout: (resolve, reject) => reject(new Error("Promise timed out")) }
+        );
 
         const promise = deferred.catch((error) => {
             expect(error).toEqual(new Error("rejected error"));
@@ -55,7 +67,5 @@ describe("DeferredPromise", () => {
 
         jest.advanceTimersByTime(100);
         await promise;
-
-        jest.useRealTimers();
     });
 });
