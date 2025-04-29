@@ -22,10 +22,12 @@ export function describeWithMongoDB(
         const integration = setupIntegrationTest(() => ({
             ...getUserConfig(mdbIntegration),
             connectionString: mdbIntegration.connectionString(),
+            telemetry: "disabled", // Explicitly disable telemetry
         }));
 
         beforeEach(() => {
             integration.mcpServer().userConfig.connectionString = mdbIntegration.connectionString();
+            integration.mcpServer().userConfig.telemetry = "disabled"; // Ensure telemetry stays disabled
         });
 
         fn({
