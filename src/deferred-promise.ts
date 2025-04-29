@@ -4,7 +4,6 @@ type DeferredPromiseOptions<T> = {
 };
 
 /** Creates a promise and exposes its resolve and reject methods, with an optional timeout. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export class DeferredPromise<T> extends Promise<T> {
     resolve!: (value: T) => void;
     reject!: (reason: unknown) => void;
