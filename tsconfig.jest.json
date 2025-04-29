@@ -1,8 +1,6 @@
 {
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "module": "esnext",
-    "target": "esnext",
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "types": ["jest", "jest-extended"]

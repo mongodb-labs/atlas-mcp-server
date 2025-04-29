@@ -1,9 +1,12 @@
 import { MongoCluster } from "mongodb-runner";
 import path from "path";
+import { fileURLToPath } from "url";
 import fs from "fs/promises";
 import { MongoClient, ObjectId } from "mongodb";
-import { getResponseContent, IntegrationTest, setupIntegrationTest } from "../../helpers.js";
-import { config, UserConfig } from "../../../../src/config.js";
+import { getResponseContent, IntegrationTest, setupIntegrationTest, defaultTestConfig } from "../../helpers.js";
+import { UserConfig } from "../../../../src/config.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 interface MongoDBIntegrationTest {
     mongoClient: () => MongoClient;
@@ -14,7 +17,7 @@ interface MongoDBIntegrationTest {
 export function describeWithMongoDB(
     name: string,
     fn: (integration: IntegrationTest & MongoDBIntegrationTest & { connectMcpClient: () => Promise<void> }) => void,
-    getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => config,
+    getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => defaultTestConfig,
     describeFn = describe
 ) {
     describeFn(name, () => {

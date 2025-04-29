@@ -5,6 +5,7 @@ import { BaseEvent, TelemetryResult } from "../../src/telemetry/types.js";
 import { EventCache } from "../../src/telemetry/eventCache.js";
 import { config } from "../../src/config.js";
 import { MACHINE_METADATA } from "../../src/telemetry/constants.js";
+import { jest } from "@jest/globals";
 
 // Mock the ApiClient to avoid real API calls
 jest.mock("../../src/common/atlas/apiClient.js");
@@ -103,14 +104,19 @@ describe("Telemetry", () => {
 
         // Setup mocked API client
         mockApiClient = new MockApiClient({ baseUrl: "" }) as jest.Mocked<ApiClient>;
-        mockApiClient.sendEvents = jest.fn().mockResolvedValue(undefined);
-        mockApiClient.hasCredentials = jest.fn().mockReturnValue(true);
+        //@ts-expect-error This is a workaround
+        mockApiClient.sendEvents = jest.fn<() => undefined>().mockResolvedValue(undefined);
+        mockApiClient.hasCredentials = jest.fn<() => boolean>().mockReturnValue(true);
 
         // Setup mocked EventCache
         mockEventCache = new MockEventCache() as jest.Mocked<EventCache>;
+        //@ts-expect-error This is a workaround
         mockEventCache.getEvents = jest.fn().mockReturnValue([]);
+        //@ts-expect-error This is a workaround
         mockEventCache.clearEvents = jest.fn().mockResolvedValue(undefined);
+        //@ts-expect-error This is a workaround
         mockEventCache.appendEvents = jest.fn().mockResolvedValue(undefined);
+        //@ts-expect-error This is a workaround
         MockEventCache.getInstance = jest.fn().mockReturnValue(mockEventCache);
 
         // Create a simplified session with our mocked API client
@@ -118,13 +124,16 @@ describe("Telemetry", () => {
             apiClient: mockApiClient,
             sessionId: "test-session-id",
             agentRunner: { name: "test-agent", version: "1.0.0" } as const,
+            //@ts-expect-error This is a workaround
             close: jest.fn().mockResolvedValue(undefined),
+            //@ts-expect-error This is a workaround
             setAgentRunner: jest.fn().mockResolvedValue(undefined),
         } as unknown as Session;
 
         // Create the telemetry instance with mocked dependencies
         telemetry = Telemetry.create(
             session,
+            config,
             {
                 ...MACHINE_METADATA,
             },

@@ -1,15 +1,14 @@
 import { ObjectId } from "mongodb";
 import { Group } from "../../../../src/common/atlas/openapi.js";
 import { ApiClient } from "../../../../src/common/atlas/apiClient.js";
-import { setupIntegrationTest, IntegrationTest } from "../../helpers.js";
-import { config } from "../../../../src/config.js";
+import { setupIntegrationTest, IntegrationTest, defaultTestConfig } from "../../helpers.js";
 
 export type IntegrationTestFunction = (integration: IntegrationTest) => void;
 
 export function describeWithAtlas(name: string, fn: IntegrationTestFunction) {
     const testDefinition = () => {
         const integration = setupIntegrationTest(() => ({
-            ...config,
+            ...defaultTestConfig,
             apiClientId: process.env.MDB_MCP_API_CLIENT_ID,
             apiClientSecret: process.env.MDB_MCP_API_CLIENT_SECRET,
         }));

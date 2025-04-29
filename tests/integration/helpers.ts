@@ -6,6 +6,7 @@ import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
 import { Telemetry } from "../../src/telemetry/telemetry.js";
+import { config } from "../../src/config.js";
 
 interface ParameterInfo {
     name: string;
@@ -20,6 +21,10 @@ export interface IntegrationTest {
     mcpClient: () => Client;
     mcpServer: () => Server;
 }
+export const defaultTestConfig: UserConfig = {
+    ...config,
+    telemetry: "disabled",
+};
 
 export function setupIntegrationTest(getUserConfig: () => UserConfig): IntegrationTest {
     let mcpClient: Client | undefined;
@@ -54,7 +59,7 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
 
         userConfig.telemetry = "disabled";
 
-        const telemetry = Telemetry.create(session);
+        const telemetry = Telemetry.create(session, userConfig);
 
         mcpServer = new Server({
             session,
@@ -62,17 +67,11 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
             telemetry,
             mcpServer: new McpServer({
                 name: "test-server",
-                version: "1.2.3",
+                version: "5.2.3",
             }),
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
-    });
-
-    beforeEach(() => {
-        if (mcpServer) {
-            mcpServer.userConfig.telemetry = "disabled";
-        }
     });
 
     afterEach(async () => {

@@ -11,6 +11,10 @@ export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNev
 
 export type OperationType = "metadata" | "read" | "create" | "delete" | "update";
 export type ToolCategory = "mongodb" | "atlas";
+export type TelemetryToolMetadata = {
+    projectId?: string;
+    orgId?: string;
+};
 
 export abstract class ToolBase {
     protected abstract name: string;
@@ -31,28 +35,6 @@ export abstract class ToolBase {
         protected readonly telemetry: Telemetry
     ) {}
 
-    /**
-     * Creates and emits a tool telemetry event
-     * @param startTime - Start time in milliseconds
-     * @param result - Whether the command succeeded or failed
-     * @param error - Optional error if the command failed
-     */
-    private async emitToolEvent(startTime: number, result: CallToolResult): Promise<void> {
-        const duration = Date.now() - startTime;
-        const event: ToolEvent = {
-            timestamp: new Date().toISOString(),
-            source: "mdbmcp",
-            properties: {
-                command: this.name,
-                category: this.category,
-                component: "tool",
-                duration_ms: duration,
-                result: result.isError ? "failure" : "success",
-            },
-        };
-        await this.telemetry.emitEvents([event]);
-    }
-
     public register(server: McpServer): void {
         if (!this.verifyAllowed()) {
             return;
@@ -64,12 +46,12 @@ export abstract class ToolBase {
                 logger.debug(LogId.toolExecute, "tool", `Executing ${this.name} with args: ${JSON.stringify(args)}`);
 
                 const result = await this.execute(...args);
-                await this.emitToolEvent(startTime, result);
+                await this.emitToolEvent(startTime, result, ...args).catch(() => {});
                 return result;
             } catch (error: unknown) {
                 logger.error(LogId.toolExecuteFailure, "tool", `Error executing ${this.name}: ${error as string}`);
                 const toolResult = await this.handleError(error, args[0] as ToolArgs<typeof this.argsShape>);
-                await this.emitToolEvent(startTime, toolResult).catch(() => {});
+                await this.emitToolEvent(startTime, toolResult, ...args).catch(() => {});
                 return toolResult;
             }
         };
@@ -148,5 +130,48 @@ export abstract class ToolBase {
                 },
             ],
         };
+    }
+
+    protected abstract resolveTelemetryMetadata(
+        ...args: Parameters<ToolCallback<typeof this.argsShape>>
+    ): TelemetryToolMetadata;
+
+    /**
+     * Creates and emits a tool telemetry event
+     * @param startTime - Start time in milliseconds
+     * @param result - Whether the command succeeded or failed
+     * @param args - The arguments passed to the tool
+     */
+    private async emitToolEvent(
+        startTime: number,
+        result: CallToolResult,
+        ...args: Parameters<ToolCallback<typeof this.argsShape>>
+    ): Promise<void> {
+        if (!this.telemetry.isTelemetryEnabled()) {
+            return;
+        }
+        const duration = Date.now() - startTime;
+        const metadata = this.resolveTelemetryMetadata(...args);
+        const event: ToolEvent = {
+            timestamp: new Date().toISOString(),
+            source: "mdbmcp",
+            properties: {
+                command: this.name,
+                category: this.category,
+                component: "tool",
+                duration_ms: duration,
+                result: result.isError ? "failure" : "success",
+            },
+        };
+
+        if (metadata?.orgId) {
+            event.properties.org_id = metadata.orgId;
+        }
+
+        if (metadata?.projectId) {
+            event.properties.project_id = metadata.projectId;
+        }
+
+        await this.telemetry.emitEvents([event]);
     }
 }
