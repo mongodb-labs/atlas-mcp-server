@@ -1,3 +1,8 @@
+// Mock node-machine-id to simulate machine ID resolution
+jest.mock("node-machine-id", () => ({
+    machineId: jest.fn(),
+}));
+
 import { ApiClient } from "../../src/common/atlas/apiClient.js";
 import { Session } from "../../src/session.js";
 import { DEVICE_ID_TIMEOUT, Telemetry } from "../../src/telemetry/telemetry.js";
@@ -6,6 +11,9 @@ import { EventCache } from "../../src/telemetry/eventCache.js";
 import { config } from "../../src/config.js";
 import { MACHINE_METADATA } from "../../src/telemetry/constants.js";
 import { jest } from "@jest/globals";
+import { createHmac } from "crypto";
+import logger, { LogId } from "../../src/logger.js";
+import nodeMachineId from "node-machine-id";
 
 // Mock the ApiClient to avoid real API calls
 jest.mock("../../src/common/atlas/apiClient.js");
@@ -15,14 +23,7 @@ const MockApiClient = ApiClient as jest.MockedClass<typeof ApiClient>;
 jest.mock("../../src/telemetry/eventCache.js");
 const MockEventCache = EventCache as jest.MockedClass<typeof EventCache>;
 
-// Mock node-machine-id to simulate machine ID resolution
-jest.mock("node-machine-id", () => ({
-    machineId: jest.fn(),
-}));
-
-import * as nodeMachineId from "node-machine-id";
-import { createHmac } from "crypto";
-import logger, { LogId } from "../../src/logger.js";
+const mockMachineId = jest.spyOn(nodeMachineId, "machineId");
 
 describe("Telemetry", () => {
     let mockApiClient: jest.Mocked<ApiClient>;
@@ -145,7 +146,9 @@ describe("Telemetry", () => {
 
     describe("sending events", () => {
         beforeEach(() => {
-            (nodeMachineId.machineId as jest.Mock).mockResolvedValue("test-machine-id");
+            // @ts-expect-error This is a workaround
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            mockMachineId.mockResolvedValue("test-machine-id");
         });
 
         describe("when telemetry is enabled", () => {
@@ -265,8 +268,9 @@ describe("Telemetry", () => {
         });
 
         it("should successfully resolve the machine ID", async () => {
-            (nodeMachineId.machineId as jest.Mock).mockResolvedValue(machineId);
-            telemetry = Telemetry.create(session);
+            // @ts-expect-error This is a workaround
+            mockMachineId.mockResolvedValue(machineId);
+            telemetry = Telemetry.create(session, config);
 
             expect(telemetry["isBufferingEvents"]).toBe(true);
             expect(telemetry.getCommonProperties().device_id).toBe(undefined);
@@ -280,9 +284,11 @@ describe("Telemetry", () => {
         it("should handle machine ID resolution failure", async () => {
             const loggerSpy = jest.spyOn(logger, "debug");
 
-            (nodeMachineId.machineId as jest.Mock).mockRejectedValue(new Error("Failed to get device ID"));
+            // @ts-expect-error This is a workaround
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            mockMachineId.mockRejectedValue(new Error("Failed to get device ID"));
 
-            telemetry = Telemetry.create(session);
+            telemetry = Telemetry.create(session, config);
 
             expect(telemetry["isBufferingEvents"]).toBe(true);
             expect(telemetry.getCommonProperties().device_id).toBe(undefined);
@@ -302,11 +308,12 @@ describe("Telemetry", () => {
         it("should timeout if machine ID resolution takes too long", async () => {
             const loggerSpy = jest.spyOn(logger, "debug");
 
-            (nodeMachineId.machineId as jest.Mock).mockImplementation(() => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            mockMachineId.mockImplementation(() => {
                 return new Promise(() => {});
             });
 
-            telemetry = Telemetry.create(session);
+            telemetry = Telemetry.create(session, config);
 
             expect(telemetry["isBufferingEvents"]).toBe(true);
             expect(telemetry.getCommonProperties().device_id).toBe(undefined);

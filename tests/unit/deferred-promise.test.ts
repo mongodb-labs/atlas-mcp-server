@@ -1,4 +1,5 @@
 import { DeferredPromise } from "../../src/deferred-promise.js";
+import { jest } from "@jest/globals";
 
 describe("DeferredPromise", () => {
     beforeEach(() => {

@@ -71,7 +71,8 @@ export class Telemetry {
                 return this.commonProperties.device_id;
             }
 
-            const originalId = await nodeMachineId.machineId(true);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+            const originalId: string = await nodeMachineId.machineId(true);
 
             // Create a hashed format from the all uppercase version of the machine ID
             // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
