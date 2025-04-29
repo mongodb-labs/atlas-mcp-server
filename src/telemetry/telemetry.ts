@@ -24,16 +24,8 @@ export function isTelemetryEnabled(): boolean {
         return false;
     }
 
-    const doNotTrack = process.env.DO_NOT_TRACK;
-    if (doNotTrack) {
-        const value = doNotTrack.toLowerCase();
-        // Telemetry should be disabled if DO_NOT_TRACK is "1", "true", or "yes"
-        if (value === "1" || value === "true" || value === "yes") {
-            return false;
-        }
-    }
-
-    return true;
+    const doNotTrack = "DO_NOT_TRACK" in process.env;
+    return !doNotTrack;
 }
 
 export class Telemetry {
