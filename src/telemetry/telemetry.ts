@@ -7,15 +7,19 @@ import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
 import { createHmac } from "crypto";
 import { machineId } from "node-machine-id";
+import { DeferredPromise } from "../deferred-promise.js";
 
 type EventResult = {
     success: boolean;
     error?: Error;
 };
 
+export const DEVICE_ID_TIMEOUT = 3000;
+
 export class Telemetry {
     private isBufferingEvents: boolean = true;
-    private resolveDeviceId: (deviceId: string) => void = () => {};
+    /** Resolves when the device ID is retrieved or timeout occurs */
+    public deviceIdPromise: DeferredPromise<string> | undefined;
 
     private constructor(
         private readonly session: Session,
@@ -25,7 +29,7 @@ export class Telemetry {
 
     static create(
         session: Session,
-        commonProperties: CommonProperties = MACHINE_METADATA,
+        commonProperties: CommonProperties = { ...MACHINE_METADATA },
         eventCache: EventCache = EventCache.getInstance()
     ): Telemetry {
         const instance = new Telemetry(session, commonProperties, eventCache);
@@ -35,55 +39,42 @@ export class Telemetry {
     }
 
     private async start(): Promise<void> {
-        this.commonProperties.device_id = await this.getDeviceId();
+        this.deviceIdPromise = DeferredPromise.fromPromise(this.getDeviceId());
+        this.commonProperties.device_id = await this.deviceIdPromise;
 
         this.isBufferingEvents = false;
-        await this.emitEvents(this.eventCache.getEvents());
     }
 
     public async close(): Promise<void> {
-        this.resolveDeviceId("unknown");
+        this.deviceIdPromise?.resolve("unknown");
         this.isBufferingEvents = false;
         await this.emitEvents(this.eventCache.getEvents());
-    }
-
-    private async machineIdWithTimeout(): Promise<string> {
-        try {
-            return Promise.race<string>([
-                machineId(true),
-                new Promise<string>((resolve, reject) => {
-                    this.resolveDeviceId = resolve;
-                    setTimeout(() => {
-                        reject(new Error("Timeout getting machine ID"));
-                    }, 3000);
-                }),
-            ]);
-        } catch (error) {
-            logger.debug(LogId.telemetryMachineIdFailure, "telemetry", `Error getting machine ID: ${String(error)}`);
-            return "unknown";
-        }
     }
 
     /**
      * @returns A hashed, unique identifier for the running device or `undefined` if not known.
      */
     private async getDeviceId(): Promise<string> {
-        if (this.commonProperties.device_id) {
-            return this.commonProperties.device_id;
+        try {
+            if (this.commonProperties.device_id) {
+                return this.commonProperties.device_id;
+            }
+
+            const originalId = await DeferredPromise.fromPromise(machineId(true), { timeout: DEVICE_ID_TIMEOUT });
+
+            // Create a hashed format from the all uppercase version of the machine ID
+            // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
+            const hmac = createHmac("sha256", originalId.toUpperCase());
+
+            /** This matches the message used to create the hashes in Atlas CLI */
+            const DEVICE_ID_HASH_MESSAGE = "atlascli";
+
+            hmac.update(DEVICE_ID_HASH_MESSAGE);
+            return hmac.digest("hex");
+        } catch (error) {
+            logger.debug(LogId.telemetryMachineIdFailure, "telemetry", String(error));
+            return "unknown";
         }
-
-        // Create a hashed format from the all uppercase version of the machine ID
-        // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
-
-        const originalId = (await this.machineIdWithTimeout()).toUpperCase();
-
-        const hmac = createHmac("sha256", originalId);
-
-        /** This matches the message used to create the hashes in Atlas CLI */
-        const DEVICE_ID_HASH_MESSAGE = "atlascli";
-
-        hmac.update(DEVICE_ID_HASH_MESSAGE);
-        return hmac.digest("hex");
     }
 
     /**
@@ -134,6 +125,7 @@ export class Telemetry {
     public getCommonProperties(): CommonProperties {
         return {
             ...this.commonProperties,
+            device_id: this.commonProperties.device_id,
             mcp_client_version: this.session.agentRunner?.version,
             mcp_client_name: this.session.agentRunner?.name,
             session_id: this.session.sessionId,
