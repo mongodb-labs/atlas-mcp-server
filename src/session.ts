@@ -26,7 +26,6 @@ export class Session extends EventEmitter<{
         username: string;
         projectId: string;
         clusterName: string;
-        organizationId?: string;
         expiryDate: Date;
     };
 
