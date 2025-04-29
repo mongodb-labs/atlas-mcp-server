@@ -20,21 +20,35 @@ export class Telemetry {
     private isBufferingEvents: boolean = true;
     /** Resolves when the device ID is retrieved or timeout occurs */
     public deviceIdPromise: DeferredPromise<string> | undefined;
+    private eventCache: EventCache;
+    private getRawMachineId: () => Promise<string>;
 
     private constructor(
         private readonly session: Session,
         private readonly userConfig: UserConfig,
         private readonly commonProperties: CommonProperties,
-        private readonly eventCache: EventCache
-    ) {}
+        { eventCache, getRawMachineId }: { eventCache: EventCache; getRawMachineId: () => Promise<string> }
+    ) {
+        this.eventCache = eventCache;
+        this.getRawMachineId = getRawMachineId;
+    }
 
     static create(
         session: Session,
         userConfig: UserConfig,
-        commonProperties: CommonProperties = { ...MACHINE_METADATA },
-        eventCache: EventCache = EventCache.getInstance()
+        {
+            commonProperties = { ...MACHINE_METADATA },
+            eventCache = EventCache.getInstance(),
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+            getRawMachineId = () => nodeMachineId.machineId(true),
+        }: {
+            eventCache?: EventCache;
+            getRawMachineId?: () => Promise<string>;
+            commonProperties?: CommonProperties;
+        } = {}
     ): Telemetry {
-        const instance = new Telemetry(session, userConfig, commonProperties, eventCache);
+        const instance = new Telemetry(session, userConfig, commonProperties, { eventCache, getRawMachineId });
 
         void instance.start();
         return instance;
@@ -71,8 +85,7 @@ export class Telemetry {
                 return this.commonProperties.device_id;
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-            const originalId: string = await nodeMachineId.machineId(true);
+            const originalId: string = await this.getRawMachineId();
 
             // Create a hashed format from the all uppercase version of the machine ID
             // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.

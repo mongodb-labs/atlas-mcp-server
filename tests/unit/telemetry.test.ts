@@ -1,19 +1,12 @@
-// Mock node-machine-id to simulate machine ID resolution
-jest.mock("node-machine-id", () => ({
-    machineId: jest.fn(),
-}));
-
 import { ApiClient } from "../../src/common/atlas/apiClient.js";
 import { Session } from "../../src/session.js";
 import { DEVICE_ID_TIMEOUT, Telemetry } from "../../src/telemetry/telemetry.js";
 import { BaseEvent, TelemetryResult } from "../../src/telemetry/types.js";
 import { EventCache } from "../../src/telemetry/eventCache.js";
 import { config } from "../../src/config.js";
-import { MACHINE_METADATA } from "../../src/telemetry/constants.js";
 import { jest } from "@jest/globals";
-import { createHmac } from "crypto";
 import logger, { LogId } from "../../src/logger.js";
-import nodeMachineId from "node-machine-id";
+import { createHmac } from "crypto";
 
 // Mock the ApiClient to avoid real API calls
 jest.mock("../../src/common/atlas/apiClient.js");
@@ -23,9 +16,10 @@ const MockApiClient = ApiClient as jest.MockedClass<typeof ApiClient>;
 jest.mock("../../src/telemetry/eventCache.js");
 const MockEventCache = EventCache as jest.MockedClass<typeof EventCache>;
 
-const mockMachineId = jest.spyOn(nodeMachineId, "machineId");
-
 describe("Telemetry", () => {
+    const machineId = "test-machine-id";
+    const hashedMachineId = createHmac("sha256", machineId.toUpperCase()).update("atlascli").digest("hex");
+
     let mockApiClient: jest.Mocked<ApiClient>;
     let mockEventCache: jest.Mocked<EventCache>;
     let session: Session;
@@ -131,26 +125,15 @@ describe("Telemetry", () => {
             setAgentRunner: jest.fn().mockResolvedValue(undefined),
         } as unknown as Session;
 
-        // Create the telemetry instance with mocked dependencies
-        telemetry = Telemetry.create(
-            session,
-            config,
-            {
-                ...MACHINE_METADATA,
-            },
-            mockEventCache
-        );
+        telemetry = Telemetry.create(session, config, {
+            eventCache: mockEventCache,
+            getRawMachineId: () => Promise.resolve(machineId),
+        });
 
         config.telemetry = "enabled";
     });
 
     describe("sending events", () => {
-        beforeEach(() => {
-            // @ts-expect-error This is a workaround
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            mockMachineId.mockResolvedValue("test-machine-id");
-        });
-
         describe("when telemetry is enabled", () => {
             it("should send events successfully", async () => {
                 const testEvent = createTestEvent();
@@ -200,11 +183,106 @@ describe("Telemetry", () => {
                     sendEventsCalledWith: [cachedEvent, newEvent],
                 });
             });
+
+            it("should correctly add common properties to events", () => {
+                const commonProps = telemetry.getCommonProperties();
+
+                // Use explicit type assertion
+                const expectedProps: Record<string, string> = {
+                    mcp_client_version: "1.0.0",
+                    mcp_client_name: "test-agent",
+                    session_id: "test-session-id",
+                    config_atlas_auth: "true",
+                    config_connection_string: expect.any(String) as unknown as string,
+                    device_id: hashedMachineId,
+                };
+
+                expect(commonProps).toMatchObject(expectedProps);
+            });
+
+            describe("machine ID resolution", () => {
+                beforeEach(() => {
+                    jest.clearAllMocks();
+                    jest.useFakeTimers();
+                });
+
+                afterEach(() => {
+                    jest.clearAllMocks();
+                    jest.useRealTimers();
+                });
+
+                it("should successfully resolve the machine ID", async () => {
+                    telemetry = Telemetry.create(session, config, {
+                        getRawMachineId: () => Promise.resolve(machineId),
+                    });
+
+                    expect(telemetry["isBufferingEvents"]).toBe(true);
+                    expect(telemetry.getCommonProperties().device_id).toBe(undefined);
+
+                    await telemetry.deviceIdPromise;
+
+                    expect(telemetry["isBufferingEvents"]).toBe(false);
+                    expect(telemetry.getCommonProperties().device_id).toBe(hashedMachineId);
+                });
+
+                it("should handle machine ID resolution failure", async () => {
+                    const loggerSpy = jest.spyOn(logger, "debug");
+
+                    telemetry = Telemetry.create(session, config, {
+                        getRawMachineId: () => Promise.reject(new Error("Failed to get device ID")),
+                    });
+
+                    expect(telemetry["isBufferingEvents"]).toBe(true);
+                    expect(telemetry.getCommonProperties().device_id).toBe(undefined);
+
+                    await telemetry.deviceIdPromise;
+
+                    expect(telemetry["isBufferingEvents"]).toBe(false);
+                    expect(telemetry.getCommonProperties().device_id).toBe("unknown");
+
+                    expect(loggerSpy).toHaveBeenCalledWith(
+                        LogId.telemetryDeviceIdFailure,
+                        "telemetry",
+                        "Error: Failed to get device ID"
+                    );
+                });
+
+                it("should timeout if machine ID resolution takes too long", async () => {
+                    const loggerSpy = jest.spyOn(logger, "debug");
+
+                    telemetry = Telemetry.create(session, config, { getRawMachineId: () => new Promise(() => {}) });
+
+                    expect(telemetry["isBufferingEvents"]).toBe(true);
+                    expect(telemetry.getCommonProperties().device_id).toBe(undefined);
+
+                    jest.advanceTimersByTime(DEVICE_ID_TIMEOUT / 2);
+
+                    // Make sure the timeout doesn't happen prematurely.
+                    expect(telemetry["isBufferingEvents"]).toBe(true);
+                    expect(telemetry.getCommonProperties().device_id).toBe(undefined);
+
+                    jest.advanceTimersByTime(DEVICE_ID_TIMEOUT);
+
+                    await telemetry.deviceIdPromise;
+
+                    expect(telemetry.getCommonProperties().device_id).toBe("unknown");
+                    expect(telemetry["isBufferingEvents"]).toBe(false);
+                    expect(loggerSpy).toHaveBeenCalledWith(
+                        LogId.telemetryDeviceIdTimeout,
+                        "telemetry",
+                        "Device ID retrieval timed out"
+                    );
+                });
+            });
         });
 
         describe("when telemetry is disabled", () => {
             beforeEach(() => {
                 config.telemetry = "disabled";
+            });
+
+            afterEach(() => {
+                config.telemetry = "enabled";
             });
 
             it("should not send events", async () => {
@@ -214,21 +292,6 @@ describe("Telemetry", () => {
 
                 verifyMockCalls();
             });
-        });
-
-        it("should correctly add common properties to events", () => {
-            const commonProps = telemetry.getCommonProperties();
-
-            // Use explicit type assertion
-            const expectedProps: Record<string, string> = {
-                mcp_client_version: "1.0.0",
-                mcp_client_name: "test-agent",
-                session_id: "test-session-id",
-                config_atlas_auth: "true",
-                config_connection_string: expect.any(String) as unknown as string,
-            };
-
-            expect(commonProps).toMatchObject(expectedProps);
         });
 
         describe("when DO_NOT_TRACK environment variable is set", () => {
@@ -250,91 +313,6 @@ describe("Telemetry", () => {
 
                 verifyMockCalls();
             });
-        });
-    });
-
-    describe("machine ID resolution", () => {
-        const machineId = "test-machine-id";
-        const hashedMachineId = createHmac("sha256", machineId.toUpperCase()).update("atlascli").digest("hex");
-
-        beforeEach(() => {
-            jest.useFakeTimers();
-            jest.clearAllMocks();
-        });
-
-        afterEach(() => {
-            jest.useRealTimers();
-            jest.clearAllMocks();
-        });
-
-        it("should successfully resolve the machine ID", async () => {
-            // @ts-expect-error This is a workaround
-            mockMachineId.mockResolvedValue(machineId);
-            telemetry = Telemetry.create(session, config);
-
-            expect(telemetry["isBufferingEvents"]).toBe(true);
-            expect(telemetry.getCommonProperties().device_id).toBe(undefined);
-
-            await telemetry.deviceIdPromise;
-
-            expect(telemetry["isBufferingEvents"]).toBe(false);
-            expect(telemetry.getCommonProperties().device_id).toBe(hashedMachineId);
-        });
-
-        it("should handle machine ID resolution failure", async () => {
-            const loggerSpy = jest.spyOn(logger, "debug");
-
-            // @ts-expect-error This is a workaround
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            mockMachineId.mockRejectedValue(new Error("Failed to get device ID"));
-
-            telemetry = Telemetry.create(session, config);
-
-            expect(telemetry["isBufferingEvents"]).toBe(true);
-            expect(telemetry.getCommonProperties().device_id).toBe(undefined);
-
-            await telemetry.deviceIdPromise;
-
-            expect(telemetry["isBufferingEvents"]).toBe(false);
-            expect(telemetry.getCommonProperties().device_id).toBe("unknown");
-
-            expect(loggerSpy).toHaveBeenCalledWith(
-                LogId.telemetryDeviceIdFailure,
-                "telemetry",
-                "Error: Failed to get device ID"
-            );
-        });
-
-        it("should timeout if machine ID resolution takes too long", async () => {
-            const loggerSpy = jest.spyOn(logger, "debug");
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            mockMachineId.mockImplementation(() => {
-                return new Promise(() => {});
-            });
-
-            telemetry = Telemetry.create(session, config);
-
-            expect(telemetry["isBufferingEvents"]).toBe(true);
-            expect(telemetry.getCommonProperties().device_id).toBe(undefined);
-
-            jest.advanceTimersByTime(DEVICE_ID_TIMEOUT / 2);
-
-            // Make sure the timeout doesn't happen prematurely.
-            expect(telemetry["isBufferingEvents"]).toBe(true);
-            expect(telemetry.getCommonProperties().device_id).toBe(undefined);
-
-            jest.advanceTimersByTime(DEVICE_ID_TIMEOUT);
-
-            await telemetry.deviceIdPromise;
-
-            expect(telemetry.getCommonProperties().device_id).toBe("unknown");
-            expect(telemetry["isBufferingEvents"]).toBe(false);
-            expect(loggerSpy).toHaveBeenCalledWith(
-                LogId.telemetryDeviceIdTimeout,
-                "telemetry",
-                "Device ID retrieval timed out"
-            );
         });
     });
 });
