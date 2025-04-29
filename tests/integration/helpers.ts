@@ -23,8 +23,12 @@ export interface IntegrationTest {
 export function setupIntegrationTest(getUserConfig: () => UserConfig): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
+    let oldDoNotTrackValue: string | undefined;
 
     beforeAll(async () => {
+        // GET DO_NOT_TRACK value
+        oldDoNotTrackValue = process.env.DO_NOT_TRACK;
+        process.env.DO_NOT_TRACK = "1";
         const userConfig = getUserConfig();
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
@@ -51,23 +55,16 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
             apiClientSecret: userConfig.apiClientSecret,
         });
 
-        userConfig.telemetry = "disabled";
         mcpServer = new Server({
             session,
             userConfig,
             mcpServer: new McpServer({
                 name: "test-server",
-                version: "1.2.3",
+                version: "5.2.3",
             }),
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
-    });
-
-    beforeEach(() => {
-        if (mcpServer) {
-            mcpServer.userConfig.telemetry = "disabled";
-        }
     });
 
     afterEach(async () => {
@@ -82,6 +79,13 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
 
         await mcpServer?.close();
         mcpServer = undefined;
+
+        // Reset DO_NOT_TRACK value
+        if (oldDoNotTrackValue !== undefined) {
+            process.env.DO_NOT_TRACK = oldDoNotTrackValue;
+        } else {
+            delete process.env.DO_NOT_TRACK;
+        }
     });
 
     const getMcpClient = () => {
