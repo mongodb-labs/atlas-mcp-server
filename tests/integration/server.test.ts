@@ -1,5 +1,4 @@
-import { expectDefined, setupIntegrationTest } from "./helpers.js";
-import { config } from "../../src/config.js";
+import { defaultTestConfig, expectDefined, setupIntegrationTest } from "./helpers.js";
 import { describeWithMongoDB } from "./tools/mongodb/mongodbHelpers.js";
 
 describe("Server integration test", () => {
@@ -16,7 +15,7 @@ describe("Server integration test", () => {
             });
         },
         () => ({
-            ...config,
+            ...defaultTestConfig,
             apiClientId: undefined,
             apiClientSecret: undefined,
         })
@@ -24,7 +23,7 @@ describe("Server integration test", () => {
 
     describe("with atlas", () => {
         const integration = setupIntegrationTest(() => ({
-            ...config,
+            ...defaultTestConfig,
             apiClientId: "test",
             apiClientSecret: "test",
         }));
@@ -59,7 +58,7 @@ describe("Server integration test", () => {
 
     describe("with read-only mode", () => {
         const integration = setupIntegrationTest(() => ({
-            ...config,
+            ...defaultTestConfig,
             readOnly: true,
             apiClientId: "test",
             apiClientSecret: "test",

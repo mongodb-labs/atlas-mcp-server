@@ -5,6 +5,7 @@ import { UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
+import { config } from "../../src/config.js";
 
 interface ParameterInfo {
     name: string;
@@ -19,16 +20,16 @@ export interface IntegrationTest {
     mcpClient: () => Client;
     mcpServer: () => Server;
 }
+export const defaultTestConfig: UserConfig = {
+    ...config,
+    telemetry: "disabled",
+};
 
 export function setupIntegrationTest(getUserConfig: () => UserConfig): IntegrationTest {
     let mcpClient: Client | undefined;
     let mcpServer: Server | undefined;
-    let oldDoNotTrackValue: string | undefined;
 
     beforeAll(async () => {
-        // GET DO_NOT_TRACK value
-        oldDoNotTrackValue = process.env.DO_NOT_TRACK;
-        process.env.DO_NOT_TRACK = "1";
         const userConfig = getUserConfig();
         const clientTransport = new InMemoryTransport();
         const serverTransport = new InMemoryTransport();
@@ -79,13 +80,6 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
 
         await mcpServer?.close();
         mcpServer = undefined;
-
-        // Reset DO_NOT_TRACK value
-        if (oldDoNotTrackValue !== undefined) {
-            process.env.DO_NOT_TRACK = oldDoNotTrackValue;
-        } else {
-            delete process.env.DO_NOT_TRACK;
-        }
     });
 
     const getMcpClient = () => {
