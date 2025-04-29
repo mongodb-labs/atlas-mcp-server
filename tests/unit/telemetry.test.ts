@@ -284,7 +284,7 @@ describe("Telemetry", () => {
             expect(telemetry.getCommonProperties().device_id).toBe("unknown");
 
             expect(loggerSpy).toHaveBeenCalledWith(
-                LogId.telemetryMachineIdFailure,
+                LogId.telemetryDeviceIdFailure,
                 "telemetry",
                 "Error: Failed to get device ID"
             );
@@ -315,7 +315,7 @@ describe("Telemetry", () => {
             expect(telemetry.getCommonProperties().device_id).toBe("unknown");
             expect(telemetry["isBufferingEvents"]).toBe(false);
             expect(loggerSpy).toHaveBeenCalledWith(
-                LogId.telemetryMachineIdFailure,
+                LogId.telemetryDeviceIdFailure,
                 "telemetry",
                 "Error: Promise timed out"
             );

@@ -40,7 +40,12 @@ export class Telemetry {
 
     private async start(): Promise<void> {
         this.deviceIdPromise = DeferredPromise.fromPromise(this.getDeviceId());
-        this.commonProperties.device_id = await this.deviceIdPromise;
+        try {
+            this.commonProperties.device_id = await this.deviceIdPromise;
+        } catch (error) {
+            logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
+            this.commonProperties.device_id = "unknown";
+        }
 
         this.isBufferingEvents = false;
     }
@@ -72,7 +77,7 @@ export class Telemetry {
             hmac.update(DEVICE_ID_HASH_MESSAGE);
             return hmac.digest("hex");
         } catch (error) {
-            logger.debug(LogId.telemetryMachineIdFailure, "telemetry", String(error));
+            logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
             return "unknown";
         }
     }
