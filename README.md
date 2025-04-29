@@ -35,14 +35,13 @@ A Model Context Protocol server for interacting with MongoDB Atlas. This project
 Common prerequisites:
 
 - Node.js v20.x
-- A MongoDB connection string or Atlas API credentials
+- A MongoDB connection string or Atlas API credentials, the Server will not start unless configured, see [configuration](#configuration) section for more details.
 
 ### WindSurf
 
 The latest instructions can be found at https://docs.windsurf.com/windsurf/mcp
 
 Step 1: Create MCP configuration file
-
 
 Create or edit the configuration file at `~/.codeium/windsurf/mcp_config.json`:
 
@@ -51,16 +50,18 @@ Create or edit the configuration file at `~/.codeium/windsurf/mcp_config.json`:
   "servers": {
     "MongoDB": {
       "command": "npx",
-      "args": [
-        "-y",
-        "mongodb-mcp-server"
-      ]
+      "args": ["-y", "mongodb-mcp-server"]
     }
   }
 }
 ```
 
-Step 2: Follow the [configuration](#configuration) section for more details on how to connect to a MongoDB instance or Atlas.
+Step 2: Setup a connection string or Atlas API credentials
+
+- Option 1: Connection String via args [example](#connection-string-with-args)
+- Option 2: Atlas API credentials via args [example](#atlas-api-credentials-with-args)
+- Option 3: Connection String via environment variables [example](#connection-string-with-environment-variables)
+- Option 4: Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
 
 ### VSCode
 
@@ -89,16 +90,16 @@ Note: the file should look like:
 }
 ```
 
-Step 2: Follow the [configuration](#configuration) section for more details on how to connect to a MongoDB instance or Atlas.
+Step 2: Setup a connection string or Atlas API credentials
 
+- Option 1: Connection String via args [example](#connection-string-with-args)
+- Option 2: Atlas API credentials via args [example](#atlas-api-credentials-with-args)
+- Option 3: Connection String via environment variables [example](#connection-string-with-environment-variables)
+- Option 4: Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
 
 ### Claude Desktop
 
-Step 1: Install claude and login
-
-Note: follow instructions at https://claude.ai/download
-
-Step 2: Launch Claude Settings -> Developer -> Edit Config
+Step 1: Launch Claude Settings -> Developer -> Edit Config
 
 Paste the mcp server configuration into the file
 
@@ -113,9 +114,12 @@ Paste the mcp server configuration into the file
 }
 ```
 
-Step 3: Close and Relaunch Claude Desktop and click on the hammer icon, the MongoDB MCP server should be detected.
+Step 2: Setup a connection string or Atlas API credentials
 
-Follow the [configuration](#configuration) section for more details on how to connect to a MongoDB instance or Atlas.
+- Option 1: Connection String via args [example](#connection-string-with-args)
+- Option 2: Atlas API credentials via args [example](#atlas-api-credentials-with-args)
+- Option 3: Connection String via environment variables [example](#connection-string-with-environment-variables)
+- Option 4: Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
 
 ## 🛠️ Supported Tools
 
@@ -275,12 +279,89 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
 
 ```
 
+#### MCP configuration file examples
+
+##### Connection String with environment variables
+
+```json
+{
+  "servers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": ["-y", "mongodb-mcp-server"],
+      "env": {
+        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+      }
+    }
+  }
+}
+```
+
+##### Atlas API credentials with environment variables
+
+```json
+{
+  "servers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": ["-y", "mongodb-mcp-server"],
+      "env": {
+        "MDB_MCP_API_CLIENT_ID": "your-atlas-client-id",
+        "MDB_MCP_API_CLIENT_SECRET": "your-atlas-client-secret"
+      }
+    }
+  }
+}
+```
+
 #### Command-Line Arguments
 
 Pass configuration options as command-line arguments when starting the server:
 
 ```shell
 npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret="your-atlas-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
+```
+
+#### MCP configuration file examples
+
+##### Connection String with command-line arguments
+
+```json
+{
+  "servers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase",
+        "--logPath",
+        "/path/to/logs"
+      ]
+    }
+  }
+}
+```
+
+##### Atlas API credentials with command-line arguments
+
+```json
+{
+  "servers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--apiClientId",
+        "your-atlas-client-id",
+        "--apiClientSecret",
+        "your-atlas-client-secret"
+      ]
+    }
+  }
+}
 ```
 
 ## 🤝 Contributing
