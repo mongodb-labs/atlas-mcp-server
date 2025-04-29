@@ -54,7 +54,7 @@ export class InspectClusterTool extends AtlasToolBase {
 
         const instanceSize = (regionConfigs.length <= 0 ? undefined : regionConfigs[0].instanceSize) || "UNKNOWN";
 
-        const clusterInstaceType = instanceSize == "M0" ? "FREE" : "DEDICATED";
+        const clusterInstanceType = instanceSize == "M0" ? "FREE" : "DEDICATED";
 
         return {
             content: [
@@ -62,7 +62,7 @@ export class InspectClusterTool extends AtlasToolBase {
                     type: "text",
                     text: `Cluster Name | Cluster Type | Tier | State | MongoDB Version | Connection String
 ----------------|----------------|----------------|----------------|----------------|----------------
-${cluster.name} | ${clusterInstaceType} | ${clusterInstaceType == "DEDICATED" ? instanceSize : "N/A"} | ${cluster.stateName} | ${cluster.mongoDBVersion || "N/A"} | ${cluster.connectionStrings?.standardSrv || cluster.connectionStrings?.standard || "N/A"}`,
+${cluster.name} | ${clusterInstanceType} | ${clusterInstanceType == "DEDICATED" ? instanceSize : "N/A"} | ${cluster.stateName} | ${cluster.mongoDBVersion || "N/A"} | ${cluster.connectionStrings?.standardSrv || cluster.connectionStrings?.standard || "N/A"}`,
                 },
             ],
         };
