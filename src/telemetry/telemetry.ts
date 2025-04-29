@@ -97,7 +97,11 @@ export class Telemetry {
         const result = await this.sendEvents(this.session.apiClient, allEvents);
         if (result.success) {
             this.eventCache.clearEvents();
-            logger.debug(LogId.telemetryEmitSuccess, "telemetry", `Sent ${allEvents.length} events successfully`);
+            logger.debug(
+                LogId.telemetryEmitSuccess,
+                "telemetry",
+                `Sent ${allEvents.length} events successfully: ${JSON.stringify(allEvents, null, 2)}`
+            );
             return;
         }
 

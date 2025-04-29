@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { ToolArgs, ToolBase, ToolCategory } from "../tool.js";
+import { ToolArgs, ToolBase, ToolCategory, ToolMetadata } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
-import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { CallToolResult, ServerNotification, ServerRequest } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
 import logger, { LogId } from "../../logger.js";
+import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
@@ -72,5 +73,16 @@ export abstract class MongoDBToolBase extends ToolBase {
 
     protected connectToMongoDB(connectionString: string): Promise<void> {
         return this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+    }
+
+    protected resolveToolMetadata(args: { [x: string]: any; }, extra: RequestHandlerExtra<ServerRequest, ServerNotification>): ToolMetadata {
+        const metadata = super.resolveToolMetadata(args, extra);
+
+        // Add projectId to the metadata if running a MongoDB operation to an Atlas cluster
+        if (this.session.connectedAtlasCluster?.projectId) {
+            metadata.projectId = this.session.connectedAtlasCluster.projectId;
+        }
+
+        return metadata;
     }
 }
