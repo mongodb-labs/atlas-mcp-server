@@ -54,13 +54,33 @@ jobs:
           MDB_MCP_API_CLIENT_ID: ${{ secrets.TEST_ATLAS_CLIENT_ID }}
           MDB_MCP_API_CLIENT_SECRET: ${{ secrets.TEST_ATLAS_CLIENT_SECRET }}
           MDB_MCP_API_BASE_URL: ${{ vars.TEST_ATLAS_BASE_URL }}
-        run: npm test -- --testPathIgnorePatterns "tests/integration/tools/mongodb" --testPathIgnorePatterns "tests/integration/[^/]+\.ts"
+        run: npm test -- --testPathIgnorePatterns "tests/unit" --testPathIgnorePatterns "tests/integration/tools/mongodb" --testPathIgnorePatterns "tests/integration/[^/]+\.ts"
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: atlas-test-results
           path: coverage/lcov.info
+
+  dep-check:
+    name: Check dependencies
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: package.json
+          cache: "npm"
+      - name: Install dependencies & build
+        run: npm ci
+      - name: Remove dev dependencies
+        run: |
+          rm -rf node_modules
+          npm pkg set scripts.prepare="exit 0"
+          npm install --omit=dev
+      - run: npx -y @modelcontextprotocol/inspector --cli --method tools/list -- node dist/index.js --connectionString "mongodb://localhost"
 
   coverage:
     name: Report Coverage
