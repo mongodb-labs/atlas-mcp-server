@@ -1,6 +1,6 @@
 import { Session } from "../session.js";
 import { BaseEvent, CommonProperties } from "./types.js";
-import { config } from "../config.js";
+import { UserConfig } from "../config.js";
 import logger, { LogId } from "../logger.js";
 import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
@@ -16,6 +16,7 @@ export class Telemetry {
 
     constructor(
         private readonly session: Session,
+        private readonly userConfig: UserConfig,
         private readonly eventCache: EventCache = EventCache.getInstance()
     ) {
         this.commonProperties = {
@@ -51,7 +52,7 @@ export class Telemetry {
             mcp_client_name: this.session.agentRunner?.name,
             session_id: this.session.sessionId,
             config_atlas_auth: this.session.apiClient.hasCredentials() ? "true" : "false",
-            config_connection_string: config.connectionString ? "true" : "false",
+            config_connection_string: this.userConfig.connectionString ? "true" : "false",
         };
     }
 
@@ -64,7 +65,7 @@ export class Telemetry {
      */
     public isTelemetryEnabled(): boolean {
         // Check if telemetry is explicitly disabled in config
-        if (config.telemetry === "disabled") {
+        if (this.userConfig.telemetry === "disabled") {
             return false;
         }
 

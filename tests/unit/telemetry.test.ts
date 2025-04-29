@@ -113,8 +113,7 @@ describe("Telemetry", () => {
         } as unknown as Session;
 
         // Create the telemetry instance with mocked dependencies
-        telemetry = new Telemetry(session, mockEventCache);
-
+        telemetry = new Telemetry(session, config, mockEventCache);
         config.telemetry = "enabled";
     });
 

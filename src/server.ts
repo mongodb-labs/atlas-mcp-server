@@ -28,7 +28,7 @@ export class Server {
     constructor({ session, mcpServer, userConfig }: ServerOptions) {
         this.startTime = Date.now();
         this.session = session;
-        this.telemetry = new Telemetry(session);
+        this.telemetry = new Telemetry(session, userConfig);
         this.mcpServer = mcpServer;
         this.userConfig = userConfig;
     }
