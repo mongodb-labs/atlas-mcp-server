@@ -11,23 +11,6 @@ type EventResult = {
     error?: Error;
 };
 
-/**
- * Checks if telemetry is currently enabled
- * This is a method rather than a constant to capture runtime config changes
- *
- * Follows the Console Do Not Track standard (https://consoledonottrack.com/)
- * by respecting the DO_NOT_TRACK environment variable
- */
-export function isTelemetryEnabled(): boolean {
-    // Check if telemetry is explicitly disabled in config
-    if (config.telemetry === "disabled") {
-        return false;
-    }
-
-    const doNotTrack = "DO_NOT_TRACK" in process.env;
-    return !doNotTrack;
-}
-
 export class Telemetry {
     private readonly commonProperties: CommonProperties;
 
@@ -46,7 +29,7 @@ export class Telemetry {
      */
     public async emitEvents(events: BaseEvent[]): Promise<void> {
         try {
-            if (!isTelemetryEnabled()) {
+            if (!this.isTelemetryEnabled()) {
                 logger.info(LogId.telemetryEmitFailure, "telemetry", `Telemetry is disabled.`);
                 return;
             }
@@ -70,6 +53,23 @@ export class Telemetry {
             config_atlas_auth: this.session.apiClient.hasCredentials() ? "true" : "false",
             config_connection_string: config.connectionString ? "true" : "false",
         };
+    }
+
+    /**
+     * Checks if telemetry is currently enabled
+     * This is a method rather than a constant to capture runtime config changes
+     *
+     * Follows the Console Do Not Track standard (https://consoledonottrack.com/)
+     * by respecting the DO_NOT_TRACK environment variable
+     */
+    public isTelemetryEnabled(): boolean {
+        // Check if telemetry is explicitly disabled in config
+        if (config.telemetry === "disabled") {
+            return false;
+        }
+
+        const doNotTrack = "DO_NOT_TRACK" in process.env;
+        return !doNotTrack;
     }
 
     /**

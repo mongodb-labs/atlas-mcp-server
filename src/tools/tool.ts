@@ -3,7 +3,7 @@ import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextproto
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger, { LogId } from "../logger.js";
-import { Telemetry, isTelemetryEnabled } from "../telemetry/telemetry.js";
+import { Telemetry } from "../telemetry/telemetry.js";
 import { type ToolEvent } from "../telemetry/types.js";
 import { UserConfig } from "../config.js";
 
@@ -185,7 +185,7 @@ export abstract class ToolBase {
         result: CallToolResult,
         ...args: Parameters<ToolCallback<typeof this.argsShape>>
     ): Promise<void> {
-        if (!isTelemetryEnabled()) {
+        if (!this.telemetry.isTelemetryEnabled()) {
             return;
         }
         const duration = Date.now() - startTime;
