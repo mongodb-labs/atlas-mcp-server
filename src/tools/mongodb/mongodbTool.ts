@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ToolArgs, ToolBase, ToolCategory, ToolMetadata } from "../tool.js";
+import { ToolArgs, ToolBase, ToolCategory, TelemetryToolMetadata } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult, ServerNotification, ServerRequest } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
@@ -78,7 +78,7 @@ export abstract class MongoDBToolBase extends ToolBase {
     protected resolveTelemetryMetadata(
         args: ToolArgs<typeof this.argsShape>,
         extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-    ): ToolMetadata {
+    ): TelemetryToolMetadata {
         const metadata = super.resolveTelemetryMetadata(args, extra);
 
         // Add projectId to the metadata if running a MongoDB operation to an Atlas cluster

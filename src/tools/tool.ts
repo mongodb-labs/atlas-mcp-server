@@ -11,7 +11,7 @@ export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNev
 
 export type OperationType = "metadata" | "read" | "create" | "delete" | "update";
 export type ToolCategory = "mongodb" | "atlas";
-export type ToolMetadata = {
+export type TelemetryToolMetadata = {
     projectId?: string;
     orgId?: string;
 };
@@ -105,7 +105,7 @@ export abstract class ToolBase {
         if (errorClarification) {
             logger.debug(
                 LogId.toolDisabled,
-                "tool",
+            "tool",
                 `Prevented registration of ${this.name} because ${errorClarification} is disabled in the config`
             );
 
@@ -139,8 +139,8 @@ export abstract class ToolBase {
      * @param args - The arguments passed to the tool
      * @returns The tool metadata
      */
-    protected resolveTelemetryMetadata(...args: Parameters<ToolCallback<typeof this.argsShape>>): ToolMetadata {
-        const toolMetadata: ToolMetadata = {};
+    protected resolveTelemetryMetadata(...args: Parameters<ToolCallback<typeof this.argsShape>>): TelemetryToolMetadata {
+        const toolMetadata: TelemetryToolMetadata = {};
         try {
             if (!args.length) {
                 return toolMetadata;
