@@ -3,8 +3,8 @@ import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextproto
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger, { LogId } from "../logger.js";
-import { Telemetry, isTelemetryEnabled  } from "../telemetry/telemetry.js";
-import { type ToolEvent} from "../telemetry/types.js";
+import { Telemetry, isTelemetryEnabled } from "../telemetry/telemetry.js";
+import { type ToolEvent } from "../telemetry/types.js";
 import { UserConfig } from "../config.js";
 
 export type ToolArgs<Args extends ZodRawShape> = z.objectOutputType<Args, ZodNever>;
@@ -14,7 +14,7 @@ export type ToolCategory = "mongodb" | "atlas";
 export type ToolMetadata = {
     projectId?: string;
     orgId?: string;
-}
+};
 
 export abstract class ToolBase {
     protected abstract name: string;
@@ -26,7 +26,6 @@ export abstract class ToolBase {
     protected abstract description: string;
 
     protected abstract argsShape: ZodRawShape;
-
 
     protected abstract execute(...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<CallToolResult>;
 
@@ -133,17 +132,14 @@ export abstract class ToolBase {
         };
     }
 
-
     /**
-     * 
+     *
      * Resolves the tool metadata from the arguments passed to the tool
-     * 
+     *
      * @param args - The arguments passed to the tool
      * @returns The tool metadata
      */
-    protected resolveToolMetadata(
-        ...args: Parameters<ToolCallback<typeof this.argsShape>>
-    ): ToolMetadata {
+    protected resolveToolMetadata(...args: Parameters<ToolCallback<typeof this.argsShape>>): ToolMetadata {
         const toolMetadata: ToolMetadata = {};
         try {
             // Parse the arguments to extract project_id and org_id
@@ -156,13 +152,11 @@ export abstract class ToolBase {
             if (parsedArgs.success && parsedArgs.data?.orgId) {
                 toolMetadata.orgId = parsedArgs.data?.orgId;
             }
-        }
-        catch (error) {
+        } catch (error) {
             logger.info(LogId.telmetryMetadataError, "tool", `Error resolving tool metadata: ${error as string}`);
         }
         return toolMetadata;
     }
-
 
     /**
      * Creates and emits a tool telemetry event
@@ -170,7 +164,11 @@ export abstract class ToolBase {
      * @param result - Whether the command succeeded or failed
      * @param args - The arguments passed to the tool
      */
-    private async emitToolEvent(startTime: number, result: CallToolResult, ...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<void> {
+    private async emitToolEvent(
+        startTime: number,
+        result: CallToolResult,
+        ...args: Parameters<ToolCallback<typeof this.argsShape>>
+    ): Promise<void> {
         if (!isTelemetryEnabled()) {
             return;
         }

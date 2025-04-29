@@ -12,12 +12,12 @@ type EventResult = {
 };
 
 /**
-     * Checks if telemetry is currently enabled
-     * This is a method rather than a constant to capture runtime config changes
-     *
-     * Follows the Console Do Not Track standard (https://consoledonottrack.com/)
-     * by respecting the DO_NOT_TRACK environment variable
-     */
+ * Checks if telemetry is currently enabled
+ * This is a method rather than a constant to capture runtime config changes
+ *
+ * Follows the Console Do Not Track standard (https://consoledonottrack.com/)
+ * by respecting the DO_NOT_TRACK environment variable
+ */
 export function isTelemetryEnabled(): boolean {
     // Check if telemetry is explicitly disabled in config
     if (config.telemetry === "disabled") {

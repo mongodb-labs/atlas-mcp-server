@@ -75,7 +75,10 @@ export abstract class MongoDBToolBase extends ToolBase {
         return this.session.connectToMongoDB(connectionString, this.config.connectOptions);
     }
 
-    protected resolveToolMetadata(args: { [x: string]: any; }, extra: RequestHandlerExtra<ServerRequest, ServerNotification>): ToolMetadata {
+    protected resolveToolMetadata(
+        args: { [x: string]: any },
+        extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+    ): ToolMetadata {
         const metadata = super.resolveToolMetadata(args, extra);
 
         // Add projectId to the metadata if running a MongoDB operation to an Atlas cluster
