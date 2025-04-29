@@ -32,14 +32,12 @@ A Model Context Protocol server for interacting with MongoDB Atlas. This project
 
 ## Installation
 
-
-
-### WindSurf
-
-Prerequisites:
+Common prerequisites:
 
 - Node.js v20.x
-- WindSurf installed on your machine
+- A MongoDB connection string or Atlas API credentials
+
+### WindSurf
 
 The latest instructions can be found at https://docs.windsurf.com/windsurf/mcp
 
@@ -65,10 +63,6 @@ Create or edit the configuration file at `~/.codeium/windsurf/mcp_config.json`:
 Step 2: Follow the [configuration](#configuration) section for more details on how to connect to a MongoDB instance or Atlas.
 
 ### VSCode
-
-Prerequisites:
-
-- Node.js v20.x
 
 Step 1: Add the mcp server to VSCode configuration
 
