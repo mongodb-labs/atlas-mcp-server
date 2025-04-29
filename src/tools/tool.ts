@@ -105,7 +105,7 @@ export abstract class ToolBase {
         if (errorClarification) {
             logger.debug(
                 LogId.toolDisabled,
-            "tool",
+                "tool",
                 `Prevented registration of ${this.name} because ${errorClarification} is disabled in the config`
             );
 
@@ -139,7 +139,9 @@ export abstract class ToolBase {
      * @param args - The arguments passed to the tool
      * @returns The tool metadata
      */
-    protected resolveTelemetryMetadata(...args: Parameters<ToolCallback<typeof this.argsShape>>): TelemetryToolMetadata {
+    protected resolveTelemetryMetadata(
+        ...args: Parameters<ToolCallback<typeof this.argsShape>>
+    ): TelemetryToolMetadata {
         const toolMetadata: TelemetryToolMetadata = {};
         try {
             if (!args.length) {
