@@ -46,7 +46,7 @@ export abstract class ToolBase {
                 logger.debug(LogId.toolExecute, "tool", `Executing ${this.name} with args: ${JSON.stringify(args)}`);
 
                 const result = await this.execute(...args);
-                await this.emitToolEvent(startTime, result, ...args);
+                await this.emitToolEvent(startTime, result, ...args).catch(() => {});
                 return result;
             } catch (error: unknown) {
                 logger.error(LogId.toolExecuteFailure, "tool", `Error executing ${this.name}: ${error as string}`);
@@ -143,38 +143,33 @@ export abstract class ToolBase {
         ...args: Parameters<ToolCallback<typeof this.argsShape>>
     ): TelemetryToolMetadata {
         const toolMetadata: TelemetryToolMetadata = {};
-        try {
-            if (!args.length) {
-                return toolMetadata;
-            }
+        if (!args.length) {
+            return toolMetadata;
+        }
 
-            // Create a typed parser for the exact shape we expect
-            const argsShape = z.object(this.argsShape);
-            const parsedResult = argsShape.safeParse(args[0]);
+        // Create a typed parser for the exact shape we expect
+        const argsShape = z.object(this.argsShape);
+        const parsedResult = argsShape.safeParse(args[0]);
 
-            if (!parsedResult.success) {
-                logger.debug(
-                    LogId.telmetryMetadataError,
-                    "tool",
-                    `Error parsing tool arguments: ${parsedResult.error.message}`
-                );
-                return toolMetadata;
-            }
+        if (!parsedResult.success) {
+            logger.debug(
+                LogId.telmetryMetadataError,
+                "tool",
+                `Error parsing tool arguments: ${parsedResult.error.message}`
+            );
+            return toolMetadata;
+        }
 
-            const data = parsedResult.data;
+        const data = parsedResult.data;
 
-            // Extract projectId using type guard
-            if ("projectId" in data && typeof data.projectId === "string" && data.projectId.trim() !== "") {
-                toolMetadata.projectId = data.projectId;
-            }
+        // Extract projectId using type guard
+        if ("projectId" in data && typeof data.projectId === "string" && data.projectId.trim() !== "") {
+            toolMetadata.projectId = data.projectId;
+        }
 
-            // Extract orgId using type guard
-            if ("orgId" in data && typeof data.orgId === "string" && data.orgId.trim() !== "") {
-                toolMetadata.orgId = data.orgId;
-            }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.debug(LogId.telmetryMetadataError, "tool", `Error resolving tool metadata: ${errorMessage}`);
+        // Extract orgId using type guard
+        if ("orgId" in data && typeof data.orgId === "string" && data.orgId.trim() !== "") {
+            toolMetadata.orgId = data.orgId;
         }
         return toolMetadata;
     }
@@ -199,7 +194,6 @@ export abstract class ToolBase {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
             properties: {
-                ...this.telemetry.getCommonProperties(),
                 command: this.name,
                 category: this.category,
                 component: "tool",
