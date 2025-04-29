@@ -149,9 +149,9 @@ export class Server {
                 const result = {
                     telemetry: this.userConfig.telemetry,
                     logPath: this.userConfig.logPath,
-                    mode: this.userConfig.connectionString
-                        ? "MongoDB; access to MongoDB tools is available"
-                        : "not set; before using any MongoDB tool, you need to configure a connection string, more info at 'https://github.com/mongodb-js/mongodb-mcp-server', alternatively you man setup MongoDB Atlas access.",
+                    connectionString: this.userConfig.connectionString
+                        ? "set; access to MongoDB tools are currently available to use"
+                        : "not set; before using any MongoDB tool, you need to configure a connection string, alternatively you man setup MongoDB Atlas access, more info at 'https://github.com/mongodb-js/mongodb-mcp-server'.",
                     connectOptions: this.userConfig.connectOptions,
                     atlas:
                         this.userConfig.apiClientId && this.userConfig.apiClientSecret
