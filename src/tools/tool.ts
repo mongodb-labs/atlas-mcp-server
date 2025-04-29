@@ -142,18 +142,37 @@ export abstract class ToolBase {
     protected resolveToolMetadata(...args: Parameters<ToolCallback<typeof this.argsShape>>): ToolMetadata {
         const toolMetadata: ToolMetadata = {};
         try {
-            // Parse the arguments to extract project_id and org_id
-            const argsShape = z.object(this.argsShape);
-            const parsedArgs = argsShape.safeParse(args[0]);
-            if (parsedArgs.success && parsedArgs.data?.projectId) {
-                toolMetadata.projectId = parsedArgs.data?.projectId;
+            if (!args[0] || typeof args[0] !== "object") {
+                return toolMetadata;
             }
 
-            if (parsedArgs.success && parsedArgs.data?.orgId) {
-                toolMetadata.orgId = parsedArgs.data?.orgId;
+            // Create a typed parser for the exact shape we expect
+            const argsShape = z.object(this.argsShape);
+            const parsedResult = argsShape.safeParse(args[0]);
+
+            if (!parsedResult.success) {
+                logger.debug(
+                    LogId.telmetryMetadataError,
+                    "tool",
+                    `Error parsing tool arguments: ${parsedResult.error.message}`
+                );
+                return toolMetadata;
+            }
+
+            const data = parsedResult.data;
+
+            // Extract projectId using type guard
+            if ("projectId" in data && typeof data.projectId === "string" && data.projectId.trim() !== "") {
+                toolMetadata.projectId = data.projectId;
+            }
+
+            // Extract orgId using type guard
+            if ("orgId" in data && typeof data.orgId === "string" && data.orgId.trim() !== "") {
+                toolMetadata.orgId = data.orgId;
             }
         } catch (error) {
-            logger.info(LogId.telmetryMetadataError, "tool", `Error resolving tool metadata: ${error as string}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.debug(LogId.telmetryMetadataError, "tool", `Error resolving tool metadata: ${errorMessage}`);
         }
         return toolMetadata;
     }

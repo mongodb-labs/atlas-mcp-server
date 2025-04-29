@@ -76,7 +76,7 @@ export abstract class MongoDBToolBase extends ToolBase {
     }
 
     protected resolveToolMetadata(
-        args: { [x: string]: any },
+        args: ToolArgs<typeof this.argsShape>,
         extra: RequestHandlerExtra<ServerRequest, ServerNotification>
     ): ToolMetadata {
         const metadata = super.resolveToolMetadata(args, extra);
