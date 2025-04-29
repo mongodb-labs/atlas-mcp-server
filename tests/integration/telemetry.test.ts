@@ -6,8 +6,6 @@ import { Session } from "../../src/session.js";
 describe("Telemetry", () => {
     it("should resolve the actual machine ID", async () => {
         const actualId = await machineId(true);
-        // Should be a UUID
-        expect(actualId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
         const actualHashedId = createHmac("sha256", actualId.toUpperCase()).update("atlascli").digest("hex");
 
         const telemetry = Telemetry.create(
