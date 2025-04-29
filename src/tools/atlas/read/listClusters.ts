@@ -107,9 +107,9 @@ ${rows}`,
                 const instanceSize =
                     (regionConfigs.length <= 0 ? undefined : regionConfigs[0].instanceSize) || "UNKNOWN";
 
-                const clusterInstaceType = instanceSize == "M0" ? "FREE" : "DEDICATED";
+                const clusterInstanceType = instanceSize == "M0" ? "FREE" : "DEDICATED";
 
-                return `${cluster.name} | ${clusterInstaceType} | ${clusterInstaceType == "DEDICATED" ? instanceSize : "N/A"} | ${cluster.stateName} | ${mongoDBVersion} | ${connectionString}`;
+                return `${cluster.name} | ${clusterInstanceType} | ${clusterInstanceType == "DEDICATED" ? instanceSize : "N/A"} | ${cluster.stateName} | ${mongoDBVersion} | ${connectionString}`;
             })
             .join("\n");
         return {
