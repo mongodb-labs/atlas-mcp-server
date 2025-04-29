@@ -153,7 +153,7 @@ export abstract class ToolBase {
 
         if (!parsedResult.success) {
             logger.debug(
-                LogId.telmetryMetadataError,
+                LogId.telemetryMetadataError,
                 "tool",
                 `Error parsing tool arguments: ${parsedResult.error.message}`
             );
