@@ -139,10 +139,10 @@ export abstract class ToolBase {
      * @param args - The arguments passed to the tool
      * @returns The tool metadata
      */
-    protected resolveToolMetadata(...args: Parameters<ToolCallback<typeof this.argsShape>>): ToolMetadata {
+    protected resolveTelemetryMetadata(...args: Parameters<ToolCallback<typeof this.argsShape>>): ToolMetadata {
         const toolMetadata: ToolMetadata = {};
         try {
-            if (!args[0] || typeof args[0] !== "object") {
+            if (!args.length) {
                 return toolMetadata;
             }
 
@@ -192,7 +192,7 @@ export abstract class ToolBase {
             return;
         }
         const duration = Date.now() - startTime;
-        const metadata = this.resolveToolMetadata(...args);
+        const metadata = this.resolveTelemetryMetadata(...args);
         const event: ToolEvent = {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
