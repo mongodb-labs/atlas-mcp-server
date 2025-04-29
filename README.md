@@ -10,6 +10,7 @@ A Model Context Protocol server for interacting with MongoDB Atlas. This project
 - [🚀 Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+    - [WindSurf](#windsurf)
     - [VSCode](#vscode)
     - [Claude Desktop](#claude)
 - [🛠️ Supported Tools](#supported-tools)
@@ -19,6 +20,7 @@ A Model Context Protocol server for interacting with MongoDB Atlas. This project
   - [Atlas API Access](#atlas-api-access)
   - [Configuration Methods](#configuration-methods)
 - [👩‍💻 Client Integration](#client-integration)
+  - [WindSurf](#windsurf)
   - [VSCode](#vscode)
   - [Claude](#claude)
 - [🤝 Contributing](#contributing)
@@ -29,6 +31,38 @@ A Model Context Protocol server for interacting with MongoDB Atlas. This project
 - MongoDB Atlas account
 
 ## Installation
+
+
+
+### WindSurf
+
+Prerequisites:
+
+- Node.js v20.x
+- WindSurf installed on your machine
+
+The latest instructions can be found at https://docs.windsurf.com/windsurf/mcp
+
+Step 1: Create MCP configuration file
+
+
+Create or edit the configuration file at `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "servers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+Step 2: Follow the [configuration](#configuration) section for more details on how to connect to a MongoDB instance or Atlas.
 
 ### VSCode
 
@@ -61,11 +95,8 @@ Note: the file should look like:
 }
 ```
 
-Notes: You can configure the server with atlas access, make sure to follow configuration section for more details.
+Step 2: Follow the [configuration](#configuration) section for more details on how to connect to a MongoDB instance or Atlas.
 
-Step 2: Try talking to github copilot
-
-- Can you connect to my mongodb instance?
 
 ### Claude Desktop
 
@@ -90,7 +121,7 @@ Paste the mcp server configuration into the file
 
 Step 3: Close and Relaunch Claude Desktop and click on the hammer icon, the MongoDB MCP server should be detected.
 
-You may experiment asking `Can you connect to my mongodb instance?`.
+Follow the [configuration](#configuration) section for more details on how to connect to a MongoDB instance or Atlas.
 
 ## 🛠️ Supported Tools
 
