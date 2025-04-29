@@ -150,9 +150,9 @@ The MongoDB MCP Server can be configured using multiple methods, with the follow
 | `apiClientSecret`  | Atlas API client secret for authentication                                                                            |
 | `connectionString` | MongoDB connection string for direct database connections (optional users may choose to inform it on every tool call) |
 | `logPath`          | Folder to store logs                                                                                                  |
-| `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled.                            |
+| `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled                             |
 | `readOnly`         | When set to true, only allows read and metadata operation types, disabling create/update/delete operations            |
-| `telemetry`        | When set to disabled, disables telemetry collection.                                                                    |
+| `telemetry`        | When set to disabled, disables telemetry collection                                                                   |
 
 #### `logPath`
 
