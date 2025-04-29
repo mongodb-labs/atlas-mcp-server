@@ -74,8 +74,13 @@ jobs:
           node-version-file: package.json
           cache: "npm"
       - name: Install dependencies & build
-        run: npm ci --omit=dev --include=@modelcontextprotocol/inspector
-      - run: npm run inspect -- --cli --method tools/list --connectionString "mongodb://localhost"
+        run: npm ci
+      - name: Remove dev dependencies
+        run: |
+          rm -rf node_modules
+          npm pkg set scripts.prepare="exit 0"
+          npm install --omit=dev
+      - run: npx -y @modelcontextprotocol/inspector --cli --method tools/list -- node dist/index.js --connectionString "mongodb://localhost"
 
   coverage:
     name: Report Coverage

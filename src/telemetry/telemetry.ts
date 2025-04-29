@@ -6,7 +6,7 @@ import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
 import { createHmac } from "crypto";
-import { machineId } from "node-machine-id";
+import nodeMachineId from "node-machine-id";
 import { DeferredPromise } from "../deferred-promise.js";
 
 type EventResult = {
@@ -39,6 +39,9 @@ export class Telemetry {
     }
 
     private async start(): Promise<void> {
+        if (!Telemetry.isTelemetryEnabled()) {
+            return;
+        }
         this.deviceIdPromise = DeferredPromise.fromPromise(this.getDeviceId(), {
             timeout: DEVICE_ID_TIMEOUT,
             onTimeout: (resolve) => {
@@ -66,7 +69,7 @@ export class Telemetry {
                 return this.commonProperties.device_id;
             }
 
-            const originalId = await machineId(true);
+            const originalId = await nodeMachineId.machineId(true);
 
             // Create a hashed format from the all uppercase version of the machine ID
             // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
