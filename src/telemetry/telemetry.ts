@@ -5,6 +5,8 @@ import logger, { LogId } from "../logger.js";
 import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
+import { createHmac } from "crypto";
+import { machineId } from "node-machine-id";
 
 type EventResult = {
     success: boolean;
@@ -12,15 +14,76 @@ type EventResult = {
 };
 
 export class Telemetry {
-    private readonly commonProperties: CommonProperties;
+    private isBufferingEvents: boolean = true;
+    private resolveDeviceId: (deviceId: string) => void = () => {};
 
-    constructor(
+    private constructor(
         private readonly session: Session,
-        private readonly eventCache: EventCache = EventCache.getInstance()
-    ) {
-        this.commonProperties = {
-            ...MACHINE_METADATA,
-        };
+        private readonly commonProperties: CommonProperties,
+        private readonly eventCache: EventCache
+    ) {}
+
+    static create(
+        session: Session,
+        commonProperties: CommonProperties = MACHINE_METADATA,
+        eventCache: EventCache = EventCache.getInstance()
+    ): Telemetry {
+        const instance = new Telemetry(session, commonProperties, eventCache);
+
+        void instance.start();
+        return instance;
+    }
+
+    private async start(): Promise<void> {
+        this.commonProperties.device_id = await this.getDeviceId();
+
+        this.isBufferingEvents = false;
+        await this.emitEvents(this.eventCache.getEvents());
+    }
+
+    public async close(): Promise<void> {
+        this.resolveDeviceId("unknown");
+        this.isBufferingEvents = false;
+        await this.emitEvents(this.eventCache.getEvents());
+    }
+
+    private async machineIdWithTimeout(): Promise<string> {
+        try {
+            return Promise.race<string>([
+                machineId(true),
+                new Promise<string>((resolve, reject) => {
+                    this.resolveDeviceId = resolve;
+                    setTimeout(() => {
+                        reject(new Error("Timeout getting machine ID"));
+                    }, 3000);
+                }),
+            ]);
+        } catch (error) {
+            logger.debug(LogId.telemetryMachineIdFailure, "telemetry", `Error getting machine ID: ${String(error)}`);
+            return "unknown";
+        }
+    }
+
+    /**
+     * @returns A hashed, unique identifier for the running device or `undefined` if not known.
+     */
+    private async getDeviceId(): Promise<string> {
+        if (this.commonProperties.device_id) {
+            return this.commonProperties.device_id;
+        }
+
+        // Create a hashed format from the all uppercase version of the machine ID
+        // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
+
+        const originalId = (await this.machineIdWithTimeout()).toUpperCase();
+
+        const hmac = createHmac("sha256", originalId);
+
+        /** This matches the message used to create the hashes in Atlas CLI */
+        const DEVICE_ID_HASH_MESSAGE = "atlascli";
+
+        hmac.update(DEVICE_ID_HASH_MESSAGE);
+        return hmac.digest("hex");
     }
 
     /**
@@ -84,6 +147,11 @@ export class Telemetry {
      * Falls back to caching if both attempts fail
      */
     private async emit(events: BaseEvent[]): Promise<void> {
+        if (this.isBufferingEvents) {
+            this.eventCache.appendEvents(events);
+            return;
+        }
+
         const cachedEvents = this.eventCache.getEvents();
         const allEvents = [...cachedEvents, ...events];
 

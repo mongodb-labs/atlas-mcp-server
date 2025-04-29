@@ -53,7 +53,6 @@ export type ServerEvent = TelemetryEvent<ServerEventProperties>;
  * Interface for static properties, they can be fetched once and reused.
  */
 export type CommonStaticProperties = {
-    device_id?: string;
     mcp_server_version: string;
     mcp_server_name: string;
     platform: string;

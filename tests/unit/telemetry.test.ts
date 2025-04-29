@@ -4,6 +4,7 @@ import { Telemetry } from "../../src/telemetry/telemetry.js";
 import { BaseEvent, TelemetryResult } from "../../src/telemetry/types.js";
 import { EventCache } from "../../src/telemetry/eventCache.js";
 import { config } from "../../src/config.js";
+import { MACHINE_METADATA } from "../../src/telemetry/constants.js";
 
 // Mock the ApiClient to avoid real API calls
 jest.mock("../../src/common/atlas/apiClient.js");
@@ -113,7 +114,14 @@ describe("Telemetry", () => {
         } as unknown as Session;
 
         // Create the telemetry instance with mocked dependencies
-        telemetry = new Telemetry(session, mockEventCache);
+        telemetry = Telemetry.create(
+            session,
+            {
+                ...MACHINE_METADATA,
+                device_id: "test-device-id",
+            },
+            mockEventCache
+        );
 
         config.telemetry = "enabled";
     });

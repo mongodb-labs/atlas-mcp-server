@@ -7,6 +7,7 @@ import { config } from "./config.js";
 import { Session } from "./session.js";
 import { Server } from "./server.js";
 import { packageInfo } from "./packageInfo.js";
+import { Telemetry } from "./telemetry/telemetry.js";
 
 try {
     const session = new Session({
@@ -19,9 +20,12 @@ try {
         version: packageInfo.version,
     });
 
+    const telemetry = Telemetry.create(session);
+
     const server = new Server({
         mcpServer,
         session,
+        telemetry,
         userConfig: config,
     });
 
