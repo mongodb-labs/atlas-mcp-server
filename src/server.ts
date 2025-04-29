@@ -107,7 +107,6 @@ export class Server {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
             properties: {
-                ...this.telemetry.getCommonProperties(),
                 result: "success",
                 duration_ms: commandDuration,
                 component: "server",

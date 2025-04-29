@@ -71,7 +71,15 @@ describe("Telemetry", () => {
         expect(appendEvents.length).toBe(appendEventsCalls);
 
         if (sendEventsCalledWith) {
-            expect(sendEvents[0]?.[0]).toEqual(sendEventsCalledWith);
+            expect(sendEvents[0]?.[0]).toEqual(
+                sendEventsCalledWith.map((event) => ({
+                    ...event,
+                    properties: {
+                        ...telemetry.getCommonProperties(),
+                        ...event.properties,
+                    },
+                }))
+            );
         }
 
         if (appendEventsCalledWith) {

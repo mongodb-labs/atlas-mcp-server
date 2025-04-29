@@ -116,7 +116,7 @@ export class Telemetry {
             await client.sendEvents(
                 events.map((event) => ({
                     ...event,
-                    properties: { ...event.properties, ...this.getCommonProperties() },
+                    properties: { ...this.getCommonProperties(), ...event.properties },
                 }))
             );
             return { success: true };
