@@ -162,6 +162,7 @@ export class Server {
                     contents: [
                         {
                             text: JSON.stringify(result),
+                            mimeType: "application/json",
                             uri: uri.href,
                         },
                     ],
