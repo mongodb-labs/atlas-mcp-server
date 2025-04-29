@@ -44,6 +44,7 @@ async function main() {
     const openapi = JSON.parse(specFile) as OpenAPIV3_1.Document;
     for (const path in openapi.paths) {
         for (const method in openapi.paths[path]) {
+            // @ts-expect-error This is a workaround for the OpenAPI types
             const operation = openapi.paths[path][method] as OpenAPIV3_1.OperationObject;
 
             if (!operation.operationId || !operation.tags?.length) {

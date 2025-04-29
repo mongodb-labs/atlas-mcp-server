@@ -3,7 +3,7 @@ import type { FetchOptions } from "openapi-fetch";
 import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
-import { BaseEvent } from "../../telemetry/types.js";
+import { CommonProperties, TelemetryEvent } from "../../telemetry/types.js";
 import { packageInfo } from "../../packageInfo.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
@@ -123,7 +123,7 @@ export class ApiClient {
         }>;
     }
 
-    async sendEvents(events: BaseEvent[]): Promise<void> {
+    async sendEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
         let endpoint = "api/private/unauth/telemetry/events";
         const headers: Record<string, string> = {
             Accept: "application/json",

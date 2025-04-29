@@ -74,7 +74,7 @@ export function parseTable(text: string): Record<string, string>[] {
     return data
         .filter((_, index) => index >= 2)
         .map((cells) => {
-            const row = {};
+            const row: Record<string, string> = {};
             cells.forEach((cell, index) => {
                 row[headers[index]] = cell;
             });

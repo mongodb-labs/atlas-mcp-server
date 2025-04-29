@@ -8,49 +8,46 @@ export type TelemetryBoolSet = "true" | "false";
 /**
  * Base interface for all events
  */
-export interface Event {
+export type TelemetryEvent<T> = {
     timestamp: string;
     source: "mdbmcp";
-    properties: Record<string, unknown>;
-}
-
-export interface BaseEvent extends Event {
-    properties: CommonProperties & {
+    properties: T & {
         component: string;
         duration_ms: number;
         result: TelemetryResult;
         category: string;
-    } & Event["properties"];
-}
+    };
+};
+
+export type BaseEvent = TelemetryEvent<unknown>;
 
 /**
  * Interface for tool events
  */
-export interface ToolEvent extends BaseEvent {
-    properties: {
-        command: string;
-        error_code?: string;
-        error_type?: string;
-        project_id?: string;
-        org_id?: string;
-        cluster_name?: string;
-        is_atlas?: boolean;
-    } & BaseEvent["properties"];
-}
+export type ToolEventProperties = {
+    command: string;
+    error_code?: string;
+    error_type?: string;
+    project_id?: string;
+    org_id?: string;
+    cluster_name?: string;
+    is_atlas?: boolean;
+};
 
+export type ToolEvent = TelemetryEvent<ToolEventProperties>;
 /**
  * Interface for server events
  */
-export interface ServerEvent extends BaseEvent {
-    properties: {
-        command: ServerCommand;
-        reason?: string;
-        startup_time_ms?: number;
-        runtime_duration_ms?: number;
-        read_only_mode?: boolean;
-        disabled_tools?: string[];
-    } & BaseEvent["properties"];
-}
+export type ServerEventProperties = {
+    command: ServerCommand;
+    reason?: string;
+    startup_time_ms?: number;
+    runtime_duration_ms?: number;
+    read_only_mode?: boolean;
+    disabled_tools?: string[];
+};
+
+export type ServerEvent = TelemetryEvent<ServerEventProperties>;
 
 /**
  * Interface for static properties, they can be fetched once and reused.
@@ -69,6 +66,7 @@ export type CommonStaticProperties = {
  * Common properties for all events that might change.
  */
 export type CommonProperties = {
+    device_id?: string;
     mcp_client_version?: string;
     mcp_client_name?: string;
     config_atlas_auth?: TelemetryBoolSet;

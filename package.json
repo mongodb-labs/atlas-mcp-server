@@ -18,14 +18,15 @@
   "scripts": {
     "prepare": "npm run build",
     "build:clean": "rm -rf dist",
-    "build:compile": "tsc",
+    "build:compile": "tsc --project tsconfig.build.json",
     "build:chmod": "chmod +x dist/index.js",
     "build": "npm run build:clean && npm run build:compile && npm run build:chmod",
     "inspect": "npm run build && mcp-inspector -- dist/index.js",
     "prettier": "prettier",
-    "check": "npm run build && npm run check:lint && npm run check:format",
+    "check": "npm run build && npm run check:types && npm run check:lint && npm run check:format",
     "check:lint": "eslint .",
     "check:format": "prettier -c .",
+    "check:types": "tsc --noEmit --project tsconfig.json",
     "reformat": "prettier --write .",
     "generate": "./scripts/generate.sh",
     "test": "jest --coverage"

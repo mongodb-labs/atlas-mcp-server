@@ -113,7 +113,12 @@ export class Telemetry {
      */
     private async sendEvents(client: ApiClient, events: BaseEvent[]): Promise<EventResult> {
         try {
-            await client.sendEvents(events);
+            await client.sendEvents(
+                events.map((event) => ({
+                    ...event,
+                    properties: { ...event.properties, ...this.getCommonProperties() },
+                }))
+            );
             return { success: true };
         } catch (error) {
             return {

@@ -43,7 +43,6 @@ export abstract class ToolBase {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
             properties: {
-                ...this.telemetry.getCommonProperties(),
                 command: this.name,
                 category: this.category,
                 component: "tool",
