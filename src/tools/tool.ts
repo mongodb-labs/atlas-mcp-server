@@ -3,7 +3,7 @@ import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextproto
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger, { LogId } from "../logger.js";
-import { Telemetry } from "../telemetry/telemetry.js";
+import { Telemetry, isTelemetryEnabled  } from "../telemetry/telemetry.js";
 import { type ToolEvent } from "../telemetry/types.js";
 import { UserConfig } from "../config.js";
 
@@ -38,6 +38,9 @@ export abstract class ToolBase {
      * @param error - Optional error if the command failed
      */
     private async emitToolEvent(startTime: number, result: CallToolResult): Promise<void> {
+        if (!isTelemetryEnabled()) {
+            return;
+        }
         const duration = Date.now() - startTime;
         const event: ToolEvent = {
             timestamp: new Date().toISOString(),

@@ -11,6 +11,31 @@ type EventResult = {
     error?: Error;
 };
 
+/**
+     * Checks if telemetry is currently enabled
+     * This is a method rather than a constant to capture runtime config changes
+     *
+     * Follows the Console Do Not Track standard (https://consoledonottrack.com/)
+     * by respecting the DO_NOT_TRACK environment variable
+     */
+export function isTelemetryEnabled(): boolean {
+    // Check if telemetry is explicitly disabled in config
+    if (config.telemetry === "disabled") {
+        return false;
+    }
+
+    const doNotTrack = process.env.DO_NOT_TRACK;
+    if (doNotTrack) {
+        const value = doNotTrack.toLowerCase();
+        // Telemetry should be disabled if DO_NOT_TRACK is "1", "true", or "yes"
+        if (value === "1" || value === "true" || value === "yes") {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 export class Telemetry {
     private readonly commonProperties: CommonProperties;
 
@@ -24,37 +49,13 @@ export class Telemetry {
     }
 
     /**
-     * Checks if telemetry is currently enabled
-     * This is a method rather than a constant to capture runtime config changes
-     *
-     * Follows the Console Do Not Track standard (https://consoledonottrack.com/)
-     * by respecting the DO_NOT_TRACK environment variable
-     */
-    private static isTelemetryEnabled(): boolean {
-        // Check if telemetry is explicitly disabled in config
-        if (config.telemetry === "disabled") {
-            return false;
-        }
-
-        const doNotTrack = process.env.DO_NOT_TRACK;
-        if (doNotTrack) {
-            const value = doNotTrack.toLowerCase();
-            // Telemetry should be disabled if DO_NOT_TRACK is "1", "true", or "yes"
-            if (value === "1" || value === "true" || value === "yes") {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Emits events through the telemetry pipeline
      * @param events - The events to emit
      */
     public async emitEvents(events: BaseEvent[]): Promise<void> {
         try {
-            if (!Telemetry.isTelemetryEnabled()) {
+            if (!isTelemetryEnabled()) {
+                logger.info(LogId.telemetryEmitFailure, "telemetry", `Telemetry is disabled.`);
                 return;
             }
 
