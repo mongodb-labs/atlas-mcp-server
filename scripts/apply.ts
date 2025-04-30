@@ -95,7 +95,7 @@ async function main() {
             return `async ${operationId}(options${requiredParams ? "" : "?"}: FetchOptions<operations["${operationId}"]>) {
     const { ${hasResponseBody ? `data, ` : ``}error, response } = await this.client.${method}("${path}", options);
     if (error) {
-        throw new ApiClientError("error calling Atlas API", response, error);
+        throw ApiClientError.fromApiError(response, error);
     }
     ${
         hasResponseBody

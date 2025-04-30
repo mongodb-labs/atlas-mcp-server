@@ -1,13 +1,22 @@
 import { ApiError } from "./openapi.js";
 
 export class ApiClientError extends Error {
-    constructor(
+    private constructor(
         message: string,
-        public readonly response?: Response,
-        public readonly body?: ApiError
+        public readonly apiError?: ApiError
     ) {
         super(message);
         this.name = "ApiClientError";
+    }
+
+    static fromApiError(
+        response: Response,
+        apiError: ApiError,
+        message: string = `error calling Atlas API`
+    ): ApiClientError {
+        const errorMessage = this.buildErrorMessage(apiError);
+
+        return new ApiClientError(`[${response.status} ${response.statusText}] ${message}: ${errorMessage}`, apiError);
     }
 
     static async fromResponse(
@@ -20,11 +29,7 @@ export class ApiClientError extends Error {
 
         const body = err && typeof err === "object" ? err : undefined;
 
-        return new ApiClientError(
-            `[${response.status} ${response.statusText}] ${message}: ${errorMessage}`,
-            response,
-            body
-        );
+        return new ApiClientError(`[${response.status} ${response.statusText}] ${message}: ${errorMessage}`, body);
     }
 
     private static async extractError(response: Response): Promise<ApiError | string | undefined> {
