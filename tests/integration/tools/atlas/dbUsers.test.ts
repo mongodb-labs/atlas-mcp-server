@@ -2,6 +2,7 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../../../../src/session.js";
 import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
 import { expectDefined, getResponseElements } from "../../helpers.js";
+import { ApiClientError } from "../../../../src/common/atlas/apiClientError.js";
 
 describeWithAtlas("db users", (integration) => {
     withProject(integration, ({ getProjectId }) => {
@@ -28,18 +29,22 @@ describeWithAtlas("db users", (integration) => {
         };
 
         afterEach(async () => {
-            const projectId = getProjectId();
-
-            const session: Session = integration.mcpServer().session;
-            await session.apiClient.deleteDatabaseUser({
-                params: {
-                    path: {
-                        groupId: projectId,
-                        username: userName,
-                        databaseName: "admin",
+            try {
+                await integration.mcpServer().session.apiClient.deleteDatabaseUser({
+                    params: {
+                        path: {
+                            groupId: getProjectId(),
+                            username: userName,
+                            databaseName: "admin",
+                        },
                     },
-                },
-            });
+                });
+            } catch (error) {
+                // Ignore 404 errors when deleting the user
+                if (!(error instanceof ApiClientError) || error.response?.status !== 404) {
+                    throw error;
+                }
+            }
         });
 
         describe("atlas-create-db-user", () => {
