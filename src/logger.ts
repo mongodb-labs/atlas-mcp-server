@@ -18,6 +18,7 @@ export const LogId = {
     telemetryEmitStart: mongoLogId(1_002_003),
     telemetryEmitSuccess: mongoLogId(1_002_004),
     telemetryMetadataError: mongoLogId(1_002_005),
+    telemetryDeviceIdFailure: mongoLogId(1_002_006),
 
     toolExecute: mongoLogId(1_003_001),
     toolExecuteFailure: mongoLogId(1_003_002),
