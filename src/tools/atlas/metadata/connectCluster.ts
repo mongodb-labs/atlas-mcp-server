@@ -101,12 +101,17 @@ export class ConnectClusterTool extends AtlasToolBase {
         cn.searchParams.set("authSource", "admin");
         const connectionString = cn.toString();
 
+        let lastError: Error | undefined = undefined;
+
         for (let i = 0; i < 20; i++) {
             try {
                 await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
                 break;
             } catch (err: unknown) {
                 const error = err instanceof Error ? err : new Error(String(err));
+
+                lastError = error;
+
                 logger.debug(
                     LogId.atlasConnectFailure,
                     "atlas-connect-cluster",
@@ -115,6 +120,10 @@ export class ConnectClusterTool extends AtlasToolBase {
 
                 await new Promise((resolve) => setTimeout(resolve, 500));
             }
+        }
+
+        if (lastError) {
+            throw lastError;
         }
 
         return {
