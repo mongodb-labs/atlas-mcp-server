@@ -1,5 +1,6 @@
 import { packageInfo } from "../packageInfo.js";
 import { type CommonStaticProperties } from "./types.js";
+import { getDeviceId } from "./device-id.js";
 /**
  * Machine-specific metadata formatted for telemetry
  */
