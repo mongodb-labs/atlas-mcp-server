@@ -95,7 +95,7 @@ async function main() {
             return `async ${operationId}(options${requiredParams ? "" : "?"}: FetchOptions<operations["${operationId}"]>) {
     const { ${hasResponseBody ? `data, ` : ``}error, response } = await this.client.${method}("${path}", options);
     if (error) {
-        throw ApiClientError.fromApiError(response, error);
+        throw ApiClientError.fromError(response, error);
     }
     ${
         hasResponseBody

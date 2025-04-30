@@ -9,27 +9,25 @@ export class ApiClientError extends Error {
         this.name = "ApiClientError";
     }
 
-    static fromApiError(
-        response: Response,
-        apiError: ApiError,
-        message: string = `error calling Atlas API`
-    ): ApiClientError {
-        const errorMessage = this.buildErrorMessage(apiError);
-
-        return new ApiClientError(`[${response.status} ${response.statusText}] ${message}: ${errorMessage}`, apiError);
-    }
-
     static async fromResponse(
         response: Response,
         message: string = `error calling Atlas API`
     ): Promise<ApiClientError> {
         const err = await this.extractError(response);
 
-        const errorMessage = this.buildErrorMessage(err);
+        return this.fromError(response, err, message);
+    }
 
-        const body = err && typeof err === "object" ? err : undefined;
+    private static fromError(
+        response: Response,
+        error?: ApiError | string | Error,
+        message: string = `error calling Atlas API`
+    ): ApiClientError {
+        const errorMessage = this.buildErrorMessage(error);
 
-        return new ApiClientError(`[${response.status} ${response.statusText}] ${message}: ${errorMessage}`, body);
+        const apiError = typeof error === "object" ? error : undefined;
+
+        return new ApiClientError(`[${response.status} ${response.statusText}] ${message}: ${errorMessage}`, apiError);
     }
 
     private static async extractError(response: Response): Promise<ApiError | string | undefined> {
@@ -44,8 +42,12 @@ export class ApiClientError extends Error {
         }
     }
 
-    private static buildErrorMessage(error?: string | ApiError): string {
+    private static buildErrorMessage(error?: string | ApiError | Error): string {
         let errorMessage: string = "unknown error";
+
+        if (error instanceof Error) {
+            return error.message;
+        }
 
         //eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (typeof error) {
