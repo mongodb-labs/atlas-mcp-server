@@ -4,6 +4,7 @@ import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
 import { generateSecurePassword } from "../../../common/atlas/generatePassword.js";
 import logger, { LogId } from "../../../logger.js";
+import { inspectCluster } from "../../../common/atlas/cluster.js";
 
 const EXPIRY_MS = 1000 * 60 * 60 * 12; // 12 hours
 
@@ -22,22 +23,9 @@ export class ConnectClusterTool extends AtlasToolBase {
     protected async execute({ projectId, clusterName }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         await this.session.disconnect();
 
-        const cluster = await this.session.apiClient.getCluster({
-            params: {
-                path: {
-                    groupId: projectId,
-                    clusterName,
-                },
-            },
-        });
+        const cluster = await inspectCluster(this.session.apiClient, projectId, clusterName);
 
-        if (!cluster) {
-            throw new Error("Cluster not found");
-        }
-
-        const baseConnectionString = cluster.connectionStrings?.standardSrv || cluster.connectionStrings?.standard;
-
-        if (!baseConnectionString) {
+        if (!cluster.connectionString) {
             throw new Error("Connection string not available");
         }
 
@@ -89,7 +77,7 @@ export class ConnectClusterTool extends AtlasToolBase {
             expiryDate,
         };
 
-        const cn = new URL(baseConnectionString);
+        const cn = new URL(cluster.connectionString);
         cn.username = username;
         cn.password = password;
         cn.searchParams.set("authSource", "admin");
