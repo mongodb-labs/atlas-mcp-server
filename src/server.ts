@@ -150,39 +150,25 @@ export class Server {
                     telemetry: this.userConfig.telemetry,
                     logPath: this.userConfig.logPath,
                     connectionString: this.userConfig.connectionString
-                        ? "set; no explicit connect needed, use switch-connection tool to connect to a different connection if necessary"
-                        : "not set; before using any mongodb tool, you need to call the connect tool with a connection string",
+                        ? "set; access to MongoDB tools are currently available to use"
+                        : "not set; before using any MongoDB tool, you need to configure a connection string, alternatively you can setup MongoDB Atlas access, more info at 'https://github.com/mongodb-js/mongodb-mcp-server'.",
                     connectOptions: this.userConfig.connectOptions,
+                    atlas:
+                        this.userConfig.apiClientId && this.userConfig.apiClientSecret
+                            ? "set; MongoDB Atlas tools are currently available to use"
+                            : "not set; MongoDB Atlas tools are currently unavailable, to have access to MongoDB Atlas tools like creating clusters or connecting to clusters make sure to setup credentials, more info at 'https://github.com/mongodb-js/mongodb-mcp-server'.",
                 };
                 return {
                     contents: [
                         {
                             text: JSON.stringify(result),
+                            mimeType: "application/json",
                             uri: uri.href,
                         },
                     ],
                 };
             }
         );
-        if (this.userConfig.connectionString) {
-            this.mcpServer.resource(
-                "connection-string",
-                "config://connection-string",
-                {
-                    description: "Preconfigured connection string that will be used as a default in the `connect` tool",
-                },
-                (uri) => {
-                    return {
-                        contents: [
-                            {
-                                text: `Preconfigured connection string: ${this.userConfig.connectionString}`,
-                                uri: uri.href,
-                            },
-                        ],
-                    };
-                }
-            );
-        }
     }
 
     private async validateConfig(): Promise<void> {

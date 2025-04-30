@@ -31,13 +31,38 @@ export class InspectClusterTool extends AtlasToolBase {
             throw new Error("Cluster not found");
         }
 
+        const regionConfigs = (cluster.replicationSpecs || [])
+            .map(
+                (replicationSpec) =>
+                    (replicationSpec.regionConfigs || []) as {
+                        providerName: string;
+                        electableSpecs?: {
+                            instanceSize: string;
+                        };
+                        readOnlySpecs?: {
+                            instanceSize: string;
+                        };
+                    }[]
+            )
+            .flat()
+            .map((regionConfig) => {
+                return {
+                    providerName: regionConfig.providerName,
+                    instanceSize: regionConfig.electableSpecs?.instanceSize || regionConfig.readOnlySpecs?.instanceSize,
+                };
+            });
+
+        const instanceSize = (regionConfigs.length <= 0 ? undefined : regionConfigs[0].instanceSize) || "UNKNOWN";
+
+        const clusterInstanceType = instanceSize == "M0" ? "FREE" : "DEDICATED";
+
         return {
             content: [
                 {
                     type: "text",
-                    text: `Cluster Name | State | MongoDB Version | Connection String
-----------------|----------------|----------------|----------------|----------------
-${cluster.name} | ${cluster.stateName} | ${cluster.mongoDBVersion || "N/A"} | ${cluster.connectionStrings?.standard || "N/A"}`,
+                    text: `Cluster Name | Cluster Type | Tier | State | MongoDB Version | Connection String
+----------------|----------------|----------------|----------------|----------------|----------------
+${cluster.name} | ${clusterInstanceType} | ${clusterInstanceType == "DEDICATED" ? instanceSize : "N/A"} | ${cluster.stateName} | ${cluster.mongoDBVersion || "N/A"} | ${cluster.connectionStrings?.standardSrv || cluster.connectionStrings?.standard || "N/A"}`,
                 },
             ],
         };
