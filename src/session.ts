@@ -69,8 +69,8 @@ export class Session extends EventEmitter<{
             this.emit("disconnect");
             return;
         }
-        try {
-            await this.apiClient.deleteDatabaseUser({
+        void this.apiClient
+            .deleteDatabaseUser({
                 params: {
                     path: {
                         groupId: this.connectedAtlasCluster.projectId,
@@ -78,16 +78,15 @@ export class Session extends EventEmitter<{
                         databaseName: "admin",
                     },
                 },
+            })
+            .catch((err: unknown) => {
+                const error = err instanceof Error ? err : new Error(String(err));
+                logger.error(
+                    LogId.atlasDeleteDatabaseUserFailure,
+                    "atlas-connect-cluster",
+                    `Error deleting previous database user: ${error.message}`
+                );
             });
-        } catch (err: unknown) {
-            const error = err instanceof Error ? err : new Error(String(err));
-
-            logger.error(
-                LogId.atlasDeleteDatabaseUserFailure,
-                "atlas-connect-cluster",
-                `Error deleting previous database user: ${error.message}`
-            );
-        }
         this.connectedAtlasCluster = undefined;
 
         this.emit("disconnect");
