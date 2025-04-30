@@ -16,16 +16,17 @@ export class ApiClientError extends Error {
     ): Promise<ApiClientError> {
         const { text, body } = await this.extractErrorMessage(response);
 
-        const errorMessage = text.length > 0
-            ? `${message}: [${response.status} ${response.statusText}] ${text.trim()}`
-            : `${message}: ${response.status} ${response.statusText}`;
+        const errorMessage =
+            text.length > 0
+                ? `${message}: [${response.status} ${response.statusText}] ${text.trim()}`
+                : `${message}: ${response.status} ${response.statusText}`;
 
         return new ApiClientError(errorMessage, response, body);
-
-        return new ApiClientError(text, response, body);
     }
 
-    private static async extractErrorMessage(response: Response): Promise<{ text: string; body: ApiError | undefined }> {
+    private static async extractErrorMessage(
+        response: Response
+    ): Promise<{ text: string; body: ApiError | undefined }> {
         let text: string = "";
         let body: ApiError | undefined = undefined;
         try {
@@ -42,12 +43,9 @@ export class ApiClientError extends Error {
             }
         }
 
-        if (text.length > 0) {
-            text = `${message}: [${response.status} ${response.statusText}] ${text.trim()}`;
-        } else {
-            text = `${message}: ${response.status} ${response.statusText}`;
-        }
-
-        return new ApiClientError(text, response, body);
+        return {
+            text,
+            body,
+        };
     }
 }
