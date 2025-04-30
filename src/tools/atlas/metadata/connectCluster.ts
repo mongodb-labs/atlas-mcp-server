@@ -16,6 +16,10 @@ async function generateSecurePassword(): Promise<string> {
     return pass;
 }
 
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export class ConnectClusterTool extends AtlasToolBase {
     protected name = "atlas-connect-cluster";
     protected description = "Connect to MongoDB Atlas cluster";
@@ -118,7 +122,7 @@ export class ConnectClusterTool extends AtlasToolBase {
                     `error connecting to cluster: ${error.message}`
                 );
 
-                await new Promise((resolve) => setTimeout(resolve, 500));
+                await sleep(500); // wait for 500ms before retrying
             }
         }
 
