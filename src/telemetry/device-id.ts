@@ -1,10 +1,10 @@
 import { createHmac } from "crypto";
-import { machineIdSync } from "node-machine-id";
+import nodeMachineId from "node-machine-id";
 import logger, { LogId } from "../logger.js";
 
 export function getDeviceId(): string {
     try {
-        const originalId = machineIdSync(true);
+        const originalId = nodeMachineId.machineIdSync(true);
         // Create a hashed format from the all uppercase version of the machine ID
         // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
         const hmac = createHmac("sha256", originalId.toUpperCase());
