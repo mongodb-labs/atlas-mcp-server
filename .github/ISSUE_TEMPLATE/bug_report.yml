@@ -1,20 +1,12 @@
 ---
 name: "Bug Report"
 description: "Report a bug to help us improve."
-title: "[Bug]: <title>"
+title: "[Bug]: "
 type: "Bug"
 body:
   - type: markdown
     attributes:
       value: "Please fill out the following details to help us address the issue."
-  - type: input
-    id: title
-    attributes:
-      label: "Bug Title"
-      description: "Provide a short and descriptive title for the bug."
-      placeholder: "e.g., can't run an aggregation"
-    validations:
-      required: true
   - type: checkboxes
     id: app
     attributes:

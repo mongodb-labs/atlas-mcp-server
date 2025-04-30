@@ -150,8 +150,9 @@ The MongoDB MCP Server can be configured using multiple methods, with the follow
 | `apiClientSecret`  | Atlas API client secret for authentication                                                                            |
 | `connectionString` | MongoDB connection string for direct database connections (optional users may choose to inform it on every tool call) |
 | `logPath`          | Folder to store logs                                                                                                  |
-| `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled.                            |
+| `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled                             |
 | `readOnly`         | When set to true, only allows read and metadata operation types, disabling create/update/delete operations            |
+| `telemetry`        | When set to disabled, disables telemetry collection                                                                   |
 
 #### `logPath`
 
@@ -195,6 +196,16 @@ You can enable read-only mode using:
 - **Command-line argument**: `--readOnly`
 
 When read-only mode is active, you'll see a message in the server logs indicating which tools were prevented from registering due to this restriction.
+
+#### Telemetry
+
+The `telemetry` configuration option allows you to disable telemetry collection. When enabled, the MCP server will collect usage data and send it to MongoDB.
+
+You can disable telemetry using:
+
+- **Environment variable**: `export MDB_MCP_TELEMETRY=disabled`
+- **Command-line argument**: `--telemetry disabled`
+- **DO_NOT_TRACK environment variable**: `export DO_NOT_TRACK=1`
 
 ### Atlas API Access
 
