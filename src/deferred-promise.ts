@@ -26,24 +26,22 @@ export class DeferredPromise<T> extends Promise<T> {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         this.reject = rejectFn!;
 
-        if (timeout !== undefined) {
+        if (timeout !== undefined && onTimeout) {
             this.timeoutId = setTimeout(() => {
-                onTimeout?.(this.resolve, this.reject);
+                onTimeout(this.resolve, this.reject);
             }, timeout);
         }
 
-        if (executor) {
-            executor(
-                (value: T) => {
-                    if (this.timeoutId) clearTimeout(this.timeoutId);
-                    this.resolve(value);
-                },
-                (reason: Error) => {
-                    if (this.timeoutId) clearTimeout(this.timeoutId);
-                    this.reject(reason);
-                }
-            );
-        }
+        executor(
+            (value: T) => {
+                if (this.timeoutId) clearTimeout(this.timeoutId);
+                this.resolve(value);
+            },
+            (reason: Error) => {
+                if (this.timeoutId) clearTimeout(this.timeoutId);
+                this.reject(reason);
+            }
+        );
     }
 
     static fromPromise<T>(promise: Promise<T>, options: DeferredPromiseOptions<T> = {}): DeferredPromise<T> {

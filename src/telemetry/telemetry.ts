@@ -77,7 +77,7 @@ export class Telemetry {
     }
 
     /**
-     * @returns A hashed, unique identifier for the running device or `undefined` if not known.
+     * @returns A hashed, unique identifier for the running device or `"unknown"` if not known.
      */
     private async getDeviceId(): Promise<string> {
         try {
@@ -126,7 +126,6 @@ export class Telemetry {
     public getCommonProperties(): CommonProperties {
         return {
             ...this.commonProperties,
-            device_id: this.commonProperties.device_id,
             mcp_client_version: this.session.agentRunner?.version,
             mcp_client_name: this.session.agentRunner?.name,
             session_id: this.session.sessionId,
