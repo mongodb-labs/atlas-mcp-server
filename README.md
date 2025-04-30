@@ -2,8 +2,6 @@
 
 A Model Context Protocol server for interacting with MongoDB Atlas. This project implements a Model Context Protocol (MCP) server enabling AI assistants to interact with MongoDB Atlas resources through natural language.
 
-> [!CAUTION]
-> Do not use this in production. This is a work in progress and is not intended for production use. It is meant for demonstration purposes only.
 
 ## 📚 Table of Contents
 
