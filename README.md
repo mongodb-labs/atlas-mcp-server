@@ -312,8 +312,6 @@ npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret
         "mongodb-mcp-server",
         "--connectionString",
         "mongodb+srv://username:password@cluster.mongodb.net/myDatabase",
-        "--logPath",
-        "/path/to/logs"
       ]
     }
   }
