@@ -14,6 +14,18 @@ export class ApiClientError extends Error {
         response: Response,
         message: string = `error calling Atlas API`
     ): Promise<ApiClientError> {
+        const { text, body } = await this.extractErrorMessage(response);
+
+        const errorMessage = text.length > 0
+            ? `${message}: [${response.status} ${response.statusText}] ${text.trim()}`
+            : `${message}: ${response.status} ${response.statusText}`;
+
+        return new ApiClientError(errorMessage, response, body);
+
+        return new ApiClientError(text, response, body);
+    }
+
+    private static async extractErrorMessage(response: Response): Promise<{ text: string; body: ApiError | undefined }> {
         let text: string = "";
         let body: ApiError | undefined = undefined;
         try {
