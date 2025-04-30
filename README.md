@@ -1,123 +1,101 @@
 # MongoDB MCP Server
 
-A Model Context Protocol server for interacting with MongoDB Atlas. This project implements a Model Context Protocol (MCP) server enabling AI assistants to interact with MongoDB Atlas resources through natural language.
-
+A Model Context Protocol server for interacting with MongoDB Databases and MongoDB Atlas.
 
 ## 📚 Table of Contents
 
 - [🚀 Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-    - [WindSurf](#windsurf)
-    - [VSCode](#vscode)
-    - [Claude Desktop](#claude)
+  - [Setup](#setup)
+    - [Quick Start](#quick-start)
 - [🛠️ Supported Tools](#supported-tools)
-  - [Tool List](#tool-list)
+  - [MongoDB Atlas Tools](#mongodb-atlas-tools)
+  - [MongoDB Database Tools](#mongodb-database-tools)
 - [⚙️ Configuration](#configuration)
   - [Configuration Options](#configuration-options)
+    - [Connection Options](#configuration-options)
+    - [Log Path](#log-path)
+    - [Disabled Tools](#disabled-tools)
+    - [Read-Only Mode](#read-only-mode)
+    - [Telemetry Settings](#telemetry)
   - [Atlas API Access](#atlas-api-access)
   - [Configuration Methods](#configuration-methods)
-- [👩‍💻 Client Integration](#client-integration)
-  - [WindSurf](#windsurf)
-  - [VSCode](#vscode)
-  - [Claude](#claude)
+    - [Environment Variables](#environment-variables)
+    - [Command-Line Arguments](#command-line-arguments)
+    - [MCP Client Configuration](#mcp-configuration-file-examples)
 - [🤝 Contributing](#contributing)
 
 ## Prerequisites
 
 - Node.js (v20 or later)
-- MongoDB Atlas account
 
-## Installation
+```shell
+node -v
+```
 
-Common prerequisites:
+- A MongoDB connection string or Atlas API credentials, **_the Server will not start unless configured_**.
+  - **_Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
+  - If you have a MongoDB connection string, you can use it directly to connect to your MongoDB instance.
 
-- Node.js v20.x
-- A MongoDB connection string or Atlas API credentials, the Server will not start unless configured, see [configuration](#configuration) section for more details.
+## Setup
 
-### WindSurf
+### Quick Start
 
-The latest instructions can be found at https://docs.windsurf.com/windsurf/mcp
+Most MCP clients require a configuration file to be created or modified to add the MCP server.
 
-Step 1: Create MCP configuration file
+- **Windsurf** ([latest instructions](https://docs.windsurf.com/windsurf/mcp)): Save the file in `~/.codeium/windsurf/mcp_config.json`
+- **VSCode**: https://docs.codeium.com/docs/mcp
+- **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
+- **Cursor**: follow https://docs.cursor.com/context/model-context-protocol
 
-Create or edit the configuration file at `~/.codeium/windsurf/mcp_config.json`:
+#### Option 1: Connection String args
+
+You can pass your connection string via args, make sure to use a valid username and password.
 
 ```json
 {
   "servers": {
     "MongoDB": {
       "command": "npx",
-      "args": ["-y", "mongodb-mcp-server"]
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+      ]
     }
   }
 }
 ```
 
-Step 2: Setup a connection string or Atlas API credentials
+#### Option 2: Atlas API credentials args
 
-- Option 1: Connection String via args [example](#connection-string-with-args)
-- Option 2: Atlas API credentials via args [example](#atlas-api-credentials-with-args)
-- Option 3: Connection String via environment variables [example](#connection-string-with-environment-variables)
-- Option 4: Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
-
-### VSCode
-
-Step 1: Add the mcp server to VSCode configuration
-
-- Press `Cmd + Shift + P` and type `MCP: Add MCP Server` and select it.
-- Select command (Stdio).
-- Input command `npx -y mongodb-mcp-server`.
-- Choose between user / workspace
-- Add arguments to the file
-
-Note: the file should look like:
-
-```
-{
-    "servers": {
-        "MongoDB": {
-            "type": "stdio",
-            "command": "npx",
-            "args": [
-                "-y",
-                "mongodb-mcp-server"
-            ]
-        }
-    }
-}
-```
-
-Step 2: Setup a connection string or Atlas API credentials
-
-- Option 1: Connection String via args [example](#connection-string-with-args)
-- Option 2: Atlas API credentials via args [example](#atlas-api-credentials-with-args)
-- Option 3: Connection String via environment variables [example](#connection-string-with-environment-variables)
-- Option 4: Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
-
-### Claude Desktop
-
-Step 1: Launch Claude Settings -> Developer -> Edit Config
-
-Paste the mcp server configuration into the file
+Use your Atlas API Service Account credentials. More details in the [Atlas API Access](#atlas-api-access) section.
 
 ```json
 {
-  "mcpServers": {
+  "servers": {
     "MongoDB": {
       "command": "npx",
-      "args": ["-y", "mongodb-mcp-server"]
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--apiClientId",
+        "your-atlas-client-id",
+        "--apiClientSecret",
+        "your-atlas-client-secret"
+      ]
     }
   }
 }
 ```
 
-Step 2: Setup a connection string or Atlas API credentials
+#### Other options
 
-- Option 1: Connection String via args [example](#connection-string-with-args)
-- Option 2: Atlas API credentials via args [example](#atlas-api-credentials-with-args)
-- Option 3: Connection String via environment variables [example](#connection-string-with-environment-variables)
-- Option 4: Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
+Alternatively you can use environment variables in the config file or set them and run the server via npx.
+
+- Connection String via environment variables [example](#connection-string-with-environment-variables)
+- Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
 
 ## 🛠️ Supported Tools
 
@@ -181,7 +159,7 @@ The MongoDB MCP Server can be configured using multiple methods, with the follow
 | `readOnly`         | When set to true, only allows read and metadata operation types, disabling create/update/delete operations            |
 | `telemetry`        | When set to disabled, disables telemetry collection                                                                   |
 
-#### `logPath`
+#### Log Path
 
 Default log location is as follows:
 
