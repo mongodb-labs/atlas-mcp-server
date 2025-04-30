@@ -220,6 +220,8 @@ To use the Atlas API tools, you'll need to create a service account in MongoDB A
    - Select appropriate permissions (for full access, use Organization Owner)
    - Click "Create"
 
+To learn more about Service Accounts, check the [MongoDB Atlas documentation](https://www.mongodb.com/docs/atlas/api/service-accounts-overview/).
+
 2. **Save Client Credentials:**
 
    - After creation, you'll be shown the Client ID and Client Secret
