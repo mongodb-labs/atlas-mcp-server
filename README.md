@@ -38,7 +38,7 @@ node -v
 
 Most MCP clients require a configuration file to be created or modified to add the MCP server.
 
-- **Windsurf** ([latest instructions](https://docs.windsurf.com/windsurf/mcp)): Save the file in `~/.codeium/windsurf/mcp_config.json`
+- **Windsurf**: On MacOS, save the file in `~/.codeium/windsurf/mcp_config.json` or check the[latest instructions](https://docs.windsurf.com/windsurf/mcp) for your environment
 - **VSCode**: https://docs.codeium.com/docs/mcp
 - **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
 - **Cursor**: follow https://docs.cursor.com/context/model-context-protocol
@@ -89,8 +89,8 @@ Use your Atlas API Service Account credentials. More details in the [Atlas API A
 
 Alternatively you can use environment variables in the config file or set them and run the server via npx.
 
-- Connection String via environment variables [example](#connection-string-with-environment-variables)
-- Atlas API credentials via environment variables [example](#atlas-api-credentials-with-environment-variables)
+- Connection String via environment variables in the MCP file [example](#connection-string-with-environment-variables)
+- Atlas API credentials via environment variables in the MCP file [example](#atlas-api-credentials-with-environment-variables)
 
 ## 🛠️ Supported Tools
 
@@ -306,7 +306,7 @@ npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret
         "-y",
         "mongodb-mcp-server",
         "--connectionString",
-        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase",
+        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
       ]
     }
   }
