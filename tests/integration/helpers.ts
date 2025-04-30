@@ -117,7 +117,7 @@ export function getResponseElements(content: unknown | { content: unknown }): { 
         content = (content as { content: unknown }).content;
     }
 
-    expect(Array.isArray(content)).toBe(true);
+    expect(content).toBeArray();
 
     const response = content as { type: string; text: string }[];
     for (const item of response) {

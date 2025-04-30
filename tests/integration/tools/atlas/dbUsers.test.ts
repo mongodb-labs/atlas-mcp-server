@@ -1,7 +1,7 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../../../../src/session.js";
 import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
-import { expectDefined } from "../../helpers.js";
+import { expectDefined, getResponseElements } from "../../helpers.js";
 
 describeWithAtlas("db users", (integration) => {
     const userName = "testuser-" + randomId;
@@ -34,10 +34,11 @@ describeWithAtlas("db users", (integration) => {
                 expect(createDbUser.inputSchema.properties).toHaveProperty("roles");
                 expect(createDbUser.inputSchema.properties).toHaveProperty("clusters");
             });
-            it("should create a database user", async () => {
+
+            it("should create a database user with supplied password", async () => {
                 const projectId = getProjectId();
 
-                const response = (await integration.mcpClient().callTool({
+                const response = await integration.mcpClient().callTool({
                     name: "atlas-create-db-user",
                     arguments: {
                         projectId,
@@ -50,10 +51,32 @@ describeWithAtlas("db users", (integration) => {
                             },
                         ],
                     },
-                })) as CallToolResult;
-                expect(response.content).toBeArray();
-                expect(response.content).toHaveLength(1);
-                expect(response.content[0].text).toContain("created sucessfully");
+                });
+                const elements = getResponseElements(response);
+                expect(elements).toHaveLength(1);
+                expect(elements[0].text).toContain("created sucessfully");
+            });
+
+            it("should create a database user with generated password", async () => {
+                const projectId = getProjectId();
+
+                const response = await integration.mcpClient().callTool({
+                    name: "atlas-create-db-user",
+                    arguments: {
+                        projectId,
+                        username: userName,
+                        roles: [
+                            {
+                                roleName: "readWrite",
+                                databaseName: "admin",
+                            },
+                        ],
+                    },
+                });
+                const elements = getResponseElements(response);
+                expect(elements).toHaveLength(1);
+                expect(elements[0].text).toContain("created sucessfully");
+                expect(elements[0].text).toContain("with password: `");
             });
         });
         describe("atlas-list-db-users", () => {
