@@ -18,14 +18,14 @@ export class ApiClientError extends Error {
         return this.fromError(response, err, message);
     }
 
-    private static fromError(
+    static fromError(
         response: Response,
         error?: ApiError | string | Error,
         message: string = `error calling Atlas API`
     ): ApiClientError {
         const errorMessage = this.buildErrorMessage(error);
 
-        const apiError = typeof error === "object" ? error : undefined;
+        const apiError = typeof error === "object" && !(error instanceof Error) ? error : undefined;
 
         return new ApiClientError(`[${response.status} ${response.statusText}] ${message}: ${errorMessage}`, apiError);
     }
