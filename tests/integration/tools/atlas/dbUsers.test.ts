@@ -4,9 +4,30 @@ import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
 import { expectDefined, getResponseElements } from "../../helpers.js";
 
 describeWithAtlas("db users", (integration) => {
-    const userName = "testuser-" + randomId;
     withProject(integration, ({ getProjectId }) => {
-        afterAll(async () => {
+        let userName: string;
+        beforeEach(() => {
+            userName = "testuser-" + randomId;
+        });
+
+        const createUserWithMCP = async (password?: string): Promise<unknown> => {
+            return await integration.mcpClient().callTool({
+                name: "atlas-create-db-user",
+                arguments: {
+                    projectId: getProjectId(),
+                    username: userName,
+                    password,
+                    roles: [
+                        {
+                            roleName: "readWrite",
+                            databaseName: "admin",
+                        },
+                    ],
+                },
+            });
+        };
+
+        afterEach(async () => {
             const projectId = getProjectId();
 
             const session: Session = integration.mcpServer().session;
@@ -36,46 +57,21 @@ describeWithAtlas("db users", (integration) => {
             });
 
             it("should create a database user with supplied password", async () => {
-                const projectId = getProjectId();
+                const response = await createUserWithMCP("testpassword");
 
-                const response = await integration.mcpClient().callTool({
-                    name: "atlas-create-db-user",
-                    arguments: {
-                        projectId,
-                        username: userName,
-                        password: "testpassword",
-                        roles: [
-                            {
-                                roleName: "readWrite",
-                                databaseName: "admin",
-                            },
-                        ],
-                    },
-                });
                 const elements = getResponseElements(response);
                 expect(elements).toHaveLength(1);
                 expect(elements[0].text).toContain("created successfully");
+                expect(elements[0].text).toContain(userName);
+                expect(elements[0].text).not.toContain("testpassword");
             });
 
             it("should create a database user with generated password", async () => {
-                const projectId = getProjectId();
-
-                const response = await integration.mcpClient().callTool({
-                    name: "atlas-create-db-user",
-                    arguments: {
-                        projectId,
-                        username: userName,
-                        roles: [
-                            {
-                                roleName: "readWrite",
-                                databaseName: "admin",
-                            },
-                        ],
-                    },
-                });
+                const response = await createUserWithMCP();
                 const elements = getResponseElements(response);
                 expect(elements).toHaveLength(1);
                 expect(elements[0].text).toContain("created successfully");
+                expect(elements[0].text).toContain(userName);
                 expect(elements[0].text).toContain("with password: `");
             });
         });
@@ -90,6 +86,8 @@ describeWithAtlas("db users", (integration) => {
             });
             it("returns database users by project", async () => {
                 const projectId = getProjectId();
+
+                await createUserWithMCP();
 
                 const response = (await integration
                     .mcpClient()
