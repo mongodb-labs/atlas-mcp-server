@@ -4,6 +4,7 @@ import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
 import { randomBytes } from "crypto";
 import { promisify } from "util";
+import logger, { LogId } from "../../../logger.js";
 
 const EXPIRY_MS = 1000 * 60 * 60 * 12; // 12 hours
 
@@ -100,7 +101,21 @@ export class ConnectClusterTool extends AtlasToolBase {
         cn.searchParams.set("authSource", "admin");
         const connectionString = cn.toString();
 
-        await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+        for (let i = 0; i < 20; i++) {
+            try {
+                await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+                break;
+            } catch (err: unknown) {
+                const error = err instanceof Error ? err : new Error(String(err));
+                logger.debug(
+                    LogId.atlasConnectFailure,
+                    "atlas-connect-cluster",
+                    `error connecting to cluster: ${error.message}`
+                );
+
+                await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+        }
 
         return {
             content: [
