@@ -11,6 +11,7 @@ export class CollectionIndexesTool extends MongoDBToolBase {
     protected async execute({ database, collection }: ToolArgs<typeof DbOperationArgs>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
         const indexes = await provider.getIndexes(database, collection);
+        const searchIndexes = await provider.getSearchIndexes(database, collection);
 
         return {
             content: [
@@ -18,12 +19,18 @@ export class CollectionIndexesTool extends MongoDBToolBase {
                     text: `Found ${indexes.length} indexes in the collection "${collection}":`,
                     type: "text",
                 },
-                ...(indexes.map((indexDefinition) => {
+                ...indexes.map((indexDefinition) => {
                     return {
                         text: `Name "${indexDefinition.name}", definition: ${JSON.stringify(indexDefinition.key)}`,
                         type: "text",
-                    };
-                }) as { text: string; type: "text" }[]),
+                    } as const;
+                }),
+                ...searchIndexes.map((indexDefinition) => {
+                    return {
+                        text: `Search index name: "${indexDefinition.name}", status: ${indexDefinition.status}, definition: ${JSON.stringify(indexDefinition.latestDefinition)}`,
+                        type: "text",
+                    } as const;
+                }),
             ],
         };
     }
