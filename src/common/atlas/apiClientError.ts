@@ -14,37 +14,34 @@ export class ApiClientError extends Error {
         response: Response,
         message: string = `error calling Atlas API`
     ): Promise<ApiClientError> {
-        const { text, body } = await this.extractErrorMessage(response);
+        const { errorMessage, body } = await this.extractErrorMessage(response);
 
-        const errorMessage =
-            text.length > 0
-                ? `${message}: [${response.status} ${response.statusText}] ${text.trim()}`
-                : `${message}: ${response.status} ${response.statusText}`;
-
-        return new ApiClientError(errorMessage, response, body);
+        return new ApiClientError(`${message}: ${errorMessage}`, response, body);
     }
 
     private static async extractErrorMessage(
         response: Response
-    ): Promise<{ text: string; body: ApiError | undefined }> {
-        let text: string = "";
+    ): Promise<{ errorMessage: string; body: ApiError | undefined }> {
+        let errorMessage: string = "";
         let body: ApiError | undefined = undefined;
         try {
             body = (await response.json()) as ApiError;
-            text = body.reason || "unknown error";
+            errorMessage = body.reason || "unknown error";
             if (body.detail && body.detail.length > 0) {
-                text = `${text}; ${body.detail}`;
+                errorMessage = `${errorMessage}; ${body.detail}`;
             }
         } catch {
             try {
-                text = await response.text();
+                errorMessage = await response.text();
             } catch {
-                text = "";
+                errorMessage = "unknown error";
             }
         }
 
+        errorMessage = `[${response.status} ${response.statusText}] ${errorMessage.trim()}`;
+
         return {
-            text,
+            errorMessage,
             body,
         };
     }
