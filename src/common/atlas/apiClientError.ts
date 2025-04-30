@@ -1,7 +1,7 @@
 import { ApiError } from "./openapi.js";
 
 export class ApiClientError extends Error {
-    private constructor(
+    constructor(
         message: string,
         public readonly response?: Response,
         public readonly body?: ApiError
@@ -14,35 +14,47 @@ export class ApiClientError extends Error {
         response: Response,
         message: string = `error calling Atlas API`
     ): Promise<ApiClientError> {
-        const { errorMessage, body } = await this.extractErrorMessage(response);
+        const err = await this.extractError(response);
 
-        return new ApiClientError(`${message}: ${errorMessage}`, response, body);
+        const errorMessage = this.buildErrorMessage(err);
+
+        const body = err && typeof err === "object" ? err : undefined;
+
+        return new ApiClientError(
+            `[${response.status} ${response.statusText}] ${message}: ${errorMessage}`,
+            response,
+            body
+        );
     }
 
-    private static async extractErrorMessage(
-        response: Response
-    ): Promise<{ errorMessage: string; body: ApiError | undefined }> {
-        let errorMessage: string = "";
-        let body: ApiError | undefined = undefined;
+    private static async extractError(response: Response): Promise<ApiError | string | undefined> {
         try {
-            body = (await response.json()) as ApiError;
-            errorMessage = body.reason || "unknown error";
-            if (body.detail && body.detail.length > 0) {
-                errorMessage = `${errorMessage}; ${body.detail}`;
-            }
+            return (await response.json()) as ApiError;
         } catch {
             try {
-                errorMessage = await response.text();
+                return await response.text();
             } catch {
-                errorMessage = "unknown error";
+                return undefined;
             }
         }
+    }
 
-        errorMessage = `[${response.status} ${response.statusText}] ${errorMessage.trim()}`;
+    private static buildErrorMessage(error?: string | ApiError): string {
+        let errorMessage: string = "unknown error";
 
-        return {
-            errorMessage,
-            body,
-        };
+        //eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (typeof error) {
+            case "object":
+                errorMessage = error.reason || "unknown error";
+                if (error.detail && error.detail.length > 0) {
+                    errorMessage = `${errorMessage}; ${error.detail}`;
+                }
+                break;
+            case "string":
+                errorMessage = error;
+                break;
+        }
+
+        return errorMessage.trim();
     }
 }

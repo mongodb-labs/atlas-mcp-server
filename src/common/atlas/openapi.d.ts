@@ -715,7 +715,7 @@ export interface components {
              * @description Azure region to which MongoDB Cloud deployed this network peering container.
              * @enum {string}
              */
-            region: "US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_EAST_2_EUAP" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "UAE_NORTH" | "GERMANY_CENTRAL" | "GERMANY_NORTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "UK_SOUTH" | "UK_WEST" | "INDIA_CENTRAL" | "INDIA_WEST" | "INDIA_SOUTH" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "UAE_CENTRAL" | "QATAR_CENTRAL" | "POLAND_CENTRAL" | "ISRAEL_CENTRAL" | "ITALY_NORTH" | "SPAIN_CENTRAL" | "MEXICO_CENTRAL" | "NEW_ZEALAND_NORTH";
+            region: "US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_EAST_2_EUAP" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "UAE_NORTH" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "UK_SOUTH" | "UK_WEST" | "INDIA_CENTRAL" | "INDIA_WEST" | "INDIA_SOUTH" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "UAE_CENTRAL" | "QATAR_CENTRAL" | "POLAND_CENTRAL" | "ISRAEL_CENTRAL" | "ITALY_NORTH" | "SPAIN_CENTRAL" | "MEXICO_CENTRAL" | "NEW_ZEALAND_NORTH";
             /** @description Unique string that identifies the Azure VNet in which MongoDB Cloud clusters in this network peering container exist. The response returns **null** if no clusters exist in this network peering container. */
             readonly vnetName?: string;
         } & {
@@ -749,7 +749,7 @@ export interface components {
              * @description Microsoft Azure Regions.
              * @enum {string}
              */
-            regionName?: "US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "GERMANY_CENTRAL" | "GERMANY_NORTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "UK_SOUTH" | "UK_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "INDIA_CENTRAL" | "INDIA_SOUTH" | "INDIA_WEST" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "UAE_CENTRAL" | "UAE_NORTH" | "QATAR_CENTRAL";
+            regionName?: "US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "UK_SOUTH" | "UK_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "INDIA_CENTRAL" | "INDIA_SOUTH" | "INDIA_WEST" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "UAE_CENTRAL" | "UAE_NORTH" | "QATAR_CENTRAL";
         } & {
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -1666,7 +1666,7 @@ export interface components {
              */
             providerName?: "AWS" | "AZURE" | "GCP" | "TENANT";
             /** @description Physical location of your MongoDB cluster nodes. The region you choose can affect network latency for clients accessing your databases. The region name is only returned in the response for single-region clusters. When MongoDB Cloud deploys a dedicated cluster, it checks if a VPC or VPC connection exists for that provider and region. If not, MongoDB Cloud creates them as part of the deployment. It assigns the VPC a Classless Inter-Domain Routing (CIDR) block. To limit a new VPC peering connection to one Classless Inter-Domain Routing (CIDR) block and region, create the connection first. Deploy the cluster after the connection starts. GCP Clusters and Multi-region clusters require one VPC peering connection for each region. MongoDB nodes can use only the peering connection that resides in the same region as the nodes to communicate with the peered VPC. */
-            regionName?: ("US_GOV_WEST_1" | "US_GOV_EAST_1" | "US_EAST_1" | "US_EAST_2" | "US_WEST_1" | "US_WEST_2" | "CA_CENTRAL_1" | "EU_NORTH_1" | "EU_WEST_1" | "EU_WEST_2" | "EU_WEST_3" | "EU_CENTRAL_1" | "EU_CENTRAL_2" | "AP_EAST_1" | "AP_NORTHEAST_1" | "AP_NORTHEAST_2" | "AP_NORTHEAST_3" | "AP_SOUTHEAST_1" | "AP_SOUTHEAST_2" | "AP_SOUTHEAST_3" | "AP_SOUTHEAST_4" | "AP_SOUTH_1" | "AP_SOUTH_2" | "SA_EAST_1" | "CN_NORTH_1" | "CN_NORTHWEST_1" | "ME_SOUTH_1" | "ME_CENTRAL_1" | "AF_SOUTH_1" | "EU_SOUTH_1" | "EU_SOUTH_2" | "IL_CENTRAL_1" | "CA_WEST_1" | "AP_SOUTHEAST_5" | "AP_SOUTHEAST_7" | "MX_CENTRAL_1" | "GLOBAL") | ("US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "GERMANY_CENTRAL" | "GERMANY_NORTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "UK_SOUTH" | "UK_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "INDIA_CENTRAL" | "INDIA_SOUTH" | "INDIA_WEST" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "UAE_CENTRAL" | "UAE_NORTH" | "QATAR_CENTRAL") | ("EASTERN_US" | "EASTERN_US_AW" | "US_EAST_4" | "US_EAST_4_AW" | "US_EAST_5" | "US_EAST_5_AW" | "US_WEST_2" | "US_WEST_2_AW" | "US_WEST_3" | "US_WEST_3_AW" | "US_WEST_4" | "US_WEST_4_AW" | "US_SOUTH_1" | "US_SOUTH_1_AW" | "CENTRAL_US" | "CENTRAL_US_AW" | "WESTERN_US" | "WESTERN_US_AW" | "NORTH_AMERICA_NORTHEAST_1" | "NORTH_AMERICA_NORTHEAST_2" | "NORTH_AMERICA_SOUTH_1" | "SOUTH_AMERICA_EAST_1" | "SOUTH_AMERICA_WEST_1" | "WESTERN_EUROPE" | "EUROPE_NORTH_1" | "EUROPE_WEST_2" | "EUROPE_WEST_3" | "EUROPE_WEST_4" | "EUROPE_WEST_6" | "EUROPE_WEST_8" | "EUROPE_WEST_9" | "EUROPE_WEST_10" | "EUROPE_WEST_12" | "EUROPE_SOUTHWEST_1" | "EUROPE_CENTRAL_2" | "MIDDLE_EAST_CENTRAL_1" | "MIDDLE_EAST_CENTRAL_2" | "MIDDLE_EAST_WEST_1" | "AUSTRALIA_SOUTHEAST_1" | "AUSTRALIA_SOUTHEAST_2" | "AFRICA_SOUTH_1" | "EASTERN_ASIA_PACIFIC" | "NORTHEASTERN_ASIA_PACIFIC" | "SOUTHEASTERN_ASIA_PACIFIC" | "ASIA_EAST_2" | "ASIA_NORTHEAST_2" | "ASIA_NORTHEAST_3" | "ASIA_SOUTH_1" | "ASIA_SOUTH_2" | "ASIA_SOUTHEAST_2");
+            regionName?: ("US_GOV_WEST_1" | "US_GOV_EAST_1" | "US_EAST_1" | "US_EAST_2" | "US_WEST_1" | "US_WEST_2" | "CA_CENTRAL_1" | "EU_NORTH_1" | "EU_WEST_1" | "EU_WEST_2" | "EU_WEST_3" | "EU_CENTRAL_1" | "EU_CENTRAL_2" | "AP_EAST_1" | "AP_NORTHEAST_1" | "AP_NORTHEAST_2" | "AP_NORTHEAST_3" | "AP_SOUTHEAST_1" | "AP_SOUTHEAST_2" | "AP_SOUTHEAST_3" | "AP_SOUTHEAST_4" | "AP_SOUTH_1" | "AP_SOUTH_2" | "SA_EAST_1" | "CN_NORTH_1" | "CN_NORTHWEST_1" | "ME_SOUTH_1" | "ME_CENTRAL_1" | "AF_SOUTH_1" | "EU_SOUTH_1" | "EU_SOUTH_2" | "IL_CENTRAL_1" | "CA_WEST_1" | "AP_SOUTHEAST_5" | "AP_SOUTHEAST_7" | "MX_CENTRAL_1" | "GLOBAL") | ("US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "UK_SOUTH" | "UK_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "INDIA_CENTRAL" | "INDIA_SOUTH" | "INDIA_WEST" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "UAE_CENTRAL" | "UAE_NORTH" | "QATAR_CENTRAL") | ("EASTERN_US" | "EASTERN_US_AW" | "US_EAST_4" | "US_EAST_4_AW" | "US_EAST_5" | "US_EAST_5_AW" | "US_WEST_2" | "US_WEST_2_AW" | "US_WEST_3" | "US_WEST_3_AW" | "US_WEST_4" | "US_WEST_4_AW" | "US_SOUTH_1" | "US_SOUTH_1_AW" | "CENTRAL_US" | "CENTRAL_US_AW" | "WESTERN_US" | "WESTERN_US_AW" | "NORTH_AMERICA_NORTHEAST_1" | "NORTH_AMERICA_NORTHEAST_2" | "NORTH_AMERICA_SOUTH_1" | "SOUTH_AMERICA_EAST_1" | "SOUTH_AMERICA_WEST_1" | "WESTERN_EUROPE" | "EUROPE_NORTH_1" | "EUROPE_WEST_2" | "EUROPE_WEST_3" | "EUROPE_WEST_4" | "EUROPE_WEST_6" | "EUROPE_WEST_8" | "EUROPE_WEST_9" | "EUROPE_WEST_10" | "EUROPE_WEST_12" | "EUROPE_SOUTHWEST_1" | "EUROPE_CENTRAL_2" | "MIDDLE_EAST_CENTRAL_1" | "MIDDLE_EAST_CENTRAL_2" | "MIDDLE_EAST_WEST_1" | "AUSTRALIA_SOUTHEAST_1" | "AUSTRALIA_SOUTHEAST_2" | "AFRICA_SOUTH_1" | "EASTERN_ASIA_PACIFIC" | "NORTHEASTERN_ASIA_PACIFIC" | "SOUTHEASTERN_ASIA_PACIFIC" | "ASIA_EAST_2" | "ASIA_NORTHEAST_2" | "ASIA_NORTHEAST_3" | "ASIA_SOUTH_1" | "ASIA_SOUTH_2" | "ASIA_SOUTHEAST_2");
         } & (components["schemas"]["AWSRegionConfig"] | components["schemas"]["AzureRegionConfig"] | components["schemas"]["GCPRegionConfig"] | components["schemas"]["TenantRegionConfig"]);
         /**
          * Cloud Service Provider Settings
@@ -1687,7 +1687,7 @@ export interface components {
              */
             providerName?: "AWS" | "AZURE" | "GCP" | "TENANT";
             /** @description Physical location of your MongoDB cluster nodes. The region you choose can affect network latency for clients accessing your databases. The region name is only returned in the response for single-region clusters. When MongoDB Cloud deploys a dedicated cluster, it checks if a VPC or VPC connection exists for that provider and region. If not, MongoDB Cloud creates them as part of the deployment. It assigns the VPC a Classless Inter-Domain Routing (CIDR) block. To limit a new VPC peering connection to one Classless Inter-Domain Routing (CIDR) block and region, create the connection first. Deploy the cluster after the connection starts. GCP Clusters and Multi-region clusters require one VPC peering connection for each region. MongoDB nodes can use only the peering connection that resides in the same region as the nodes to communicate with the peered VPC. */
-            regionName?: ("US_GOV_WEST_1" | "US_GOV_EAST_1" | "US_EAST_1" | "US_EAST_2" | "US_WEST_1" | "US_WEST_2" | "CA_CENTRAL_1" | "EU_NORTH_1" | "EU_WEST_1" | "EU_WEST_2" | "EU_WEST_3" | "EU_CENTRAL_1" | "EU_CENTRAL_2" | "AP_EAST_1" | "AP_NORTHEAST_1" | "AP_NORTHEAST_2" | "AP_NORTHEAST_3" | "AP_SOUTHEAST_1" | "AP_SOUTHEAST_2" | "AP_SOUTHEAST_3" | "AP_SOUTHEAST_4" | "AP_SOUTH_1" | "AP_SOUTH_2" | "SA_EAST_1" | "CN_NORTH_1" | "CN_NORTHWEST_1" | "ME_SOUTH_1" | "ME_CENTRAL_1" | "AF_SOUTH_1" | "EU_SOUTH_1" | "EU_SOUTH_2" | "IL_CENTRAL_1" | "CA_WEST_1" | "AP_SOUTHEAST_5" | "AP_SOUTHEAST_7" | "MX_CENTRAL_1" | "GLOBAL") | ("US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "GERMANY_CENTRAL" | "GERMANY_NORTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "UK_SOUTH" | "UK_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "INDIA_CENTRAL" | "INDIA_SOUTH" | "INDIA_WEST" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "UAE_CENTRAL" | "UAE_NORTH" | "QATAR_CENTRAL") | ("EASTERN_US" | "EASTERN_US_AW" | "US_EAST_4" | "US_EAST_4_AW" | "US_EAST_5" | "US_EAST_5_AW" | "US_WEST_2" | "US_WEST_2_AW" | "US_WEST_3" | "US_WEST_3_AW" | "US_WEST_4" | "US_WEST_4_AW" | "US_SOUTH_1" | "US_SOUTH_1_AW" | "CENTRAL_US" | "CENTRAL_US_AW" | "WESTERN_US" | "WESTERN_US_AW" | "NORTH_AMERICA_NORTHEAST_1" | "NORTH_AMERICA_NORTHEAST_2" | "NORTH_AMERICA_SOUTH_1" | "SOUTH_AMERICA_EAST_1" | "SOUTH_AMERICA_WEST_1" | "WESTERN_EUROPE" | "EUROPE_NORTH_1" | "EUROPE_WEST_2" | "EUROPE_WEST_3" | "EUROPE_WEST_4" | "EUROPE_WEST_6" | "EUROPE_WEST_8" | "EUROPE_WEST_9" | "EUROPE_WEST_10" | "EUROPE_WEST_12" | "EUROPE_SOUTHWEST_1" | "EUROPE_CENTRAL_2" | "MIDDLE_EAST_CENTRAL_1" | "MIDDLE_EAST_CENTRAL_2" | "MIDDLE_EAST_WEST_1" | "AUSTRALIA_SOUTHEAST_1" | "AUSTRALIA_SOUTHEAST_2" | "AFRICA_SOUTH_1" | "EASTERN_ASIA_PACIFIC" | "NORTHEASTERN_ASIA_PACIFIC" | "SOUTHEASTERN_ASIA_PACIFIC" | "ASIA_EAST_2" | "ASIA_NORTHEAST_2" | "ASIA_NORTHEAST_3" | "ASIA_SOUTH_1" | "ASIA_SOUTH_2" | "ASIA_SOUTHEAST_2");
+            regionName?: ("US_GOV_WEST_1" | "US_GOV_EAST_1" | "US_EAST_1" | "US_EAST_2" | "US_WEST_1" | "US_WEST_2" | "CA_CENTRAL_1" | "EU_NORTH_1" | "EU_WEST_1" | "EU_WEST_2" | "EU_WEST_3" | "EU_CENTRAL_1" | "EU_CENTRAL_2" | "AP_EAST_1" | "AP_NORTHEAST_1" | "AP_NORTHEAST_2" | "AP_NORTHEAST_3" | "AP_SOUTHEAST_1" | "AP_SOUTHEAST_2" | "AP_SOUTHEAST_3" | "AP_SOUTHEAST_4" | "AP_SOUTH_1" | "AP_SOUTH_2" | "SA_EAST_1" | "CN_NORTH_1" | "CN_NORTHWEST_1" | "ME_SOUTH_1" | "ME_CENTRAL_1" | "AF_SOUTH_1" | "EU_SOUTH_1" | "EU_SOUTH_2" | "IL_CENTRAL_1" | "CA_WEST_1" | "AP_SOUTHEAST_5" | "AP_SOUTHEAST_7" | "MX_CENTRAL_1" | "GLOBAL") | ("US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "UK_SOUTH" | "UK_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "INDIA_CENTRAL" | "INDIA_SOUTH" | "INDIA_WEST" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "UAE_CENTRAL" | "UAE_NORTH" | "QATAR_CENTRAL") | ("EASTERN_US" | "EASTERN_US_AW" | "US_EAST_4" | "US_EAST_4_AW" | "US_EAST_5" | "US_EAST_5_AW" | "US_WEST_2" | "US_WEST_2_AW" | "US_WEST_3" | "US_WEST_3_AW" | "US_WEST_4" | "US_WEST_4_AW" | "US_SOUTH_1" | "US_SOUTH_1_AW" | "CENTRAL_US" | "CENTRAL_US_AW" | "WESTERN_US" | "WESTERN_US_AW" | "NORTH_AMERICA_NORTHEAST_1" | "NORTH_AMERICA_NORTHEAST_2" | "NORTH_AMERICA_SOUTH_1" | "SOUTH_AMERICA_EAST_1" | "SOUTH_AMERICA_WEST_1" | "WESTERN_EUROPE" | "EUROPE_NORTH_1" | "EUROPE_WEST_2" | "EUROPE_WEST_3" | "EUROPE_WEST_4" | "EUROPE_WEST_6" | "EUROPE_WEST_8" | "EUROPE_WEST_9" | "EUROPE_WEST_10" | "EUROPE_WEST_12" | "EUROPE_SOUTHWEST_1" | "EUROPE_CENTRAL_2" | "MIDDLE_EAST_CENTRAL_1" | "MIDDLE_EAST_CENTRAL_2" | "MIDDLE_EAST_WEST_1" | "AUSTRALIA_SOUTHEAST_1" | "AUSTRALIA_SOUTHEAST_2" | "AFRICA_SOUTH_1" | "EASTERN_ASIA_PACIFIC" | "NORTHEASTERN_ASIA_PACIFIC" | "SOUTHEASTERN_ASIA_PACIFIC" | "ASIA_EAST_2" | "ASIA_NORTHEAST_2" | "ASIA_NORTHEAST_3" | "ASIA_SOUTH_1" | "ASIA_SOUTH_2" | "ASIA_SOUTHEAST_2");
         } & (components["schemas"]["AWSRegionConfig20240805"] | components["schemas"]["AzureRegionConfig20240805"] | components["schemas"]["GCPRegionConfig20240805"] | components["schemas"]["TenantRegionConfig20240805"]);
         /**
          * Cluster Connection Strings
@@ -1716,7 +1716,7 @@ export interface components {
         ClusterDescription20240805: {
             /**
              * Format: date-time
-             * @description If reconfiguration is necessary to regain a primary due to a regional outage, submit this field alongside your topology reconfiguration to request a new regional outage resistant topology. Forced reconfigurations during an outage of the majority of electable nodes carry a risk of data loss if replicated writes (even majority committed writes) have not been replicated to the new primary node. MongoDB Atlas docs contain more information. To proceed with an operation which carries that risk, set **acceptDataRisksAndForceReplicaSetReconfig** to the current date.
+             * @description If reconfiguration is necessary to regain a primary due to a regional outage, submit this field alongside your topology reconfiguration to request a new regional outage resistant topology. Forced reconfigurations during an outage of the majority of electable nodes carry a risk of data loss if replicated writes (even majority committed writes) have not been replicated to the new primary node. MongoDB Atlas docs contain more information. To proceed with an operation which carries that risk, set **acceptDataRisksAndForceReplicaSetReconfig** to the current date. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
              */
             acceptDataRisksAndForceReplicaSetReconfig?: string;
             advancedConfiguration?: components["schemas"]["ApiAtlasClusterAdvancedConfigurationView"];
@@ -1767,7 +1767,7 @@ export interface components {
             readonly featureCompatibilityVersion?: string;
             /**
              * Format: date-time
-             * @description Feature compatibility version expiration date. Will only appear if FCV is pinned.
+             * @description Feature compatibility version expiration date. Will only appear if FCV is pinned. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
              */
             readonly featureCompatibilityVersionExpirationDate?: string;
             /** @description Set this field to configure the Sharding Management Mode when creating a new Global Cluster.
@@ -2540,7 +2540,7 @@ export interface components {
              */
             _id: string;
             /**
-             * @description The name of the AWS S3 Bucket or Azure Storage Container that Snapshots are exported to.
+             * @description The name of the AWS S3 Bucket, Azure Storage Container, or Google Cloud Storage Bucket that Snapshots are exported to.
              * @example export-bucket
              */
             bucketName: string;
@@ -2548,7 +2548,7 @@ export interface components {
              * @description Human-readable label that identifies the cloud provider that Snapshots will be exported to.
              * @enum {string}
              */
-            cloudProvider: "AWS" | "AZURE";
+            cloudProvider: "AWS" | "AZURE" | "GCP";
             /**
              * @description Unique 24-hexadecimal character string that identifies the Unified AWS Access role ID that MongoDB Cloud uses to access the AWS S3 bucket.
              * @example 32b6e34b3d91647abb20e7b8
@@ -2615,7 +2615,7 @@ export interface components {
              * @description Human-readable label that identifies the cloud provider that Snapshots are exported to.
              * @enum {string}
              */
-            cloudProvider: "AWS" | "AZURE";
+            cloudProvider: "AWS" | "AZURE" | "GCP";
             /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
             readonly links?: components["schemas"]["Link"][];
         };
@@ -2627,7 +2627,7 @@ export interface components {
              */
             _id: string;
             /**
-             * @description The name of the AWS S3 Bucket or Azure Storage Container that Snapshots are exported to.
+             * @description The name of the AWS S3 Bucket, Azure Storage Container, or Google Cloud Storage Bucket that Snapshots are exported to.
              * @example export-bucket
              */
             bucketName: string;
@@ -2635,9 +2635,40 @@ export interface components {
              * @description Human-readable label that identifies the cloud provider that Snapshots will be exported to.
              * @enum {string}
              */
-            cloudProvider: "AWS" | "AZURE";
+            cloudProvider: "AWS" | "AZURE" | "GCP";
             /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
             readonly links?: components["schemas"]["Link"][];
+        };
+        DiskBackupSnapshotGCPExportBucketRequest: Omit<WithRequired<components["schemas"]["DiskBackupSnapshotExportBucketRequest"], "cloudProvider">, "cloudProvider"> & {
+            /**
+             * @description Human-readable label that identifies the Google Cloud Storage Bucket that the role is authorized to export to.
+             * @example export-bucket
+             */
+            bucketName: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the GCP Cloud Provider Access Role that MongoDB Cloud uses to access the Google Cloud Storage Bucket.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            roleId: string;
+        } & {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            cloudProvider: "GCP";
+        };
+        DiskBackupSnapshotGCPExportBucketResponse: Omit<WithRequired<components["schemas"]["DiskBackupSnapshotExportBucketResponse"], "_id" | "bucketName" | "cloudProvider">, "cloudProvider"> & {
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the GCP Cloud Provider Access Role that MongoDB Cloud uses to access the Google Cloud Storage Bucket.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            roleId: string;
+        } & {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            cloudProvider: "GCP";
         };
         /** @description Setting that enables disk auto-scaling. */
         DiskGBAutoScaling: {
@@ -2648,7 +2679,7 @@ export interface components {
         EmployeeAccessGrantView: {
             /**
              * Format: date-time
-             * @description Expiration date for the employee access grant.
+             * @description Expiration date for the employee access grant. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
              */
             expirationTime: string;
             /**
@@ -3571,7 +3602,7 @@ export interface components {
         SearchIndexDefinitionVersion: {
             /**
              * Format: date-time
-             * @description The time at which this index definition was created.
+             * @description The time at which this index definition was created. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
              */
             createdAt?: string;
             /**
@@ -3871,12 +3902,16 @@ export interface components {
             readonly links?: components["schemas"]["Link"][];
             /** @description Reserved. Will be used by PRIVATE_LINK connection type. */
             name?: string;
+            /** @description Reserved. Will be used by TRANSIT_GATEWAY connection type. */
+            tgwId?: string;
             /**
              * Networking Access Type
-             * @description Selected networking type. Either PUBLIC, VPC or PRIVATE_LINK. Defaults to PUBLIC. For VPC, ensure that VPC peering exists and connectivity has been established between Atlas VPC and the VPC where Kafka cluster is hosted for the connection to function properly. PRIVATE_LINK support is coming soon.
+             * @description Selected networking type. Either PUBLIC, VPC, PRIVATE_LINK, or TRANSIT_GATEWAY. Defaults to PUBLIC. For VPC, ensure that VPC peering exists and connectivity has been established between Atlas VPC and the VPC where Kafka cluster is hosted for the connection to function properly. TRANSIT_GATEWAY support is coming soon.
              * @enum {string}
              */
-            type?: "PUBLIC" | "VPC" | "PRIVATE_LINK";
+            type?: "PUBLIC" | "VPC" | "PRIVATE_LINK" | "TRANSIT_GATEWAY";
+            /** @description Reserved. Will be used by TRANSIT_GATEWAY connection type. */
+            vpcCIDR?: string;
         };
         /** @description Properties for the secure transport connection to Kafka. For SSL, this can include the trusted certificate to use. */
         StreamsKafkaSecurity: {
@@ -5049,6 +5084,8 @@ export type DiskBackupSnapshotAzureExportBucketRequest = components['schemas']['
 export type DiskBackupSnapshotAzureExportBucketResponse = components['schemas']['DiskBackupSnapshotAzureExportBucketResponse'];
 export type DiskBackupSnapshotExportBucketRequest = components['schemas']['DiskBackupSnapshotExportBucketRequest'];
 export type DiskBackupSnapshotExportBucketResponse = components['schemas']['DiskBackupSnapshotExportBucketResponse'];
+export type DiskBackupSnapshotGcpExportBucketRequest = components['schemas']['DiskBackupSnapshotGCPExportBucketRequest'];
+export type DiskBackupSnapshotGcpExportBucketResponse = components['schemas']['DiskBackupSnapshotGCPExportBucketResponse'];
 export type DiskGbAutoScaling = components['schemas']['DiskGBAutoScaling'];
 export type EmployeeAccessGrantView = components['schemas']['EmployeeAccessGrantView'];
 export type FieldViolation = components['schemas']['FieldViolation'];
@@ -5215,6 +5252,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             500: components["responses"]["internalServerError"];
         };
     };
@@ -5248,6 +5286,8 @@ export interface operations {
                 };
             };
             400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
@@ -5319,6 +5359,8 @@ export interface operations {
                 };
             };
             400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
@@ -5352,6 +5394,8 @@ export interface operations {
                 };
             };
             400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
@@ -5392,6 +5436,8 @@ export interface operations {
                 };
             };
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
     };
@@ -5437,6 +5483,7 @@ export interface operations {
             400: components["responses"]["badRequest"];
             401: components["responses"]["unauthorized"];
             403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
     };
@@ -5474,6 +5521,7 @@ export interface operations {
                     "application/vnd.atlas.2023-01-01+json": unknown;
                 };
             };
+            401: components["responses"]["unauthorized"];
             403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
@@ -5516,6 +5564,8 @@ export interface operations {
                 };
             };
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
     };
@@ -5556,6 +5606,7 @@ export interface operations {
             401: components["responses"]["unauthorized"];
             402: components["responses"]["paymentRequired"];
             403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
             409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
         };
@@ -5591,6 +5642,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
@@ -5630,6 +5682,7 @@ export interface operations {
             };
             400: components["responses"]["badRequest"];
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
@@ -5670,6 +5723,8 @@ export interface operations {
                 };
             };
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
     };
@@ -5798,6 +5853,7 @@ export interface operations {
             };
             400: components["responses"]["badRequest"];
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
@@ -5839,6 +5895,7 @@ export interface operations {
             };
             400: components["responses"]["badRequest"];
             401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
             500: components["responses"]["internalServerError"];
         };
