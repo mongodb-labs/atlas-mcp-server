@@ -80,7 +80,7 @@ export class CreateDBUserTool extends AtlasToolBase {
             content: [
                 {
                     type: "text",
-                    text: `User "${username}" created sucessfully${shouldGeneratePassword ? ` with password: \`${password}\`` : ""}.`,
+                    text: `User "${username}" created successfully${shouldGeneratePassword ? ` with password: \`${password}\`` : ""}.`,
                 },
             ],
         };

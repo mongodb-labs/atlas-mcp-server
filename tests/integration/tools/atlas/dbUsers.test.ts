@@ -54,7 +54,7 @@ describeWithAtlas("db users", (integration) => {
                 });
                 const elements = getResponseElements(response);
                 expect(elements).toHaveLength(1);
-                expect(elements[0].text).toContain("created sucessfully");
+                expect(elements[0].text).toContain("created successfully");
             });
 
             it("should create a database user with generated password", async () => {
@@ -75,7 +75,7 @@ describeWithAtlas("db users", (integration) => {
                 });
                 const elements = getResponseElements(response);
                 expect(elements).toHaveLength(1);
-                expect(elements[0].text).toContain("created sucessfully");
+                expect(elements[0].text).toContain("created successfully");
                 expect(elements[0].text).toContain("with password: `");
             });
         });
