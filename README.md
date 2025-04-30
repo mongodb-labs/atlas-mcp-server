@@ -38,10 +38,10 @@ node -v
 
 Most MCP clients require a configuration file to be created or modified to add the MCP server.
 
-- **Windsurf**: On MacOS, save the file in `~/.codeium/windsurf/mcp_config.json` or check the[latest instructions](https://docs.windsurf.com/windsurf/mcp) for your environment
+- **Windsurf**:https://docs.windsurf.com/windsurf/mcp
 - **VSCode**: https://docs.codeium.com/docs/mcp
 - **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
-- **Cursor**: follow https://docs.cursor.com/context/model-context-protocol
+- **Cursor**: https://docs.cursor.com/context/model-context-protocol
 
 #### Option 1: Connection String args
 
