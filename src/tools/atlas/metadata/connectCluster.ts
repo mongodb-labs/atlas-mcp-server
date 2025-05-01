@@ -2,19 +2,14 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { randomBytes } from "crypto";
-import { promisify } from "util";
+import { generateSecurePassword } from "../../../common/atlas/generatePassword.js";
+import logger, { LogId } from "../../../logger.js";
 
 const EXPIRY_MS = 1000 * 60 * 60 * 12; // 12 hours
 
-const randomBytesAsync = promisify(randomBytes);
-
-async function generateSecurePassword(): Promise<string> {
-    const buf = await randomBytesAsync(16);
-    const pass = buf.toString("base64url");
-    return pass;
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
 export class ConnectClusterTool extends AtlasToolBase {
     protected name = "atlas-connect-cluster";
     protected description = "Connect to MongoDB Atlas cluster";
@@ -100,7 +95,31 @@ export class ConnectClusterTool extends AtlasToolBase {
         cn.searchParams.set("authSource", "admin");
         const connectionString = cn.toString();
 
-        await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+        let lastError: Error | undefined = undefined;
+
+        for (let i = 0; i < 20; i++) {
+            try {
+                await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+                lastError = undefined;
+                break;
+            } catch (err: unknown) {
+                const error = err instanceof Error ? err : new Error(String(err));
+
+                lastError = error;
+
+                logger.debug(
+                    LogId.atlasConnectFailure,
+                    "atlas-connect-cluster",
+                    `error connecting to cluster: ${error.message}`
+                );
+
+                await sleep(500); // wait for 500ms before retrying
+            }
+        }
+
+        if (lastError) {
+            throw lastError;
+        }
 
         return {
             content: [

@@ -1,24 +1,49 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { Session } from "../../../../src/session.js";
 import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
-import { expectDefined } from "../../helpers.js";
+import { expectDefined, getResponseElements } from "../../helpers.js";
+import { ApiClientError } from "../../../../src/common/atlas/apiClientError.js";
 
 describeWithAtlas("db users", (integration) => {
-    const userName = "testuser-" + randomId;
     withProject(integration, ({ getProjectId }) => {
-        afterAll(async () => {
-            const projectId = getProjectId();
+        let userName: string;
+        beforeEach(() => {
+            userName = "testuser-" + randomId;
+        });
 
-            const session: Session = integration.mcpServer().session;
-            await session.apiClient.deleteDatabaseUser({
-                params: {
-                    path: {
-                        groupId: projectId,
-                        username: userName,
-                        databaseName: "admin",
-                    },
+        const createUserWithMCP = async (password?: string): Promise<unknown> => {
+            return await integration.mcpClient().callTool({
+                name: "atlas-create-db-user",
+                arguments: {
+                    projectId: getProjectId(),
+                    username: userName,
+                    password,
+                    roles: [
+                        {
+                            roleName: "readWrite",
+                            databaseName: "admin",
+                        },
+                    ],
                 },
             });
+        };
+
+        afterEach(async () => {
+            try {
+                await integration.mcpServer().session.apiClient.deleteDatabaseUser({
+                    params: {
+                        path: {
+                            groupId: getProjectId(),
+                            username: userName,
+                            databaseName: "admin",
+                        },
+                    },
+                });
+            } catch (error) {
+                // Ignore 404 errors when deleting the user
+                if (!(error instanceof ApiClientError) || error.response?.status !== 404) {
+                    throw error;
+                }
+            }
         });
 
         describe("atlas-create-db-user", () => {
@@ -34,26 +59,24 @@ describeWithAtlas("db users", (integration) => {
                 expect(createDbUser.inputSchema.properties).toHaveProperty("roles");
                 expect(createDbUser.inputSchema.properties).toHaveProperty("clusters");
             });
-            it("should create a database user", async () => {
-                const projectId = getProjectId();
 
-                const response = (await integration.mcpClient().callTool({
-                    name: "atlas-create-db-user",
-                    arguments: {
-                        projectId,
-                        username: userName,
-                        password: "testpassword",
-                        roles: [
-                            {
-                                roleName: "readWrite",
-                                databaseName: "admin",
-                            },
-                        ],
-                    },
-                })) as CallToolResult;
-                expect(response.content).toBeArray();
-                expect(response.content).toHaveLength(1);
-                expect(response.content[0].text).toContain("created sucessfully");
+            it("should create a database user with supplied password", async () => {
+                const response = await createUserWithMCP("testpassword");
+
+                const elements = getResponseElements(response);
+                expect(elements).toHaveLength(1);
+                expect(elements[0].text).toContain("created successfully");
+                expect(elements[0].text).toContain(userName);
+                expect(elements[0].text).not.toContain("testpassword");
+            });
+
+            it("should create a database user with generated password", async () => {
+                const response = await createUserWithMCP();
+                const elements = getResponseElements(response);
+                expect(elements).toHaveLength(1);
+                expect(elements[0].text).toContain("created successfully");
+                expect(elements[0].text).toContain(userName);
+                expect(elements[0].text).toContain("with password: `");
             });
         });
         describe("atlas-list-db-users", () => {
@@ -67,6 +90,8 @@ describeWithAtlas("db users", (integration) => {
             });
             it("returns database users by project", async () => {
                 const projectId = getProjectId();
+
+                await createUserWithMCP();
 
                 const response = (await integration
                     .mcpClient()

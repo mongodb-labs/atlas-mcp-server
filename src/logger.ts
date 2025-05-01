@@ -12,6 +12,7 @@ export const LogId = {
 
     atlasCheckCredentials: mongoLogId(1_001_001),
     atlasDeleteDatabaseUserFailure: mongoLogId(1_001_002),
+    atlasConnectFailure: mongoLogId(1_001_003),
 
     telemetryDisabled: mongoLogId(1_002_001),
     telemetryEmitFailure: mongoLogId(1_002_002),
