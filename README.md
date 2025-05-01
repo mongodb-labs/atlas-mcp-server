@@ -43,6 +43,8 @@ Most MCP clients require a configuration file to be created or modified to add t
 - **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
 - **Cursor**: https://docs.cursor.com/context/model-context-protocol
 
+Note: The configuration file syntax can be different across clients. Please check the MCP client docs to apply the latest expected syntax.
+
 #### Option 1: Connection String args
 
 You can pass your connection string via args, make sure to use a valid username and password.
