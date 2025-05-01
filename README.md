@@ -49,7 +49,7 @@ You can pass your connection string via args, make sure to use a valid username 
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "MongoDB": {
       "command": "npx",
       "args": [
@@ -69,7 +69,7 @@ Use your Atlas API Service Account credentials. More details in the [Atlas API A
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "MongoDB": {
       "command": "npx",
       "args": [
