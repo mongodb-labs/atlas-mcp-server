@@ -38,16 +38,12 @@ node -v
 
 Most MCP clients require a configuration file to be created or modified to add the MCP server.
 
+Note: The configuration file syntax can be different across clients. Please refer to the following links for the latest expected syntax:
+
 - **Windsurf**:https://docs.windsurf.com/windsurf/mcp
 - **VSCode**: https://docs.codeium.com/docs/mcp
 - **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
 - **Cursor**: https://docs.cursor.com/context/model-context-protocol
-
-Note: The configuration file syntax can be different across clients. Please refer to the following links for the latest expected syntax:
-- [Windsurf Documentation](https://docs.windsurf.com/windsurf/mcp)
-- [VSCode Documentation](https://docs.codeium.com/docs/mcp)
-- [Claude Desktop Documentation](https://modelcontextprotocol.io/quickstart/user)
-- [Cursor Documentation](https://docs.cursor.com/context/model-context-protocol)
 
 #### Option 1: Connection String args
 
