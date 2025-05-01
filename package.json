@@ -1,7 +1,7 @@
 {
   "name": "mongodb-mcp-server",
   "description": "MongoDB Model Context Protocol Server",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "main": "dist/index.js",
   "author": "MongoDB <info@mongodb.com>",
   "homepage": "https://github.com/mongodb-js/mongodb-mcp-server",
@@ -69,7 +69,7 @@
     "mongodb-log-writer": "^2.4.1",
     "mongodb-redact": "^1.1.6",
     "mongodb-schema": "^12.6.2",
-    "native-machine-id": "^0.1.0",
+    "node-machine-id": "^1.1.12",
     "openapi-fetch": "^0.13.5",
     "simple-oauth2": "^5.1.0",
     "yargs-parser": "^21.1.1",

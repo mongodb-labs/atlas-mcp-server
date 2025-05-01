@@ -126,9 +126,9 @@ export abstract class ToolBase {
                 {
                     type: "text",
                     text: `Error running ${this.name}: ${error instanceof Error ? error.message : String(error)}`,
-                    isError: true,
                 },
             ],
+            isError: true,
         };
     }
 
