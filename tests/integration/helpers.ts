@@ -230,3 +230,7 @@ export function validateThrowsForInvalidArguments(
 export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined> {
     expect(arg).toBeDefined();
 }
+
+export function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}

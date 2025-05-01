@@ -19,7 +19,7 @@ export function describeWithMongoDB(
     fn: (integration: IntegrationTest & MongoDBIntegrationTest & { connectMcpClient: () => Promise<void> }) => void,
     getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => defaultTestConfig,
     describeFn = describe
-) {
+): void {
     describeFn(name, () => {
         const mdbIntegration = setupMongoDBIntegrationTest();
         const integration = setupIntegrationTest(() => ({
