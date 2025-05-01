@@ -1,54 +1,7 @@
 import { Session } from "../../../../src/session.js";
 import { expectDefined } from "../../helpers.js";
-import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
+import { describeWithAtlas, withProject, randomId, waitClusterState, deleteAndWaitCluster } from "./atlasHelpers.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-
-function sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
-    await session.apiClient.deleteCluster({
-        params: {
-            path: {
-                groupId: projectId,
-                clusterName,
-            },
-        },
-    });
-    while (true) {
-        try {
-            await session.apiClient.getCluster({
-                params: {
-                    path: {
-                        groupId: projectId,
-                        clusterName,
-                    },
-                },
-            });
-            await sleep(1000);
-        } catch {
-            break;
-        }
-    }
-}
-
-async function waitClusterState(session: Session, projectId: string, clusterName: string, state: string) {
-    while (true) {
-        const cluster = await session.apiClient.getCluster({
-            params: {
-                path: {
-                    groupId: projectId,
-                    clusterName,
-                },
-            },
-        });
-        if (cluster?.stateName === state) {
-            return;
-        }
-        await sleep(1000);
-    }
-}
 
 describeWithAtlas("clusters", (integration) => {
     withProject(integration, ({ getProjectId }) => {

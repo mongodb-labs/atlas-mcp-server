@@ -19,7 +19,7 @@ export function describeWithMongoDB(
     fn: (integration: IntegrationTest & MongoDBIntegrationTest & { connectMcpClient: () => Promise<void> }) => void,
     getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => defaultTestConfig,
     describeFn = describe
-) {
+): void {
     describeFn(name, () => {
         const mdbIntegration = setupMongoDBIntegrationTest();
         const integration = setupIntegrationTest(() => ({
@@ -76,8 +76,6 @@ export function setupMongoDBIntegrationTest(): MongoDBIntegrationTest {
         let dbsDir = path.join(tmpDir, "mongodb-runner", "dbs");
         for (let i = 0; i < 10; i++) {
             try {
-                // TODO: Fix this type once mongodb-runner is updated.
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 mongoCluster = await MongoCluster.start({
                     tmpDir: dbsDir,
                     logDir: path.join(tmpDir, "mongodb-runner", "logs"),

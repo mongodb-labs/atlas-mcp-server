@@ -1,11 +1,12 @@
 import { ObjectId } from "mongodb";
 import { Group } from "../../../../src/common/atlas/openapi.js";
 import { ApiClient } from "../../../../src/common/atlas/apiClient.js";
-import { setupIntegrationTest, IntegrationTest, defaultTestConfig } from "../../helpers.js";
+import { setupIntegrationTest, IntegrationTest, defaultTestConfig, sleep } from "../../helpers.js";
+import { Session } from "../../../../src/session.js";
 
 export type IntegrationTestFunction = (integration: IntegrationTest) => void;
 
-export function describeWithAtlas(name: string, fn: IntegrationTestFunction) {
+export function describeWithAtlas(name: string, fn: IntegrationTestFunction): void {
     const testDefinition = () => {
         const integration = setupIntegrationTest(() => ({
             ...defaultTestConfig,
@@ -21,7 +22,8 @@ export function describeWithAtlas(name: string, fn: IntegrationTestFunction) {
     if (!process.env.MDB_MCP_API_CLIENT_ID?.length || !process.env.MDB_MCP_API_CLIENT_SECRET?.length) {
         return describe.skip("atlas", testDefinition);
     }
-    return describe("atlas", testDefinition);
+
+    describe("atlas", testDefinition);
 }
 
 interface ProjectTestArgs {
@@ -30,8 +32,8 @@ interface ProjectTestArgs {
 
 type ProjectTestFunction = (args: ProjectTestArgs) => void;
 
-export function withProject(integration: IntegrationTest, fn: ProjectTestFunction) {
-    return describe("project", () => {
+export function withProject(integration: IntegrationTest, fn: ProjectTestFunction): void {
+    describe("with project", () => {
         let projectId: string = "";
 
         beforeAll(async () => {
@@ -57,9 +59,7 @@ export function withProject(integration: IntegrationTest, fn: ProjectTestFunctio
             getProjectId: () => projectId,
         };
 
-        describe("with project", () => {
-            fn(args);
-        });
+        fn(args);
     });
 }
 
@@ -103,4 +103,47 @@ async function createProject(apiClient: ApiClient): Promise<Group> {
     }
 
     return group;
+}
+
+export async function waitClusterState(session: Session, projectId: string, clusterName: string, state: string) {
+    while (true) {
+        const cluster = await session.apiClient.getCluster({
+            params: {
+                path: {
+                    groupId: projectId,
+                    clusterName,
+                },
+            },
+        });
+        if (cluster?.stateName === state) {
+            return;
+        }
+        await sleep(1000);
+    }
+}
+
+export async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
+    await session.apiClient.deleteCluster({
+        params: {
+            path: {
+                groupId: projectId,
+                clusterName,
+            },
+        },
+    });
+    while (true) {
+        try {
+            await session.apiClient.getCluster({
+                params: {
+                    path: {
+                        groupId: projectId,
+                        clusterName,
+                    },
+                },
+            });
+            await sleep(1000);
+        } catch {
+            break;
+        }
+    }
 }
