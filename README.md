@@ -258,7 +258,7 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "MongoDB": {
       "command": "npx",
       "args": ["-y", "mongodb-mcp-server"],
@@ -274,7 +274,7 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "MongoDB": {
       "command": "npx",
       "args": ["-y", "mongodb-mcp-server"],
@@ -301,7 +301,7 @@ npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "MongoDB": {
       "command": "npx",
       "args": [
@@ -319,7 +319,7 @@ npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "MongoDB": {
       "command": "npx",
       "args": [
