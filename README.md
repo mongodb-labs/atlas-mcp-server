@@ -43,7 +43,11 @@ Most MCP clients require a configuration file to be created or modified to add t
 - **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
 - **Cursor**: https://docs.cursor.com/context/model-context-protocol
 
-Note: The configuration file syntax can be different across clients. Please check the MCP client docs to apply the latest expected syntax.
+Note: The configuration file syntax can be different across clients. Please refer to the following links for the latest expected syntax:
+- [Windsurf Documentation](https://docs.windsurf.com/windsurf/mcp)
+- [VSCode Documentation](https://docs.codeium.com/docs/mcp)
+- [Claude Desktop Documentation](https://modelcontextprotocol.io/quickstart/user)
+- [Cursor Documentation](https://docs.cursor.com/context/model-context-protocol)
 
 #### Option 1: Connection String args
 
