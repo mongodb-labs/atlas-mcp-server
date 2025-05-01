@@ -1,26 +1,11 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { Session } from "../../../../src/session.js";
-import { describeWithAtlas, withProject, randomId } from "./atlasHelpers.js";
+import { describeWithAtlas, withProject } from "./atlasHelpers.js";
 import { expectDefined } from "../../helpers.js";
+import { ObjectId } from "bson";
 
 describeWithAtlas("db users", (integration) => {
-    const userName = "testuser-" + randomId;
+    const userName = `testuser-${new ObjectId()}`;
     withProject(integration, ({ getProjectId }) => {
-        afterAll(async () => {
-            const projectId = getProjectId();
-
-            const session: Session = integration.mcpServer().session;
-            await session.apiClient.deleteDatabaseUser({
-                params: {
-                    path: {
-                        groupId: projectId,
-                        username: userName,
-                        databaseName: "admin",
-                    },
-                },
-            });
-        });
-
         describe("atlas-create-db-user", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();

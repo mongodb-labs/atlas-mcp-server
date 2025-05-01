@@ -1,19 +1,11 @@
-import { Session } from "../../../../src/session.js";
+import { ObjectId } from "bson";
 import { expectDefined } from "../../helpers.js";
-import { describeWithAtlas, withProject, randomId, waitClusterState, deleteAndWaitCluster } from "./atlasHelpers.js";
+import { describeWithAtlas, withProject, waitClusterState } from "./atlasHelpers.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 describeWithAtlas("clusters", (integration) => {
     withProject(integration, ({ getProjectId }) => {
-        const clusterName = "ClusterTest-" + randomId;
-
-        afterAll(async () => {
-            const projectId = getProjectId();
-
-            const session: Session = integration.mcpServer().session;
-
-            await deleteAndWaitCluster(session, projectId, clusterName);
-        });
+        const clusterName = `ClusterTest-${new ObjectId()}`;
 
         describe("atlas-create-free-cluster", () => {
             it("should have correct metadata", async () => {

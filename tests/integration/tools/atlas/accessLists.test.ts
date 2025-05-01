@@ -22,23 +22,6 @@ describeWithAtlas("ip access lists", (integration) => {
             values.push(ipInfo.currentIpv4Address);
         });
 
-        afterAll(async () => {
-            const apiClient = integration.mcpServer().session.apiClient;
-
-            const projectId = getProjectId();
-
-            for (const value of values) {
-                await apiClient.deleteProjectIpAccessList({
-                    params: {
-                        path: {
-                            groupId: projectId,
-                            entryValue: value,
-                        },
-                    },
-                });
-            }
-        });
-
         describe("atlas-create-access-list", () => {
             it("should have correct metadata", async () => {
                 const { tools } = await integration.mcpClient().listTools();

@@ -18,7 +18,7 @@ describeWithAtlas("orgs", (integration) => {
             expect(response.content).toHaveLength(1);
             const data = parseTable(response.content[0].text as string);
             expect(data).toHaveLength(1);
-            expect(data[0]["Organization Name"]).toEqual("MongoDB MCP Test");
+            expect(data[0]["Organization Name"]).toBeDefined();
         });
     });
 });

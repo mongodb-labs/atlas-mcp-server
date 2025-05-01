@@ -35,16 +35,36 @@ type ProjectTestFunction = (args: ProjectTestArgs) => void;
 export function withProject(integration: IntegrationTest, fn: ProjectTestFunction): void {
     describe("with project", () => {
         let projectId: string = "";
+        const projectName = `testProj-${new ObjectId()}`;
 
         beforeAll(async () => {
             const apiClient = integration.mcpServer().session.apiClient;
 
-            const group = await createProject(apiClient);
+            const group = await createProject(apiClient, projectName);
             projectId = group.id || "";
         });
 
         afterAll(async () => {
             const apiClient = integration.mcpServer().session.apiClient;
+
+            const clusters = await apiClient.listClusters({
+                params: {
+                    path: {
+                        groupId: projectId,
+                    },
+                },
+            });
+
+            const deletePromises =
+                clusters?.results?.map((cluster) => {
+                    if (cluster.name) {
+                        return deleteAndWaitCluster(integration.mcpServer().session, projectId, cluster.name);
+                    }
+
+                    return Promise.resolve();
+                }) ?? [];
+
+            await Promise.all(deletePromises);
 
             await apiClient.deleteProject({
                 params: {
@@ -55,11 +75,9 @@ export function withProject(integration: IntegrationTest, fn: ProjectTestFunctio
             });
         });
 
-        const args = {
+        fn({
             getProjectId: () => projectId,
-        };
-
-        fn(args);
+        });
     });
 }
 
@@ -81,11 +99,7 @@ export function parseTable(text: string): Record<string, string>[] {
         });
 }
 
-export const randomId = new ObjectId().toString();
-
-async function createProject(apiClient: ApiClient): Promise<Group> {
-    const projectName: string = `testProj-` + randomId;
-
+async function createProject(apiClient: ApiClient, projectName: string): Promise<Group> {
     const orgs = await apiClient.listOrganizations();
     if (!orgs?.results?.length || !orgs.results[0].id) {
         throw new Error("No orgs found");
@@ -122,7 +136,7 @@ export async function waitClusterState(session: Session, projectId: string, clus
     }
 }
 
-export async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
+async function deleteAndWaitCluster(session: Session, projectId: string, clusterName: string) {
     await session.apiClient.deleteCluster({
         params: {
             path: {

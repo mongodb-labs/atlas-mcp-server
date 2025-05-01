@@ -1,6 +1,6 @@
 import { ObjectId } from "bson";
 import { defaultTestConfig, IntegrationTest, setupIntegrationTest } from "../../helpers.js";
-import { deleteAndWaitCluster, waitClusterState, withProject } from "../atlas/atlasHelpers.js";
+import { waitClusterState, withProject } from "../atlas/atlasHelpers.js";
 
 export function describeWithAtlasSearch(
     name: string,
@@ -20,7 +20,7 @@ export function describeWithAtlasSearch(
 
         describe(name, () => {
             withProject(integration, ({ getProjectId }) => {
-                const clusterName = "ClusterTest-" + new ObjectId().toString();
+                const clusterName = `ClusterTest-${new ObjectId()}`;
                 beforeAll(async () => {
                     const projectId = getProjectId();
 
@@ -47,14 +47,6 @@ export function describeWithAtlasSearch(
                             },
                         ],
                     });
-                });
-
-                afterAll(async () => {
-                    const projectId = getProjectId();
-
-                    const session = integration.mcpServer().session;
-
-                    await deleteAndWaitCluster(session, projectId, clusterName);
                 });
 
                 fn({

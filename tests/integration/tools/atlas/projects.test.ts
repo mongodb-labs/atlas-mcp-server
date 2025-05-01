@@ -3,10 +3,8 @@ import { ObjectId } from "mongodb";
 import { parseTable, describeWithAtlas } from "./atlasHelpers.js";
 import { expectDefined } from "../../helpers.js";
 
-const randomId = new ObjectId().toString();
-
 describeWithAtlas("projects", (integration) => {
-    const projName = "testProj-" + randomId;
+    const projName = `testProj-${new ObjectId()}`;
 
     afterAll(async () => {
         const session = integration.mcpServer().session;
