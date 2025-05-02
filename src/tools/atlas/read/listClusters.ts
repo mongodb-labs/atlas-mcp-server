@@ -84,6 +84,7 @@ ${rows}`,
         clusters?: PaginatedClusterDescription20240805,
         flexClusters?: PaginatedFlexClusters20241113
     ): CallToolResult {
+        // Check if both traditional clusters and flex clusters are absent
         if (!clusters?.results?.length && !flexClusters?.results?.length) {
             throw new Error("No clusters found.");
         }
