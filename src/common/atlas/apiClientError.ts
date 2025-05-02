@@ -3,6 +3,7 @@ import { ApiError } from "./openapi.js";
 export class ApiClientError extends Error {
     private constructor(
         message: string,
+        public readonly response: Response,
         public readonly apiError?: ApiError
     ) {
         super(message);
@@ -27,7 +28,11 @@ export class ApiClientError extends Error {
 
         const apiError = typeof error === "object" && !(error instanceof Error) ? error : undefined;
 
-        return new ApiClientError(`[${response.status} ${response.statusText}] ${message}: ${errorMessage}`, apiError);
+        return new ApiClientError(
+            `[${response.status} ${response.statusText}] ${message}: ${errorMessage}`,
+            response,
+            apiError
+        );
     }
 
     private static async extractError(response: Response): Promise<ApiError | string | undefined> {
