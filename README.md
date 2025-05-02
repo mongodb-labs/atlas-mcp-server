@@ -41,7 +41,7 @@ Most MCP clients require a configuration file to be created or modified to add t
 Note: The configuration file syntax can be different across clients. Please refer to the following links for the latest expected syntax:
 
 - **Windsurf**:https://docs.windsurf.com/windsurf/mcp
-- **VSCode**: https://docs.codeium.com/docs/mcp
+- **VSCode**: https://code.visualstudio.com/docs/copilot/chat/mcp-servers
 - **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
 - **Cursor**: https://docs.cursor.com/context/model-context-protocol
 
