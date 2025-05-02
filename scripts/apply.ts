@@ -93,7 +93,10 @@ async function main() {
         .map((operation) => {
             const { operationId, method, path, requiredParams, hasResponseBody } = operation;
             return `async ${operationId}(options${requiredParams ? "" : "?"}: FetchOptions<operations["${operationId}"]>) {
-    ${hasResponseBody ? `const { data } = ` : ``}await this.client.${method}("${path}", options);
+    const { ${hasResponseBody ? `data, ` : ``}error, response } = await this.client.${method}("${path}", options);
+    if (error) {
+        throw ApiClientError.fromError(response, error);
+    }
     ${
         hasResponseBody
             ? `return data;

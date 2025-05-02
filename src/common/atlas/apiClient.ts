@@ -55,14 +55,6 @@ export class ApiClient {
         },
     };
 
-    private readonly errorMiddleware: Middleware = {
-        async onResponse({ response }) {
-            if (!response.ok) {
-                throw await ApiClientError.fromResponse(response);
-            }
-        },
-    };
-
     constructor(options: ApiClientOptions) {
         this.options = {
             ...options,
@@ -91,7 +83,6 @@ export class ApiClient {
             });
             this.client.use(this.authMiddleware);
         }
-        this.client.use(this.errorMiddleware);
     }
 
     public hasCredentials(): boolean {
@@ -151,83 +142,152 @@ export class ApiClient {
 
     // DO NOT EDIT. This is auto-generated code.
     async listClustersForAllProjects(options?: FetchOptions<operations["listClustersForAllProjects"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/clusters", options);
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/clusters", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async listProjects(options?: FetchOptions<operations["listProjects"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups", options);
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async createProject(options: FetchOptions<operations["createProject"]>) {
-        const { data } = await this.client.POST("/api/atlas/v2/groups", options);
+        const { data, error, response } = await this.client.POST("/api/atlas/v2/groups", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async deleteProject(options: FetchOptions<operations["deleteProject"]>) {
-        await this.client.DELETE("/api/atlas/v2/groups/{groupId}", options);
+        const { error, response } = await this.client.DELETE("/api/atlas/v2/groups/{groupId}", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
     }
 
     async getProject(options: FetchOptions<operations["getProject"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}", options);
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async listProjectIpAccessLists(options: FetchOptions<operations["listProjectIpAccessLists"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/accessList", options);
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/accessList", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async createProjectIpAccessList(options: FetchOptions<operations["createProjectIpAccessList"]>) {
-        const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/accessList", options);
+        const { data, error, response } = await this.client.POST("/api/atlas/v2/groups/{groupId}/accessList", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async deleteProjectIpAccessList(options: FetchOptions<operations["deleteProjectIpAccessList"]>) {
-        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/accessList/{entryValue}", options);
+        const { error, response } = await this.client.DELETE(
+            "/api/atlas/v2/groups/{groupId}/accessList/{entryValue}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
     }
 
     async listClusters(options: FetchOptions<operations["listClusters"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters", options);
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async createCluster(options: FetchOptions<operations["createCluster"]>) {
-        const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/clusters", options);
+        const { data, error, response } = await this.client.POST("/api/atlas/v2/groups/{groupId}/clusters", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async deleteCluster(options: FetchOptions<operations["deleteCluster"]>) {
-        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
+        const { error, response } = await this.client.DELETE(
+            "/api/atlas/v2/groups/{groupId}/clusters/{clusterName}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
     }
 
     async getCluster(options: FetchOptions<operations["getCluster"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters/{clusterName}", options);
+        const { data, error, response } = await this.client.GET(
+            "/api/atlas/v2/groups/{groupId}/clusters/{clusterName}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async listDatabaseUsers(options: FetchOptions<operations["listDatabaseUsers"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/groups/{groupId}/databaseUsers", options);
+        const { data, error, response } = await this.client.GET(
+            "/api/atlas/v2/groups/{groupId}/databaseUsers",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async createDatabaseUser(options: FetchOptions<operations["createDatabaseUser"]>) {
-        const { data } = await this.client.POST("/api/atlas/v2/groups/{groupId}/databaseUsers", options);
+        const { data, error, response } = await this.client.POST(
+            "/api/atlas/v2/groups/{groupId}/databaseUsers",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async deleteDatabaseUser(options: FetchOptions<operations["deleteDatabaseUser"]>) {
-        await this.client.DELETE("/api/atlas/v2/groups/{groupId}/databaseUsers/{databaseName}/{username}", options);
+        const { error, response } = await this.client.DELETE(
+            "/api/atlas/v2/groups/{groupId}/databaseUsers/{databaseName}/{username}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
     }
 
     async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/orgs", options);
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/orgs", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
     async listOrganizationProjects(options: FetchOptions<operations["listOrganizationProjects"]>) {
-        const { data } = await this.client.GET("/api/atlas/v2/orgs/{orgId}/groups", options);
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/orgs/{orgId}/groups", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
         return data;
     }
 
