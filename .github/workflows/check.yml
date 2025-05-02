@@ -49,10 +49,9 @@ jobs:
         with:
           node-version-file: package.json
           cache: "npm"
-      - name: Install dependencies & build
-        run: npm ci
-      - name: Remove dev dependencies
+      - name: Install dependencies, build and remove dev dependencies
         run: |
+          npm ci
           rm -rf node_modules
           npm pkg set scripts.prepare="exit 0"
           npm install --omit=dev
