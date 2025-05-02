@@ -86,8 +86,6 @@ jobs:
         uses: coverallsapp/github-action@v2.3.6
         with:
           file: coverage/lcov.info
-          git-branch: ${{ github.head_ref || github.ref_name }}
-          git-commit: ${{ github.event.pull_request.head.sha || github.sha }}
 
   merge-dependabot-pr:
     name: Merge Dependabot PR
