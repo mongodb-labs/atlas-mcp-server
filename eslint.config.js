@@ -49,6 +49,7 @@ export default defineConfig([
         "global.d.ts",
         "eslint.config.js",
         "jest.config.ts",
+        "src/types/*.d.ts",
     ]),
     eslintPluginPrettierRecommended,
 ]);

@@ -390,8 +390,11 @@ describe("Telemetry", () => {
                 }
                 await session.connectToMongoDB(testCase.connectionString, config.connectOptions, telemetry);
                 expect(session.serviceProvider).toBeDefined();
-                expect(MockNodeDriverServiceProvider.connect).toHaveBeenCalledOnce();
-                const connectionString = MockNodeDriverServiceProvider.connect.mock.calls[0][0];
+
+                // eslint-disable-next-line @typescript-eslint/unbound-method
+                const connectMock = MockNodeDriverServiceProvider.connect as jest.Mock;
+                expect(connectMock).toHaveBeenCalledOnce();
+                const connectionString = connectMock.mock.calls[0][0];
                 if (testCase.expectAppName) {
                     expect(connectionString).toContain("appName=MongoDB+MCP+Server");
                 } else {

@@ -40,7 +40,6 @@ export class Telemetry {
             commonProperties = { ...MACHINE_METADATA },
             eventCache = EventCache.getInstance(),
 
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             getRawMachineId = () => nodeMachineId.machineId(true),
         }: {
             eventCache?: EventCache;
