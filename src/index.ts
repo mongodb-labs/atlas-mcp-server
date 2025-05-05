@@ -6,7 +6,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { config } from "./config.js";
 import { Session } from "./session.js";
 import { Server } from "./server.js";
-import { packageInfo } from "./packageInfo.js";
+import { packageInfo } from "./helpers/packageInfo.js";
 import { Telemetry } from "./telemetry/telemetry.js";
 
 try {

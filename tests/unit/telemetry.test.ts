@@ -7,6 +7,10 @@ import { config } from "../../src/config.js";
 import { jest } from "@jest/globals";
 import logger, { LogId } from "../../src/logger.js";
 import { createHmac } from "crypto";
+import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
+
+jest.mock("@mongosh/service-provider-node-driver");
+const MockNodeDriverServiceProvider = NodeDriverServiceProvider as jest.MockedClass<typeof NodeDriverServiceProvider>;
 
 // Mock the ApiClient to avoid real API calls
 jest.mock("../../src/common/atlas/apiClient.js");
@@ -314,5 +318,97 @@ describe("Telemetry", () => {
                 verifyMockCalls();
             });
         });
+    });
+
+    describe("connectToMongoDB", () => {
+        beforeEach(() => {
+            session = new Session({
+                apiClientId: "test-client-id",
+                apiBaseUrl: "https://api.test.com",
+            });
+
+            MockNodeDriverServiceProvider.connect = jest.fn(() =>
+                Promise.resolve({} as unknown as NodeDriverServiceProvider)
+            );
+        });
+
+        const testCases: {
+            connectionString: string;
+            isAtlas: boolean;
+            expectAppName: boolean;
+            expectTelemetryId: boolean;
+            name: string;
+            disableTelemetry?: boolean;
+        }[] = [
+            {
+                connectionString: "mongodb://localhost:27017",
+                isAtlas: false,
+                expectAppName: true,
+                expectTelemetryId: false,
+                name: "local db",
+            },
+            {
+                connectionString: "mongodb+srv://test.mongodb.net/test?retryWrites=true&w=majority",
+                isAtlas: true,
+                expectAppName: true,
+                expectTelemetryId: true,
+                name: "atlas db",
+            },
+            {
+                connectionString: "mongodb://localhost:27017?appName=CustomAppName",
+                isAtlas: false,
+                expectAppName: false,
+                expectTelemetryId: false,
+                name: "local db with custom appName",
+            },
+            {
+                connectionString:
+                    "mongodb+srv://test.mongodb.net/test?retryWrites=true&w=majority&appName=CustomAppName",
+                isAtlas: true,
+                expectAppName: false,
+                expectTelemetryId: false,
+                name: "atlas db with custom appName",
+            },
+
+            {
+                connectionString: "mongodb+srv://test.mongodb.net/test?retryWrites=true&w=majority",
+                isAtlas: true,
+                expectAppName: true,
+                expectTelemetryId: false,
+                name: "atlas db with telemetry disabled",
+                disableTelemetry: true,
+            },
+        ];
+
+        for (const testCase of testCases) {
+            it(`should update connection string for ${testCase.name}`, async () => {
+                if (testCase.disableTelemetry) {
+                    config.telemetry = "disabled";
+                    telemetry = Telemetry.create(session, config, {
+                        getRawMachineId: () => Promise.resolve(machineId),
+                    });
+                }
+                await session.connectToMongoDB(testCase.connectionString, config.connectOptions, telemetry);
+                expect(session.serviceProvider).toBeDefined();
+                expect(MockNodeDriverServiceProvider.connect).toHaveBeenCalledOnce();
+                const connectionString = MockNodeDriverServiceProvider.connect.mock.calls[0][0];
+                if (testCase.expectAppName) {
+                    expect(connectionString).toContain("appName=MongoDB+MCP+Server");
+                } else {
+                    expect(connectionString).not.toContain("appName=MongoDB+MCP+Server");
+                }
+
+                if (testCase.disableTelemetry) {
+                    expect(connectionString).not.toMatch(/appName=[^-]*-[^&]*/);
+                } else {
+                    const telemetryId = await telemetry.deviceIdPromise;
+                    if (testCase.isAtlas && testCase.expectTelemetryId) {
+                        expect(connectionString).toContain(telemetryId);
+                    } else {
+                        expect(connectionString).not.toContain(telemetryId);
+                    }
+                }
+            });
+        }
     });
 });

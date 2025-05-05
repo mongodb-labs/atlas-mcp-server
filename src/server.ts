@@ -187,7 +187,11 @@ export class Server {
 
         if (this.userConfig.connectionString) {
             try {
-                await this.session.connectToMongoDB(this.userConfig.connectionString, this.userConfig.connectOptions);
+                await this.session.connectToMongoDB(
+                    this.userConfig.connectionString,
+                    this.userConfig.connectOptions,
+                    this.telemetry
+                );
             } catch (error) {
                 console.error(
                     "Failed to connect to MongoDB instance using the connection string from the config: ",

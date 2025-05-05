@@ -99,7 +99,7 @@ export class ConnectClusterTool extends AtlasToolBase {
 
         for (let i = 0; i < 20; i++) {
             try {
-                await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+                await this.session.connectToMongoDB(connectionString, this.config.connectOptions, this.telemetry);
                 lastError = undefined;
                 break;
             } catch (err: unknown) {
