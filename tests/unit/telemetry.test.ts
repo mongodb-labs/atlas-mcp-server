@@ -307,7 +307,7 @@ describe("Telemetry", () => {
             });
 
             afterEach(() => {
-                process.env.DO_NOT_TRACK = originalEnv;
+                delete process.env.DO_NOT_TRACK;
             });
 
             it("should not send events", async () => {
@@ -330,6 +330,10 @@ describe("Telemetry", () => {
             MockNodeDriverServiceProvider.connect = jest.fn(() =>
                 Promise.resolve({} as unknown as NodeDriverServiceProvider)
             );
+        });
+
+        afterEach(() => {
+            config.telemetry = "enabled";
         });
 
         const testCases: {
@@ -388,6 +392,7 @@ describe("Telemetry", () => {
                         getRawMachineId: () => Promise.resolve(machineId),
                     });
                 }
+
                 await session.connectToMongoDB(testCase.connectionString, config.connectOptions, telemetry);
                 expect(session.serviceProvider).toBeDefined();
 
