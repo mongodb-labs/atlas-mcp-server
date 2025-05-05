@@ -6,8 +6,7 @@ import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
 import nodeMachineId from "node-machine-id";
-import { DeferredPromise } from "../deferred-promise.js";
-import { getDeviceId as extractDeviceId } from "@mongodb-js/device-id";
+import { getDeviceId } from "@mongodb-js/device-id";
 
 type EventResult = {
     success: boolean;
@@ -19,7 +18,8 @@ export const DEVICE_ID_TIMEOUT = 3000;
 export class Telemetry {
     private isBufferingEvents: boolean = true;
     /** Resolves when the device ID is retrieved or timeout occurs */
-    public deviceIdPromise: DeferredPromise<string> | undefined;
+    public deviceIdPromise: Promise<string> | undefined;
+    public resolveDeviceId: ((value: string) => void) | undefined;
     private eventCache: EventCache;
     private getRawMachineId: () => Promise<string>;
 
@@ -58,35 +58,22 @@ export class Telemetry {
         if (!this.isTelemetryEnabled()) {
             return;
         }
-        this.deviceIdPromise = DeferredPromise.fromPromise(this.getDeviceId(), {
-            timeout: DEVICE_ID_TIMEOUT,
-            onTimeout: (resolve) => {
-                resolve("unknown");
-                logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
-            },
+        const { value: deviceId, resolve: resolveDeviceId } = getDeviceId({
+            getMachineId: () => this.getRawMachineId(),
+            isNodeMachineId: true,
+            onError: (error) => logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error)),
         });
-        this.commonProperties.device_id = await this.deviceIdPromise;
+
+        this.resolveDeviceId = resolveDeviceId;
+        this.commonProperties.device_id = await deviceId;
 
         this.isBufferingEvents = false;
     }
 
     public async close(): Promise<void> {
-        this.deviceIdPromise?.resolve("unknown");
+        this.resolveDeviceId?.("unknown");
         this.isBufferingEvents = false;
         await this.emitEvents(this.eventCache.getEvents());
-    }
-
-    /**
-     * @returns A hashed, unique identifier for the running device or `"unknown"` if not known.
-     */
-    private async getDeviceId(): Promise<string> {
-        if (this.commonProperties.device_id) {
-            return this.commonProperties.device_id;
-        }
-        return extractDeviceId({
-            getMachineId: () => this.getRawMachineId(),
-            isNodeMachineId: true,
-        }).value;
     }
 
     /**
