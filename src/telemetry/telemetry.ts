@@ -5,9 +5,9 @@ import logger, { LogId } from "../logger.js";
 import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
-import { createHmac } from "crypto";
 import nodeMachineId from "node-machine-id";
 import { DeferredPromise } from "../deferred-promise.js";
+import { getDeviceId as extractDeviceId } from "@mongodb-js/device-id";
 
 type EventResult = {
     success: boolean;
@@ -80,26 +80,13 @@ export class Telemetry {
      * @returns A hashed, unique identifier for the running device or `"unknown"` if not known.
      */
     private async getDeviceId(): Promise<string> {
-        try {
-            if (this.commonProperties.device_id) {
-                return this.commonProperties.device_id;
-            }
-
-            const originalId: string = await this.getRawMachineId();
-
-            // Create a hashed format from the all uppercase version of the machine ID
-            // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
-            const hmac = createHmac("sha256", originalId.toUpperCase());
-
-            /** This matches the message used to create the hashes in Atlas CLI */
-            const DEVICE_ID_HASH_MESSAGE = "atlascli";
-
-            hmac.update(DEVICE_ID_HASH_MESSAGE);
-            return hmac.digest("hex");
-        } catch (error) {
-            logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
-            return "unknown";
+        if (this.commonProperties.device_id) {
+            return this.commonProperties.device_id;
         }
+        return extractDeviceId({
+            getMachineId: () => this.getRawMachineId(),
+            isNodeMachineId: true,
+        }).value;
     }
 
     /**
