@@ -60,8 +60,13 @@ export class Telemetry {
             getMachineId: () => this.getRawMachineId(),
             isNodeMachineId: true,
             onError: (error) => logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error)),
+            onTimeout: (resolve) => {
+                logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
+                resolve("unknown");
+            },
         });
 
+        this.deviceIdPromise = deviceId;
         this.resolveDeviceId = resolveDeviceId;
         this.commonProperties.device_id = await deviceId;
 
