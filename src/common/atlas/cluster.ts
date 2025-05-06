@@ -6,7 +6,7 @@ export interface Cluster {
     name?: string;
     instanceType: "FREE" | "DEDICATED" | "FLEX";
     instanceSize?: string;
-    state?: "IDLE" | "CREATING" | "UPDATING" | "DELETING" | "REPAIRING" | "UNKNOWN";
+    state?: "IDLE" | "CREATING" | "UPDATING" | "DELETING" | "REPAIRING";
     mongoDBVersion?: string;
     connectionString?: string;
 }
