@@ -17,42 +17,32 @@ interface MongoDBIntegrationTest {
 export function describeWithMongoDB(
     name: string,
     fn: (integration: IntegrationTest & MongoDBIntegrationTest & { connectMcpClient: () => Promise<void> }) => void,
-    getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => defaultTestConfig,
-    describeFn = describe
+    getUserConfig: (mdbIntegration: MongoDBIntegrationTest) => UserConfig = () => defaultTestConfig
 ) {
-    describeFn(name, () => {
+    describe(name, () => {
         const mdbIntegration = setupMongoDBIntegrationTest();
         const integration = setupIntegrationTest(() => ({
             ...getUserConfig(mdbIntegration),
-            connectionString: mdbIntegration.connectionString(),
         }));
-
-        beforeEach(() => {
-            integration.mcpServer().userConfig.connectionString = mdbIntegration.connectionString();
-        });
 
         fn({
             ...integration,
             ...mdbIntegration,
             connectMcpClient: async () => {
-                // TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when
-                // the connect tool is reenabled
-                // await integration.mcpClient().callTool({
-                //     name: "connect",
-                //     arguments: { connectionString: mdbIntegration.connectionString() },
-                // });
+                const { tools } = await integration.mcpClient().listTools();
+                if (tools.find((tool) => tool.name === "connect")) {
+                    await integration.mcpClient().callTool({
+                        name: "connect",
+                        arguments: { connectionString: mdbIntegration.connectionString() },
+                    });
+                }
             },
         });
     });
 }
 
 export function setupMongoDBIntegrationTest(): MongoDBIntegrationTest {
-    let mongoCluster: // TODO: Fix this type once mongodb-runner is updated.
-    | {
-              connectionString: string;
-              close: () => Promise<void>;
-          }
-        | undefined;
+    let mongoCluster: MongoCluster | undefined;
     let mongoClient: MongoClient | undefined;
     let randomDbName: string;
 
@@ -139,11 +129,14 @@ export function validateAutoConnectBehavior(
     },
     beforeEachImpl?: () => Promise<void>
 ): void {
-    // TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when the connect tool is reenabled
-    describe.skip("when not connected", () => {
+    describe("when not connected", () => {
         if (beforeEachImpl) {
             beforeEach(() => beforeEachImpl());
         }
+
+        afterEach(() => {
+            integration.mcpServer().userConfig.connectionString = undefined;
+        });
 
         it("connects automatically if connection string is configured", async () => {
             integration.mcpServer().userConfig.connectionString = integration.connectionString();

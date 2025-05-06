@@ -104,8 +104,8 @@ export class Session extends EventEmitter<{
             connectionString,
             defaultAppName: `${packageInfo.mcpServerName} ${packageInfo.version}`,
         });
-        const provider = await NodeDriverServiceProvider.connect(connectionString, {
-            productDocsLink: "https://docs.mongodb.com/todo-mcp",
+        this.serviceProvider = await NodeDriverServiceProvider.connect(connectionString, {
+            productDocsLink: "http://github.com/mongodb-js/mongodb-mcp-server/",
             productName: "MongoDB MCP",
             readConcern: {
                 level: connectOptions.readConcern,
@@ -116,7 +116,5 @@ export class Session extends EventEmitter<{
             },
             timeoutMS: connectOptions.timeoutMS,
         });
-
-        this.serviceProvider = provider;
     }
 }

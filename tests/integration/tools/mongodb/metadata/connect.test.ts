@@ -2,8 +2,6 @@ import { describeWithMongoDB } from "../mongodbHelpers.js";
 import { getResponseContent, validateThrowsForInvalidArguments, validateToolMetadata } from "../../../helpers.js";
 import { config } from "../../../../../src/config.js";
 
-// These tests are temporarily skipped because the connect tool is disabled for the initial release.
-// TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when the connect tool is reenabled
 describeWithMongoDB(
     "switchConnection tool",
     (integration) => {
@@ -77,8 +75,7 @@ describeWithMongoDB(
     (mdbIntegration) => ({
         ...config,
         connectionString: mdbIntegration.connectionString(),
-    }),
-    describe.skip
+    })
 );
 describeWithMongoDB(
     "Connect tool",
@@ -127,6 +124,5 @@ describeWithMongoDB(
             });
         });
     },
-    () => config,
-    describe.skip
+    () => config
 );
