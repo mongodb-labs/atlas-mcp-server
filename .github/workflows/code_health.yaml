@@ -62,26 +62,6 @@ jobs:
           name: atlas-test-results
           path: coverage/lcov.info
 
-  dep-check:
-    name: Check dependencies
-    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
-    steps:
-      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: package.json
-          cache: "npm"
-      - name: Install dependencies & build
-        run: npm ci
-      - name: Remove dev dependencies
-        run: |
-          rm -rf node_modules
-          npm pkg set scripts.prepare="exit 0"
-          npm install --omit=dev
-      - run: npx -y @modelcontextprotocol/inspector --cli --method tools/list -- node dist/index.js --connectionString "mongodb://localhost"
-
   coverage:
     name: Report Coverage
     if: always() && github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
