@@ -29,7 +29,7 @@ node -v
 ```
 
 - A MongoDB connection string or Atlas API credentials, **_the Server will not start unless configured_**.
-  - **_ Service Accounts Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
+  - **_Service Accounts Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
   - If you have a MongoDB connection string, you can use it directly to connect to your MongoDB instance.
 
 ## Setup
