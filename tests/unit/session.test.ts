@@ -50,8 +50,7 @@ describe("Session", () => {
 
                 // eslint-disable-next-line @typescript-eslint/unbound-method
                 const connectMock = MockNodeDriverServiceProvider.connect as jest.Mock<
-                    ReturnType<typeof NodeDriverServiceProvider.connect>,
-                    Parameters<typeof NodeDriverServiceProvider.connect>
+                    typeof NodeDriverServiceProvider.connect
                 >;
                 expect(connectMock).toHaveBeenCalledOnce();
                 const connectionString = connectMock.mock.calls[0][0];
