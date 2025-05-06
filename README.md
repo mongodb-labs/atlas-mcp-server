@@ -244,8 +244,8 @@ Set environment variables with the prefix `MDB_MCP_` followed by the option name
 
 ```shell
 # Set Atlas API credentials (via Service Accounts)
-export MDB_MCP_API_CLIENT_ID="your-atlas-client-id"
-export MDB_MCP_API_CLIENT_SECRET="your-atlas-client-secret"
+export MDB_MCP_API_CLIENT_ID="your-atlas-service-accounts-client-id"
+export MDB_MCP_API_CLIENT_SECRET="your-atlas-service-accounts-client-secret"
 
 # Set a custom MongoDB connection string
 export MDB_MCP_CONNECTION_STRING="mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
@@ -281,8 +281,8 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
       "command": "npx",
       "args": ["-y", "mongodb-mcp-server"],
       "env": {
-        "MDB_MCP_API_CLIENT_ID": "your-atlas-client-id",
-        "MDB_MCP_API_CLIENT_SECRET": "your-atlas-client-secret"
+        "MDB_MCP_API_CLIENT_ID": "your-atlas-service-accounts-client-id",
+        "MDB_MCP_API_CLIENT_SECRET": "your-atlas-service-accounts-client-secret"
       }
     }
   }
@@ -294,7 +294,7 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
 Pass configuration options as command-line arguments when starting the server:
 
 ```shell
-npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret="your-atlas-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
+npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
 ```
 
 #### MCP configuration file examples
@@ -328,9 +328,9 @@ npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret
         "-y",
         "mongodb-mcp-server",
         "--apiClientId",
-        "your-atlas-client-id",
+        "your-atlas-service-accounts-client-id",
         "--apiClientSecret",
-        "your-atlas-client-secret"
+        "your-atlas-service-accounts-client-secret"
       ]
     }
   }
