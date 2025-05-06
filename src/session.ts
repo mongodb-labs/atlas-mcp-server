@@ -6,7 +6,6 @@ import EventEmitter from "events";
 import { ConnectOptions } from "./config.js";
 import { setAppNameParamIfMissing } from "./helpers/connectionOptions.js";
 import { packageInfo } from "./helpers/packageInfo.js";
-import { Telemetry } from "./telemetry/telemetry.js";
 
 export interface SessionOptions {
     apiBaseUrl: string;
@@ -100,15 +99,10 @@ export class Session extends EventEmitter<{
         this.emit("close");
     }
 
-    async connectToMongoDB(
-        connectionString: string,
-        connectOptions: ConnectOptions,
-        telemetry: Telemetry
-    ): Promise<void> {
+    async connectToMongoDB(connectionString: string, connectOptions: ConnectOptions): Promise<void> {
         connectionString = setAppNameParamIfMissing({
             connectionString,
             defaultAppName: `${packageInfo.mcpServerName} ${packageInfo.version}`,
-            telemetryAnonymousId: await telemetry.deviceIdPromise,
         });
         const provider = await NodeDriverServiceProvider.connect(connectionString, {
             productDocsLink: "https://docs.mongodb.com/todo-mcp",
