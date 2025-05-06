@@ -29,7 +29,7 @@ node -v
 ```
 
 - A MongoDB connection string or Atlas API credentials, **_the Server will not start unless configured_**.
-  - **_Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
+  - **_ Service Accounts Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
   - If you have a MongoDB connection string, you can use it directly to connect to your MongoDB instance.
 
 ## Setup
@@ -67,7 +67,7 @@ You can pass your connection string via args, make sure to use a valid username 
 
 #### Option 2: Atlas API credentials args
 
-Use your Atlas API Service Account credentials. More details in the [Atlas API Access](#atlas-api-access) section.
+Use your Atlas API Service Accounts credentials. More details in the [Atlas API Access](#atlas-api-access) section.
 
 ```json
 {
@@ -78,9 +78,9 @@ Use your Atlas API Service Account credentials. More details in the [Atlas API A
         "-y",
         "mongodb-mcp-server",
         "--apiClientId",
-        "your-atlas-client-id",
+        "your-atlas-service-accounts-client-id",
         "--apiClientSecret",
-        "your-atlas-client-secret"
+        "your-atlas-service-accounts-client-secret"
       ]
     }
   }
@@ -243,7 +243,7 @@ To learn more about Service Accounts, check the [MongoDB Atlas documentation](ht
 Set environment variables with the prefix `MDB_MCP_` followed by the option name in uppercase with underscores:
 
 ```shell
-# Set Atlas API credentials
+# Set Atlas API credentials (via Service Accounts)
 export MDB_MCP_API_CLIENT_ID="your-atlas-client-id"
 export MDB_MCP_API_CLIENT_SECRET="your-atlas-client-secret"
 
