@@ -307,7 +307,11 @@ describe("Telemetry", () => {
             });
 
             afterEach(() => {
-                delete process.env.DO_NOT_TRACK;
+                if (originalEnv) {
+                    process.env.DO_NOT_TRACK = originalEnv;
+                } else {
+                    delete process.env.DO_NOT_TRACK;
+                }
             });
 
             it("should not send events", async () => {
