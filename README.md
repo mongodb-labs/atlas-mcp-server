@@ -98,7 +98,7 @@ Start Server using npx command:
 - For a complete list of arguments see [Configuration Options](#configuration-options)
 - To configure your Atlas Service Accounts credentials please refer to [Atlas API Access](#atlas-api-access)
 
-#### Option 4: Use environment variables with CLI
+#### Option 4: Standalone Service using environment variables 
 
 ```shell
  npx -y mongodb-mcp-server 
