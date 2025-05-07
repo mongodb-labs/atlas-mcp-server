@@ -92,7 +92,7 @@ Use your Atlas API Service Accounts credentials. Must follow all the steps in [A
 Start Server using npx command:
 
 ```shell
- npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret" --logPath=dev-logs
+ npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"
 ```
 
 #### Other options
