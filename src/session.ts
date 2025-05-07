@@ -105,7 +105,7 @@ export class Session extends EventEmitter<{
             defaultAppName: `${packageInfo.mcpServerName} ${packageInfo.version}`,
         });
         this.serviceProvider = await NodeDriverServiceProvider.connect(connectionString, {
-            productDocsLink: "http://github.com/mongodb-js/mongodb-mcp-server/",
+            productDocsLink: "https://github.com/mongodb-js/mongodb-mcp-server/",
             productName: "MongoDB MCP",
             readConcern: {
                 level: connectOptions.readConcern,
