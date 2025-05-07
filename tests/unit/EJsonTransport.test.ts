@@ -57,16 +57,15 @@ describe("EJsonTransport", () => {
     });
 
     it("has _readBuffer field of type EJsonReadBuffer", () => {
-        const readBuffer = transport["_readBuffer"];
-        expect(readBuffer).toBeDefined();
-        expect(readBuffer).toBeInstanceOf(EJsonReadBuffer);
+        expect(transport["_readBuffer"]).toBeDefined();
+        expect(transport["_readBuffer"]).toBeInstanceOf(EJsonReadBuffer);
     });
 
     describe("standard StdioServerTransport", () => {
         it("has a _readBuffer field", () => {
-            const transport = new StdioServerTransport();
-            expect(transport["_readBuffer"]).toBeDefined();
-            expect(transport["_readBuffer"]).toBeInstanceOf(ReadBuffer);
+            const standardTransport = new StdioServerTransport();
+            expect(standardTransport["_readBuffer"]).toBeDefined();
+            expect(standardTransport["_readBuffer"]).toBeInstanceOf(ReadBuffer);
         });
     });
 });
