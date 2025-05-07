@@ -67,7 +67,7 @@ You can pass your connection string via args, make sure to use a valid username 
 
 #### Option 2: Atlas API credentials args
 
-Use your Atlas API Service Accounts credentials. More details in the [Atlas API Access](#atlas-api-access) section.
+Use your Atlas API Service Accounts credentials. Must follow all the steps in [Atlas API Access](#atlas-api-access) section.
 
 ```json
 {
@@ -229,7 +229,7 @@ To learn more about Service Accounts, check the [MongoDB Atlas documentation](ht
    - After creation, you'll be shown the Client ID and Client Secret
    - **Important:** Copy and save the Client Secret immediately as it won't be displayed again
 
-3. **Add Access List Entry (Optional but recommended):**
+3. **Add Access List Entry:**
 
    - Add your IP address to the API access list
 
