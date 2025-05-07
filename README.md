@@ -95,8 +95,8 @@ Start Server using npx command:
  npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"
 ```
 
-For complete list of arguments see [Configuration Options](#configuration-options)
-For Atlas API credentials please refer to [Atlas API Access](#atlas-api-access)
+- For a complete list of arguments see [Configuration Options](#configuration-options)
+- To configure your Atlas Service Accounts credentials please refer to [Atlas API Access](#atlas-api-access)
 
 #### Option 4: Use environment variables with CLI
 
