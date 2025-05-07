@@ -38,7 +38,7 @@ node -v
 
 Start Server using npx command:
 
-```
+```shell
  npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"  --logPath=dev-logs
 ```
 
