@@ -216,6 +216,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/atlas/v2/groups/{groupId}/flexClusters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Return All Flex Clusters from One Project
+         * @description Returns details for all flex clusters in the specified project. To use this resource, the requesting Service Account or API Key must have the Project Read Only role.
+         */
+        get: operations["listFlexClusters"];
+        put?: never;
+        /**
+         * Create One Flex Cluster in One Project
+         * @description Creates one flex cluster in the specified project. To use this resource, the requesting Service Account or API Key must have the Project Owner role.
+         */
+        post: operations["createFlexCluster"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/atlas/v2/groups/{groupId}/flexClusters/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Return One Flex Cluster from One Project
+         * @description Returns details for one flex cluster in the specified project. To use this resource, the requesting Service Account or API Key must have the Project Read Only role.
+         */
+        get: operations["getFlexCluster"];
+        put?: never;
+        post?: never;
+        /**
+         * Remove One Flex Cluster from One Project
+         * @description Removes one flex cluster from the specified project. The flex cluster must have termination protection disabled in order to be deleted. To use this resource, the requesting Service Account or API Key must have the Project Owner role.
+         */
+        delete: operations["deleteFlexCluster"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/atlas/v2/orgs": {
         parameters: {
             query?: never;
@@ -2698,6 +2746,147 @@ export interface components {
         };
         Fields: Record<string, never>;
         /**
+         * Flex Backup Configuration
+         * @description Flex backup configuration.
+         */
+        FlexBackupSettings20241113: {
+            /**
+             * @description Flag that indicates whether backups are performed for this flex cluster. Backup uses flex cluster backups.
+             * @default true
+             */
+            readonly enabled: boolean;
+        };
+        /**
+         * Flex Cluster Description
+         * @description Group of settings that configure a MongoDB Flex cluster.
+         */
+        FlexClusterDescription20241113: {
+            backupSettings?: components["schemas"]["FlexBackupSettings20241113"];
+            /**
+             * @description Flex cluster topology.
+             * @default REPLICASET
+             * @enum {string}
+             */
+            readonly clusterType: "REPLICASET";
+            connectionStrings?: components["schemas"]["FlexConnectionStrings20241113"];
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this instance. This parameter expresses its value in ISO 8601 format in UTC.
+             */
+            readonly createDate?: string;
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the project.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the instance.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /** @description Version of MongoDB that the instance runs. */
+            readonly mongoDBVersion?: string;
+            /** @description Human-readable label that identifies the instance. */
+            readonly name?: string;
+            providerSettings: components["schemas"]["FlexProviderSettings20241113"];
+            /**
+             * @description Human-readable label that indicates the current operating condition of this instance.
+             * @enum {string}
+             */
+            readonly stateName?: "IDLE" | "CREATING" | "UPDATING" | "DELETING" | "REPAIRING";
+            /** @description List that contains key-value pairs between 1 to 255 characters in length for tagging and categorizing the instance. */
+            tags?: components["schemas"]["ResourceTag"][];
+            /**
+             * @description Flag that indicates whether termination protection is enabled on the cluster. If set to `true`, MongoDB Cloud won't delete the cluster. If set to `false`, MongoDB Cloud will delete the cluster.
+             * @default false
+             */
+            terminationProtectionEnabled: boolean;
+            /**
+             * @description Method by which the cluster maintains the MongoDB versions.
+             * @default LTS
+             * @enum {string}
+             */
+            readonly versionReleaseSystem: "LTS";
+        };
+        /**
+         * Flex Cluster Description Create
+         * @description Settings that you can specify when you create a flex cluster.
+         */
+        FlexClusterDescriptionCreate20241113: {
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /** @description Human-readable label that identifies the instance. */
+            name: string;
+            providerSettings: components["schemas"]["FlexProviderSettingsCreate20241113"];
+            /** @description List that contains key-value pairs between 1 to 255 characters in length for tagging and categorizing the instance. */
+            tags?: components["schemas"]["ResourceTag"][];
+            /**
+             * @description Flag that indicates whether termination protection is enabled on the cluster. If set to `true`, MongoDB Cloud won't delete the cluster. If set to `false`, MongoDB Cloud will delete the cluster.
+             * @default false
+             */
+            terminationProtectionEnabled: boolean;
+        };
+        /**
+         * Flex Cluster Connection Strings
+         * @description Collection of Uniform Resource Locators that point to the MongoDB database.
+         */
+        FlexConnectionStrings20241113: {
+            /** @description Public connection string that you can use to connect to this cluster. This connection string uses the mongodb:// protocol. */
+            readonly standard?: string;
+            /** @description Public connection string that you can use to connect to this flex cluster. This connection string uses the `mongodb+srv://` protocol. */
+            readonly standardSrv?: string;
+        };
+        /**
+         * Cloud Service Provider Settings for a Flex Cluster
+         * @description Group of cloud provider settings that configure the provisioned MongoDB flex cluster.
+         */
+        FlexProviderSettings20241113: {
+            /**
+             * @description Cloud service provider on which MongoDB Cloud provisioned the flex cluster.
+             * @enum {string}
+             */
+            readonly backingProviderName?: "AWS" | "AZURE" | "GCP";
+            /**
+             * Format: double
+             * @description Storage capacity available to the flex cluster expressed in gigabytes.
+             */
+            readonly diskSizeGB?: number;
+            /**
+             * @description Human-readable label that identifies the provider type.
+             * @default FLEX
+             * @enum {string}
+             */
+            readonly providerName: "FLEX";
+            /** @description Human-readable label that identifies the geographic location of your MongoDB flex cluster. The region you choose can affect network latency for clients accessing your databases. For a complete list of region names, see [AWS](https://docs.atlas.mongodb.com/reference/amazon-aws/#std-label-amazon-aws), [GCP](https://docs.atlas.mongodb.com/reference/google-gcp/), and [Azure](https://docs.atlas.mongodb.com/reference/microsoft-azure/). */
+            readonly regionName?: string;
+        };
+        /**
+         * Cloud Service Provider Settings for a Flex Cluster
+         * @description Group of cloud provider settings that configure the provisioned MongoDB flex cluster.
+         */
+        FlexProviderSettingsCreate20241113: {
+            /**
+             * @description Cloud service provider on which MongoDB Cloud provisioned the flex cluster.
+             * @enum {string}
+             */
+            backingProviderName: "AWS" | "AZURE" | "GCP";
+            /**
+             * Format: double
+             * @description Storage capacity available to the flex cluster expressed in gigabytes.
+             */
+            readonly diskSizeGB?: number;
+            /**
+             * @description Human-readable label that identifies the provider type.
+             * @default FLEX
+             * @enum {string}
+             */
+            readonly providerName: "FLEX";
+            /** @description Human-readable label that identifies the geographic location of your MongoDB flex cluster. The region you choose can affect network latency for clients accessing your databases. For a complete list of region names, see [AWS](https://docs.atlas.mongodb.com/reference/amazon-aws/#std-label-amazon-aws), [GCP](https://docs.atlas.mongodb.com/reference/google-gcp/), and [Azure](https://docs.atlas.mongodb.com/reference/microsoft-azure/). */
+            regionName: string;
+        };
+        /**
          * Tenant
          * @description Collection of settings that configures how a cluster might scale its cluster tier and whether the cluster can scale down.
          */
@@ -3404,6 +3593,17 @@ export interface components {
             readonly links?: components["schemas"]["Link"][];
             /** @description List of returned documents that MongoDB Cloud provides when completing this request. */
             readonly results?: components["schemas"]["ClusterDescription20240805"][];
+            /**
+             * Format: int32
+             * @description Total number of documents available. MongoDB Cloud omits this value if `includeCount` is set to `false`. The total number is an estimate and may not be exact.
+             */
+            readonly totalCount?: number;
+        };
+        PaginatedFlexClusters20241113: {
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /** @description List of returned documents that MongoDB Cloud provides when completing this request. */
+            readonly results?: components["schemas"]["FlexClusterDescription20241113"][];
             /**
              * Format: int32
              * @description Total number of documents available. MongoDB Cloud omits this value if `includeCount` is set to `false`. The total number is an estimate and may not be exact.
@@ -5090,6 +5290,12 @@ export type DiskGbAutoScaling = components['schemas']['DiskGBAutoScaling'];
 export type EmployeeAccessGrantView = components['schemas']['EmployeeAccessGrantView'];
 export type FieldViolation = components['schemas']['FieldViolation'];
 export type Fields = components['schemas']['Fields'];
+export type FlexBackupSettings20241113 = components['schemas']['FlexBackupSettings20241113'];
+export type FlexClusterDescription20241113 = components['schemas']['FlexClusterDescription20241113'];
+export type FlexClusterDescriptionCreate20241113 = components['schemas']['FlexClusterDescriptionCreate20241113'];
+export type FlexConnectionStrings20241113 = components['schemas']['FlexConnectionStrings20241113'];
+export type FlexProviderSettings20241113 = components['schemas']['FlexProviderSettings20241113'];
+export type FlexProviderSettingsCreate20241113 = components['schemas']['FlexProviderSettingsCreate20241113'];
 export type FreeComputeAutoScalingRules = components['schemas']['FreeComputeAutoScalingRules'];
 export type GcpCloudProviderContainer = components['schemas']['GCPCloudProviderContainer'];
 export type GcpComputeAutoScaling = components['schemas']['GCPComputeAutoScaling'];
@@ -5122,6 +5328,7 @@ export type OrgUserRolesResponse = components['schemas']['OrgUserRolesResponse']
 export type PaginatedApiAtlasDatabaseUserView = components['schemas']['PaginatedApiAtlasDatabaseUserView'];
 export type PaginatedAtlasGroupView = components['schemas']['PaginatedAtlasGroupView'];
 export type PaginatedClusterDescription20240805 = components['schemas']['PaginatedClusterDescription20240805'];
+export type PaginatedFlexClusters20241113 = components['schemas']['PaginatedFlexClusters20241113'];
 export type PaginatedNetworkAccessView = components['schemas']['PaginatedNetworkAccessView'];
 export type PaginatedOrgGroupView = components['schemas']['PaginatedOrgGroupView'];
 export type PaginatedOrganizationView = components['schemas']['PaginatedOrganizationView'];
@@ -5817,6 +6024,165 @@ export interface operations {
             401: components["responses"]["unauthorized"];
             403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    listFlexClusters: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response returns the total number of items (**totalCount**) in the response. */
+                includeCount?: components["parameters"]["includeCount"];
+                /** @description Number of items that the response returns per page. */
+                itemsPerPage?: components["parameters"]["itemsPerPage"];
+                /** @description Number of the page that displays the current set of the total objects that the response returns. */
+                pageNum?: components["parameters"]["pageNum"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2024-11-13+json": components["schemas"]["PaginatedFlexClusters20241113"];
+                };
+            };
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
+            409: components["responses"]["conflict"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    createFlexCluster: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+            };
+            cookie?: never;
+        };
+        /** @description Create One Flex Cluster in One Project. */
+        requestBody: {
+            content: {
+                "application/vnd.atlas.2024-11-13+json": components["schemas"]["FlexClusterDescriptionCreate20241113"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2024-11-13+json": components["schemas"]["FlexClusterDescription20241113"];
+                };
+            };
+            400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            402: components["responses"]["paymentRequired"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
+            409: components["responses"]["conflict"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    getFlexCluster: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+                /** @description Human-readable label that identifies the flex cluster. */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2024-11-13+json": components["schemas"]["FlexClusterDescription20241113"];
+                };
+            };
+            400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
+            409: components["responses"]["conflict"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    deleteFlexCluster: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+                /** @description Human-readable label that identifies the flex cluster. */
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description This endpoint does not return a response body. */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2024-11-13+json": unknown;
+                };
+            };
+            400: components["responses"]["badRequest"];
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
+            409: components["responses"]["conflict"];
             500: components["responses"]["internalServerError"];
         };
     };

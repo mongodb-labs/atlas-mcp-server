@@ -67,7 +67,7 @@ You can pass your connection string via args, make sure to use a valid username 
 
 #### Option 2: Atlas API credentials args
 
-Use your Atlas API Service Accounts credentials. More details in the [Atlas API Access](#atlas-api-access) section.
+Use your Atlas API Service Accounts credentials. Must follow all the steps in [Atlas API Access](#atlas-api-access) section.
 
 ```json
 {
@@ -87,9 +87,24 @@ Use your Atlas API Service Accounts credentials. More details in the [Atlas API 
 }
 ```
 
-#### Other options
+### Option 3: Standalone Service using command arguments
 
-Alternatively you can use environment variables in the config file or set them and run the server via npx.
+Start Server using npx command:
+
+```shell
+ npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"
+```
+
+- For a complete list of arguments see [Configuration Options](#configuration-options)
+- To configure your Atlas Service Accounts credentials please refer to [Atlas API Access](#atlas-api-access)
+
+#### Option 4: Standalone Service using environment variables
+
+```shell
+ npx -y mongodb-mcp-server
+```
+
+You can use environment variables in the config file or set them and run the server via npx.
 
 - Connection String via environment variables in the MCP file [example](#connection-string-with-environment-variables)
 - Atlas API credentials via environment variables in the MCP file [example](#atlas-api-credentials-with-environment-variables)
@@ -229,7 +244,7 @@ To learn more about Service Accounts, check the [MongoDB Atlas documentation](ht
    - After creation, you'll be shown the Client ID and Client Secret
    - **Important:** Copy and save the Client Secret immediately as it won't be displayed again
 
-3. **Add Access List Entry (Optional but recommended):**
+3. **Add Access List Entry:**
 
    - Add your IP address to the API access list
 

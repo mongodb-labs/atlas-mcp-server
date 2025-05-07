@@ -275,6 +275,46 @@ export class ApiClient {
         }
     }
 
+    async listFlexClusters(options: FetchOptions<operations["listFlexClusters"]>) {
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/flexClusters", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
+    }
+
+    async createFlexCluster(options: FetchOptions<operations["createFlexCluster"]>) {
+        const { data, error, response } = await this.client.POST(
+            "/api/atlas/v2/groups/{groupId}/flexClusters",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
+    }
+
+    async deleteFlexCluster(options: FetchOptions<operations["deleteFlexCluster"]>) {
+        const { error, response } = await this.client.DELETE(
+            "/api/atlas/v2/groups/{groupId}/flexClusters/{name}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+    }
+
+    async getFlexCluster(options: FetchOptions<operations["getFlexCluster"]>) {
+        const { data, error, response } = await this.client.GET(
+            "/api/atlas/v2/groups/{groupId}/flexClusters/{name}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
+    }
+
     async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {
         const { data, error, response } = await this.client.GET("/api/atlas/v2/orgs", options);
         if (error) {
