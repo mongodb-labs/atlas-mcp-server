@@ -27,7 +27,11 @@ export abstract class AtlasToolBase extends ToolBase {
                     content: [
                         {
                             type: "text",
-                            text: `Unable to authenticate with MongoDB Atlas. Your API credentials may be invalid, expired or lack permissions. Please check your Atlas API credentials and ensure they have the appropriate permissions. For more information on setting up API keys, visit: https://www.mongodb.com/docs/atlas/configure-api-access/`,
+                            text: `Unable to authenticate with MongoDB Atlas, API error: ${error.message}
+
+Hint: Your API credentials may be invalid, expired or lack permissions. 
+Please check your Atlas API credentials and ensure they have the appropriate permissions.
+For more information on setting up API keys, visit: https://www.mongodb.com/docs/atlas/configure-api-access/`,
                         },
                     ],
                     isError: true,
@@ -39,19 +43,11 @@ export abstract class AtlasToolBase extends ToolBase {
                     content: [
                         {
                             type: "text",
-                            text: `You don't have sufficient permissions to perform this action in MongoDB Atlas. Please ensure your API key has the necessary roles assigned. For more information on Atlas API access roles, visit: https://www.mongodb.com/docs/atlas/api/service-accounts-overview/`,
-                        },
-                    ],
-                    isError: true,
-                };
-            }
-
-            if (statusCode === 429) {
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: `MongoDB Atlas API rate limit exceeded. Please wait before making additional requests. For more information on rate limits, visit: https://www.mongodb.com/docs/atlas/api/#rate-limits`,
+                            text: `Received a Forbidden API Error: ${error.message}
+                            
+You don't have sufficient permissions to perform this action in MongoDB Atlas
+Please ensure your API key has the necessary roles assigned.
+For more information on Atlas API access roles, visit: https://www.mongodb.com/docs/atlas/api/service-accounts-overview/`,
                         },
                     ],
                     isError: true,
