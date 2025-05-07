@@ -227,6 +227,7 @@ export function validateThrowsForInvalidArguments(
 }
 
 /** Expects the argument being defined and asserts it */
-export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined> {
+export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined | null> {
     expect(arg).toBeDefined();
+    expect(arg).not.toBeNull();
 }
