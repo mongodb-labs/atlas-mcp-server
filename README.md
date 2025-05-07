@@ -36,14 +36,6 @@ node -v
 
 ### Quick Start
 
-Start Server using npx command:
-
-```shell
- npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"  --logPath=dev-logs
-```
-
-#### Configuration Options
-
 Most MCP clients require a configuration file to be created or modified to add the MCP server.
 
 Note: The configuration file syntax can be different across clients. Please refer to the following links for the latest expected syntax:
@@ -93,6 +85,14 @@ Use your Atlas API Service Accounts credentials. Must follow all the steps in [A
     }
   }
 }
+```
+
+### Option 3: Standalone Service using command arguments
+
+Start Server using npx command:
+
+```shell
+ npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret" --logPath=dev-logs
 ```
 
 #### Other options
