@@ -1,9 +1,10 @@
 import { Decimal128, MaxKey, MinKey, ObjectId, Timestamp, UUID } from "bson";
-import { createEJsonTransport } from "../../src/helpers/EJsonTransport.js";
+import { createEJsonTransport, EJsonReadBuffer } from "../../src/helpers/EJsonTransport.js";
 import { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 import { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { Readable } from "stream";
+import { ReadBuffer } from "@modelcontextprotocol/sdk/shared/stdio.js";
 
 describe("EJsonTransport", () => {
     let transport: StdioServerTransport;
@@ -52,6 +53,20 @@ describe("EJsonTransport", () => {
                 minKey: new MinKey(),
                 timestamp: new Timestamp({ t: 123, i: 456 }),
             },
+        });
+    });
+
+    it("has _readBuffer field of type EJsonReadBuffer", () => {
+        const readBuffer = transport["_readBuffer"];
+        expect(readBuffer).toBeDefined();
+        expect(readBuffer).toBeInstanceOf(EJsonReadBuffer);
+    });
+
+    describe("standard StdioServerTransport", () => {
+        it("has a _readBuffer field", () => {
+            const transport = new StdioServerTransport();
+            expect(transport["_readBuffer"]).toBeDefined();
+            expect(transport["_readBuffer"]).toBeInstanceOf(ReadBuffer);
         });
     });
 });

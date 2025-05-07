@@ -2,7 +2,9 @@ import { JSONRPCMessage, JSONRPCMessageSchema } from "@modelcontextprotocol/sdk/
 import { EJSON } from "bson";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-class EJsonReadBuffer {
+// This is almost a copy of ReadBuffer from @modelcontextprotocol/sdk
+// but it uses EJSON.parse instead of JSON.parse to handle BSON types
+export class EJsonReadBuffer {
     private _buffer?: Buffer;
 
     append(chunk: Buffer): void {
