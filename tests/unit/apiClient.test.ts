@@ -140,7 +140,7 @@ describe("ApiClient", () => {
             mockFetch.mockResolvedValueOnce(new Response(null, { status: 200 }));
 
             // @ts-expect-error accessing private property for testing
-            apiClient.getAccessToken = jest.fn().mockRejectedValue(undefined);
+            apiClient.getAccessToken = jest.fn().mockReturnValueOnce(undefined);
 
             await apiClient.sendEvents(mockEvents);
 
