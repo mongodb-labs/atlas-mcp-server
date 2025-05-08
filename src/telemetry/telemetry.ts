@@ -66,6 +66,9 @@ export class Telemetry {
                     case "timeout":
                         logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
                         break;
+                    case "abort":
+                        // No need to log in the case of aborts
+                        break;
                 }
             },
             abortSignal: this.deviceIdAbortController.signal,
