@@ -135,6 +135,27 @@ describe("ApiClient", () => {
             });
         });
 
+        it("should fall back to unauthenticated endpoint when token is undefined", async () => {
+            const mockFetch = jest.spyOn(global, "fetch");
+            mockFetch.mockResolvedValueOnce(new Response(null, { status: 200 }));
+
+            // @ts-expect-error accessing private property for testing
+            apiClient.getAccessToken = jest.fn().mockRejectedValue(undefined);
+
+            await apiClient.sendEvents(mockEvents);
+
+            const url = new URL("api/private/unauth/telemetry/events", "https://api.test.com");
+            expect(mockFetch).toHaveBeenCalledWith(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    "User-Agent": "test-user-agent",
+                },
+                body: JSON.stringify(mockEvents),
+            });
+        });
+
         it("should fall back to unauthenticated endpoint on 401 error", async () => {
             const mockFetch = jest.spyOn(global, "fetch");
             mockFetch
