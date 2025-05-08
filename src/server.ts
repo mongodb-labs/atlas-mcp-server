@@ -188,7 +188,7 @@ export class Server {
 
         if (this.userConfig.apiClientId && this.userConfig.apiClientSecret) {
             try {
-                await this.session.apiClient.hasValidAccessToken();
+                await this.session.apiClient.validateAccessToken();
             } catch (error) {
                 if (this.userConfig.connectionString === undefined) {
                     console.error("Failed to validate MongoDB Atlas the credentials from the config: ", error);
