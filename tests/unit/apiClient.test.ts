@@ -1,11 +1,6 @@
 import { jest } from "@jest/globals";
 import { ApiClient } from "../../src/common/atlas/apiClient.js";
-import {
-    CommonProperties,
-    TelemetryEvent,
-    CommonStaticProperties,
-    TelemetryResult,
-} from "../../src/telemetry/types.js";
+import { CommonProperties, TelemetryEvent, TelemetryResult } from "../../src/telemetry/types.js";
 
 describe("ApiClient", () => {
     let apiClient: ApiClient;
