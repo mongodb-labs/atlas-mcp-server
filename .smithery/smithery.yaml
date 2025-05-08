@@ -19,6 +19,6 @@ startCommand:
         "dist/index.js"
       ],
       "env": {
-        "MDB_MCP_CONNECTION_STRING": config.connectionString || "mongodb://localhost:27017"
+        "MDB_MCP_CONNECTION_STRING": config.connectionString
       }
     })
