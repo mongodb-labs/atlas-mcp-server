@@ -95,7 +95,7 @@ describe("ApiClient", () => {
     });
 
     describe("sendEvents", () => {
-        it("should send events to authenticated endpoint when token is available", async () => {
+        it("should send events to authenticated endpoint when token is available and valid", async () => {
             const mockFetch = jest.spyOn(global, "fetch");
             mockFetch.mockResolvedValueOnce(new Response(null, { status: 200 }));
 
@@ -114,12 +114,33 @@ describe("ApiClient", () => {
             });
         });
 
-        it("should fall back to unauthenticated endpoint when token is not available", async () => {
+        it("should fall back to unauthenticated endpoint when token is not available via exception", async () => {
             const mockFetch = jest.spyOn(global, "fetch");
             mockFetch.mockResolvedValueOnce(new Response(null, { status: 200 }));
 
             // @ts-expect-error accessing private property for testing
-            apiClient.getAccessToken = jest.fn().mockResolvedValue(undefined);
+            apiClient.getAccessToken = jest.fn().mockRejectedValue(new Error("No access token available"));
+
+            await apiClient.sendEvents(mockEvents);
+
+            const url = new URL("api/private/unauth/telemetry/events", "https://api.test.com");
+            expect(mockFetch).toHaveBeenCalledWith(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    "User-Agent": "test-user-agent",
+                },
+                body: JSON.stringify(mockEvents),
+            });
+        });
+
+        it("should fall back to unauthenticated endpoint when token is undefined", async () => {
+            const mockFetch = jest.spyOn(global, "fetch");
+            mockFetch.mockResolvedValueOnce(new Response(null, { status: 200 }));
+
+            // @ts-expect-error accessing private property for testing
+            apiClient.getAccessToken = jest.fn().mockReturnValueOnce(undefined);
 
             await apiClient.sendEvents(mockEvents);
 

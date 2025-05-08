@@ -61,7 +61,8 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
         // Mock hasValidAccessToken for tests
         if (userConfig.apiClientId && userConfig.apiClientSecret) {
             const mockFn = jest.fn<() => Promise<boolean>>().mockResolvedValue(true);
-            session.apiClient.hasValidAccessToken = mockFn;
+            // @ts-expect-error accessing private property for testing
+            session.apiClient.validateAccessToken = mockFn;
         }
 
         userConfig.telemetry = "disabled";

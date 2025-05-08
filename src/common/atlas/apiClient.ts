@@ -89,9 +89,8 @@ export class ApiClient {
         return !!(this.oauth2Client && this.accessToken);
     }
 
-    public async hasValidAccessToken(): Promise<boolean> {
-        const accessToken = await this.getAccessToken();
-        return accessToken !== undefined;
+    public async validateAccessToken(): Promise<void> {
+        await this.getAccessToken();
     }
 
     public async getIpInfo(): Promise<{
@@ -119,48 +118,57 @@ export class ApiClient {
         }>;
     }
 
-    async sendEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
+    public async sendEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
+        if (!this.options.credentials) {
+            await this.sendUnauthEvents(events);
+            return;
+        }
+
+        try {
+            await this.sendAuthEvents(events);
+        } catch (error) {
+            if (error instanceof ApiClientError) {
+                if (error.response.status !== 401) {
+                    throw error;
+                }
+            }
+
+            // send unauth events if any of the following are true:
+            // 1: the token is not valid (not ApiClientError)
+            // 2: if the api responded with 401 (ApiClientError with status 401)
+            await this.sendUnauthEvents(events);
+        }
+    }
+
+    private async sendAuthEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
+        const accessToken = await this.getAccessToken();
+        if (!accessToken) {
+            throw new Error("No access token available");
+        }
+        const authUrl = new URL("api/private/v1.0/telemetry/events", this.options.baseUrl);
+        const response = await fetch(authUrl, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": this.options.userAgent,
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(events),
+        });
+
+        if (!response.ok) {
+            throw await ApiClientError.fromResponse(response);
+        }
+    }
+
+    private async sendUnauthEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
         const headers: Record<string, string> = {
             Accept: "application/json",
             "Content-Type": "application/json",
             "User-Agent": this.options.userAgent,
         };
 
-        const accessToken = await this.getAccessToken();
-        if (accessToken) {
-            const authUrl = new URL("api/private/v1.0/telemetry/events", this.options.baseUrl);
-            headers["Authorization"] = `Bearer ${accessToken}`;
-
-            try {
-                const response = await fetch(authUrl, {
-                    method: "POST",
-                    headers,
-                    body: JSON.stringify(events),
-                });
-
-                if (response.ok) {
-                    return;
-                }
-
-                // If anything other than 401, throw the error
-                if (response.status !== 401) {
-                    throw await ApiClientError.fromResponse(response);
-                }
-
-                // For 401, fall through to unauthenticated endpoint
-                delete headers["Authorization"];
-            } catch (error) {
-                // If the error is not a 401, rethrow it
-                if (!(error instanceof ApiClientError) || error.response.status !== 401) {
-                    throw error;
-                }
-
-                // For 401 errors, fall through to unauthenticated endpoint
-                delete headers["Authorization"];
-            }
-        }
-
-        // Send to unauthenticated endpoint (either as fallback from 401 or direct if no token)
         const unauthUrl = new URL("api/private/unauth/telemetry/events", this.options.baseUrl);
         const response = await fetch(unauthUrl, {
             method: "POST",
