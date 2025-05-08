@@ -32,6 +32,7 @@ describe("ApiClient", () => {
                 clientId: "test-client-id",
                 clientSecret: "test-client-secret",
             },
+            userAgent: "test-user-agent",
         });
 
         // @ts-expect-error accessing private property for testing
@@ -105,9 +106,9 @@ describe("ApiClient", () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: expect.stringContaining("Bearer"),
+                    Authorization: "Bearer mockToken",
                     Accept: "application/json",
-                    "User-Agent": expect.stringContaining("AtlasMCP"),
+                    "User-Agent": "test-user-agent",
                 },
                 body: JSON.stringify(mockEvents),
             });
@@ -128,7 +129,7 @@ describe("ApiClient", () => {
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
-                    "User-Agent": expect.stringContaining("AtlasMCP"),
+                    "User-Agent": "test-user-agent",
                 },
                 body: JSON.stringify(mockEvents),
             });
@@ -149,7 +150,7 @@ describe("ApiClient", () => {
                 headers: {
                     "Content-Type": "application/json",
                     Accept: "application/json",
-                    "User-Agent": expect.stringContaining("AtlasMCP"),
+                    "User-Agent": "test-user-agent",
                 },
                 body: JSON.stringify(mockEvents),
             });
