@@ -7,6 +7,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
 import { Telemetry } from "../../src/telemetry/telemetry.js";
 import { config } from "../../src/config.js";
+import { jest } from "@jest/globals";
 
 interface ParameterInfo {
     name: string;
@@ -57,6 +58,12 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
             apiClientSecret: userConfig.apiClientSecret,
         });
 
+        // Mock hasValidAccessToken for tests
+        if (userConfig.apiClientId && userConfig.apiClientSecret) {
+            const mockFn = jest.fn<() => Promise<boolean>>().mockResolvedValue(true);
+            session.apiClient.hasValidAccessToken = mockFn;
+        }
+
         userConfig.telemetry = "disabled";
 
         const telemetry = Telemetry.create(session, userConfig);
@@ -70,6 +77,9 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
                 version: "5.2.3",
             }),
         });
+
+        // mock validation
+
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
     });

@@ -89,6 +89,11 @@ export class ApiClient {
         return !!(this.oauth2Client && this.accessToken);
     }
 
+    public async hasValidAccessToken(): Promise<boolean> {
+        const accessToken = await this.getAccessToken();
+        return accessToken !== undefined;
+    }
+
     public async getIpInfo(): Promise<{
         currentIpv4Address: string;
     }> {
@@ -115,7 +120,6 @@ export class ApiClient {
     }
 
     async sendEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
-        let endpoint = "api/private/unauth/telemetry/events";
         const headers: Record<string, string> = {
             Accept: "application/json",
             "Content-Type": "application/json",
@@ -124,12 +128,41 @@ export class ApiClient {
 
         const accessToken = await this.getAccessToken();
         if (accessToken) {
-            endpoint = "api/private/v1.0/telemetry/events";
+            const authUrl = new URL("api/private/v1.0/telemetry/events", this.options.baseUrl);
             headers["Authorization"] = `Bearer ${accessToken}`;
+
+            try {
+                const response = await fetch(authUrl, {
+                    method: "POST",
+                    headers,
+                    body: JSON.stringify(events),
+                });
+
+                if (response.ok) {
+                    return;
+                }
+
+                // If anything other than 401, throw the error
+                if (response.status !== 401) {
+                    throw await ApiClientError.fromResponse(response);
+                }
+
+                // For 401, fall through to unauthenticated endpoint
+                delete headers["Authorization"];
+            } catch (error) {
+                // If the error is not a 401, rethrow it
+                if (!(error instanceof ApiClientError) || error.response.status !== 401) {
+                    throw error;
+                }
+
+                // For 401 errors, fall through to unauthenticated endpoint
+                delete headers["Authorization"];
+            }
         }
 
-        const url = new URL(endpoint, this.options.baseUrl);
-        const response = await fetch(url, {
+        // Send to unauthenticated endpoint (either as fallback from 401 or direct if no token)
+        const unauthUrl = new URL("api/private/unauth/telemetry/events", this.options.baseUrl);
+        const response = await fetch(unauthUrl, {
             method: "POST",
             headers,
             body: JSON.stringify(events),
@@ -237,6 +270,7 @@ export class ApiClient {
             "/api/atlas/v2/groups/{groupId}/clusters/{clusterName}",
             options
         );
+
         if (error) {
             throw ApiClientError.fromError(response, error);
         }

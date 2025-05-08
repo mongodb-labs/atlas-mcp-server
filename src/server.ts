@@ -104,7 +104,7 @@ export class Server {
      * @param command - The server command (e.g., "start", "stop", "register", "deregister")
      * @param additionalProperties - Additional properties specific to the event
      */
-    emitServerEvent(command: ServerCommand, commandDuration: number, error?: Error) {
+    private emitServerEvent(command: ServerCommand, commandDuration: number, error?: Error) {
         const event: ServerEvent = {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
@@ -183,6 +183,23 @@ export class Server {
                     error
                 );
                 throw new Error("Failed to connect to MongoDB instance using the connection string from the config");
+            }
+        }
+
+        if (this.userConfig.apiClientId && this.userConfig.apiClientSecret) {
+            try {
+                await this.session.apiClient.hasValidAccessToken();
+            } catch (error) {
+                if (this.userConfig.connectionString === undefined) {
+                    console.error("Failed to validate MongoDB Atlas the credentials from the config: ", error);
+
+                    throw new Error(
+                        "Failed to connect to MongoDB Atlas instance using the credentials from the config"
+                    );
+                }
+                console.error(
+                    "Failed to validate MongoDB Atlas the credentials from the config, but validated the connection string."
+                );
             }
         }
     }

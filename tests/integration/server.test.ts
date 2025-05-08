@@ -1,3 +1,4 @@
+import { beforeAll } from "@jest/globals";
 import { defaultTestConfig, expectDefined, setupIntegrationTest } from "./helpers.js";
 import { describeWithMongoDB } from "./tools/mongodb/mongodbHelpers.js";
 
