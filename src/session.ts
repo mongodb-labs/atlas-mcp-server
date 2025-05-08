@@ -4,6 +4,8 @@ import { Implementation } from "@modelcontextprotocol/sdk/types.js";
 import logger, { LogId } from "./logger.js";
 import EventEmitter from "events";
 import { ConnectOptions } from "./config.js";
+import { setAppNameParamIfMissing } from "./helpers/connectionOptions.js";
+import { packageInfo } from "./helpers/packageInfo.js";
 
 export interface SessionOptions {
     apiBaseUrl: string;
@@ -98,8 +100,12 @@ export class Session extends EventEmitter<{
     }
 
     async connectToMongoDB(connectionString: string, connectOptions: ConnectOptions): Promise<void> {
-        const provider = await NodeDriverServiceProvider.connect(connectionString, {
-            productDocsLink: "https://docs.mongodb.com/todo-mcp",
+        connectionString = setAppNameParamIfMissing({
+            connectionString,
+            defaultAppName: `${packageInfo.mcpServerName} ${packageInfo.version}`,
+        });
+        this.serviceProvider = await NodeDriverServiceProvider.connect(connectionString, {
+            productDocsLink: "https://github.com/mongodb-js/mongodb-mcp-server/",
             productName: "MongoDB MCP",
             readConcern: {
                 level: connectOptions.readConcern,
@@ -110,7 +116,5 @@ export class Session extends EventEmitter<{
             },
             timeoutMS: connectOptions.timeoutMS,
         });
-
-        this.serviceProvider = provider;
     }
 }

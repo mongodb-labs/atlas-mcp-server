@@ -19,7 +19,7 @@ export class Telemetry {
     private isBufferingEvents: boolean = true;
     /** Resolves when the device ID is retrieved or timeout occurs */
     public deviceIdPromise: Promise<string> | undefined;
-    public resolveDeviceId: ((value: string) => void) | undefined;
+    private deviceIdAbortController = new AbortController();
     private eventCache: EventCache;
     private getRawMachineId: () => Promise<string>;
 
@@ -56,25 +56,28 @@ export class Telemetry {
         if (!this.isTelemetryEnabled()) {
             return;
         }
-        const { value: deviceId, resolve: resolveDeviceId } = getDeviceId({
+        this.deviceIdPromise = getDeviceId({
             getMachineId: () => this.getRawMachineId(),
-            isNodeMachineId: true,
-            onError: (error) => logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error)),
-            onTimeout: (resolve) => {
-                logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
-                resolve("unknown");
+            onError: (reason, error) => {
+                switch (reason) {
+                    case "resolutionError":
+                        logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
+                        break;
+                    case "timeout":
+                        logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
+                        break;
+                }
             },
+            abortSignal: this.deviceIdAbortController.signal,
         });
 
-        this.deviceIdPromise = deviceId;
-        this.resolveDeviceId = resolveDeviceId;
-        this.commonProperties.device_id = await deviceId;
+        this.commonProperties.device_id = await this.deviceIdPromise;
 
         this.isBufferingEvents = false;
     }
 
     public async close(): Promise<void> {
-        this.resolveDeviceId?.("unknown");
+        this.deviceIdAbortController.abort();
         this.isBufferingEvents = false;
         await this.emitEvents(this.eventCache.getEvents());
     }

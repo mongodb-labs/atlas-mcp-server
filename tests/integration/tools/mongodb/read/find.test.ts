@@ -4,6 +4,7 @@ import {
     validateToolMetadata,
     validateThrowsForInvalidArguments,
     getResponseElements,
+    expectDefined,
 } from "../../../helpers.js";
 import { describeWithMongoDB, validateAutoConnectBehavior } from "../mongodbHelpers.js";
 
@@ -170,6 +171,33 @@ describeWithMongoDB("find tool", (integration) => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 expect(JSON.parse(elements[i + 1].text).value).toEqual(i);
             }
+        });
+
+        it("can find objects by $oid", async () => {
+            await integration.connectMcpClient();
+
+            const fooObject = await integration
+                .mongoClient()
+                .db(integration.randomDbName())
+                .collection("foo")
+                .findOne();
+            expectDefined(fooObject);
+
+            const response = await integration.mcpClient().callTool({
+                name: "find",
+                arguments: {
+                    database: integration.randomDbName(),
+                    collection: "foo",
+                    filter: { _id: fooObject._id },
+                },
+            });
+
+            const elements = getResponseElements(response.content);
+            expect(elements).toHaveLength(2);
+            expect(elements[0].text).toEqual('Found 1 documents in the collection "foo":');
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            expect(JSON.parse(elements[1].text).value).toEqual(fooObject.value);
         });
     });
 

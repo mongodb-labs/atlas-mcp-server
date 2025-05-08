@@ -4,7 +4,7 @@ import { AccessToken, ClientCredentials } from "simple-oauth2";
 import { ApiClientError } from "./apiClientError.js";
 import { paths, operations } from "./openapi.js";
 import { CommonProperties, TelemetryEvent } from "../../telemetry/types.js";
-import { packageInfo } from "../../packageInfo.js";
+import { packageInfo } from "../../helpers/packageInfo.js";
 
 const ATLAS_API_VERSION = "2025-03-12";
 
@@ -273,6 +273,46 @@ export class ApiClient {
         if (error) {
             throw ApiClientError.fromError(response, error);
         }
+    }
+
+    async listFlexClusters(options: FetchOptions<operations["listFlexClusters"]>) {
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/flexClusters", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
+    }
+
+    async createFlexCluster(options: FetchOptions<operations["createFlexCluster"]>) {
+        const { data, error, response } = await this.client.POST(
+            "/api/atlas/v2/groups/{groupId}/flexClusters",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
+    }
+
+    async deleteFlexCluster(options: FetchOptions<operations["deleteFlexCluster"]>) {
+        const { error, response } = await this.client.DELETE(
+            "/api/atlas/v2/groups/{groupId}/flexClusters/{name}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+    }
+
+    async getFlexCluster(options: FetchOptions<operations["getFlexCluster"]>) {
+        const { data, error, response } = await this.client.GET(
+            "/api/atlas/v2/groups/{groupId}/flexClusters/{name}",
+            options
+        );
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
     }
 
     async listOrganizations(options?: FetchOptions<operations["listOrganizations"]>) {

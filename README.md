@@ -29,7 +29,7 @@ node -v
 ```
 
 - A MongoDB connection string or Atlas API credentials, **_the Server will not start unless configured_**.
-  - **_Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
+  - **_Service Accounts Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
   - If you have a MongoDB connection string, you can use it directly to connect to your MongoDB instance.
 
 ## Setup
@@ -67,7 +67,7 @@ You can pass your connection string via args, make sure to use a valid username 
 
 #### Option 2: Atlas API credentials args
 
-Use your Atlas API Service Account credentials. More details in the [Atlas API Access](#atlas-api-access) section.
+Use your Atlas API Service Accounts credentials. Must follow all the steps in [Atlas API Access](#atlas-api-access) section.
 
 ```json
 {
@@ -78,18 +78,33 @@ Use your Atlas API Service Account credentials. More details in the [Atlas API A
         "-y",
         "mongodb-mcp-server",
         "--apiClientId",
-        "your-atlas-client-id",
+        "your-atlas-service-accounts-client-id",
         "--apiClientSecret",
-        "your-atlas-client-secret"
+        "your-atlas-service-accounts-client-secret"
       ]
     }
   }
 }
 ```
 
-#### Other options
+### Option 3: Standalone Service using command arguments
 
-Alternatively you can use environment variables in the config file or set them and run the server via npx.
+Start Server using npx command:
+
+```shell
+ npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"
+```
+
+- For a complete list of arguments see [Configuration Options](#configuration-options)
+- To configure your Atlas Service Accounts credentials please refer to [Atlas API Access](#atlas-api-access)
+
+#### Option 4: Standalone Service using environment variables
+
+```shell
+ npx -y mongodb-mcp-server
+```
+
+You can use environment variables in the config file or set them and run the server via npx.
 
 - Connection String via environment variables in the MCP file [example](#connection-string-with-environment-variables)
 - Atlas API credentials via environment variables in the MCP file [example](#atlas-api-credentials-with-environment-variables)
@@ -229,7 +244,7 @@ To learn more about Service Accounts, check the [MongoDB Atlas documentation](ht
    - After creation, you'll be shown the Client ID and Client Secret
    - **Important:** Copy and save the Client Secret immediately as it won't be displayed again
 
-3. **Add Access List Entry (Optional but recommended):**
+3. **Add Access List Entry:**
 
    - Add your IP address to the API access list
 
@@ -243,9 +258,9 @@ To learn more about Service Accounts, check the [MongoDB Atlas documentation](ht
 Set environment variables with the prefix `MDB_MCP_` followed by the option name in uppercase with underscores:
 
 ```shell
-# Set Atlas API credentials
-export MDB_MCP_API_CLIENT_ID="your-atlas-client-id"
-export MDB_MCP_API_CLIENT_SECRET="your-atlas-client-secret"
+# Set Atlas API credentials (via Service Accounts)
+export MDB_MCP_API_CLIENT_ID="your-atlas-service-accounts-client-id"
+export MDB_MCP_API_CLIENT_SECRET="your-atlas-service-accounts-client-secret"
 
 # Set a custom MongoDB connection string
 export MDB_MCP_CONNECTION_STRING="mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
@@ -281,8 +296,8 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
       "command": "npx",
       "args": ["-y", "mongodb-mcp-server"],
       "env": {
-        "MDB_MCP_API_CLIENT_ID": "your-atlas-client-id",
-        "MDB_MCP_API_CLIENT_SECRET": "your-atlas-client-secret"
+        "MDB_MCP_API_CLIENT_ID": "your-atlas-service-accounts-client-id",
+        "MDB_MCP_API_CLIENT_SECRET": "your-atlas-service-accounts-client-secret"
       }
     }
   }
@@ -294,7 +309,7 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
 Pass configuration options as command-line arguments when starting the server:
 
 ```shell
-npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret="your-atlas-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
+npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
 ```
 
 #### MCP configuration file examples
@@ -328,9 +343,9 @@ npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret
         "-y",
         "mongodb-mcp-server",
         "--apiClientId",
-        "your-atlas-client-id",
+        "your-atlas-service-accounts-client-id",
         "--apiClientSecret",
-        "your-atlas-client-secret"
+        "your-atlas-service-accounts-client-secret"
       ]
     }
   }

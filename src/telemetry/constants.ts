@@ -1,4 +1,4 @@
-import { packageInfo } from "../packageInfo.js";
+import { packageInfo } from "../helpers/packageInfo.js";
 import { type CommonStaticProperties } from "./types.js";
 
 /**
