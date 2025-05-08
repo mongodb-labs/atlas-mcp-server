@@ -1,19 +1,9 @@
 {
+  "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "target": "es2020",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "strict": true,
-    "strictNullChecks": true,
-    "esModuleInterop": true,
-    "types": ["node", "jest"],
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "typeRoots": ["./node_modules/@types", "./src/types"]
+    "rootDir": ".",
+    "types": ["jest"],
+    "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["**/*"]
 }

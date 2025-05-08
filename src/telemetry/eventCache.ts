@@ -1,5 +1,5 @@
-import { BaseEvent } from "./types.js";
 import { LRUCache } from "lru-cache";
+import { BaseEvent } from "./types.js";
 
 /**
  * Singleton class for in-memory telemetry event caching
@@ -13,7 +13,7 @@ export class EventCache {
     private cache: LRUCache<number, BaseEvent>;
     private nextId = 0;
 
-    private constructor() {
+    constructor() {
         this.cache = new LRUCache({
             max: EventCache.MAX_EVENTS,
             // Using FIFO eviction strategy for events

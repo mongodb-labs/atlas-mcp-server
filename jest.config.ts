@@ -12,7 +12,7 @@ export default {
             "ts-jest",
             {
                 useESM: true,
-                tsconfig: "tsconfig.jest.json", // Use specific tsconfig file for Jest
+                tsconfig: "tsconfig.jest.json",
             },
         ],
     },

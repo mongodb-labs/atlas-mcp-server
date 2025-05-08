@@ -16,6 +16,7 @@ export interface ServerOptions {
     session: Session;
     userConfig: UserConfig;
     mcpServer: McpServer;
+    telemetry: Telemetry;
 }
 
 export class Server {
@@ -25,10 +26,10 @@ export class Server {
     public readonly userConfig: UserConfig;
     private readonly startTime: number;
 
-    constructor({ session, mcpServer, userConfig }: ServerOptions) {
+    constructor({ session, mcpServer, userConfig, telemetry }: ServerOptions) {
         this.startTime = Date.now();
         this.session = session;
-        this.telemetry = new Telemetry(session);
+        this.telemetry = telemetry;
         this.mcpServer = mcpServer;
         this.userConfig = userConfig;
     }
@@ -93,6 +94,7 @@ export class Server {
     }
 
     async close(): Promise<void> {
+        await this.telemetry.close();
         await this.session.close();
         await this.mcpServer.close();
     }
@@ -107,7 +109,6 @@ export class Server {
             timestamp: new Date().toISOString(),
             source: "mdbmcp",
             properties: {
-                ...this.telemetry.getCommonProperties(),
                 result: "success",
                 duration_ms: commandDuration,
                 component: "server",
@@ -119,7 +120,7 @@ export class Server {
         if (command === "start") {
             event.properties.startup_time_ms = commandDuration;
             event.properties.read_only_mode = this.userConfig.readOnly || false;
-            event.properties.disallowed_tools = this.userConfig.disabledTools || [];
+            event.properties.disabled_tools = this.userConfig.disabledTools || [];
         }
         if (command === "stop") {
             event.properties.runtime_duration_ms = Date.now() - this.startTime;
@@ -151,53 +152,28 @@ export class Server {
                     telemetry: this.userConfig.telemetry,
                     logPath: this.userConfig.logPath,
                     connectionString: this.userConfig.connectionString
-                        ? "set; no explicit connect needed, use switch-connection tool to connect to a different connection if necessary"
-                        : "not set; before using any mongodb tool, you need to call the connect tool with a connection string",
+                        ? "set; access to MongoDB tools are currently available to use"
+                        : "not set; before using any MongoDB tool, you need to configure a connection string, alternatively you can setup MongoDB Atlas access, more info at 'https://github.com/mongodb-js/mongodb-mcp-server'.",
                     connectOptions: this.userConfig.connectOptions,
+                    atlas:
+                        this.userConfig.apiClientId && this.userConfig.apiClientSecret
+                            ? "set; MongoDB Atlas tools are currently available to use"
+                            : "not set; MongoDB Atlas tools are currently unavailable, to have access to MongoDB Atlas tools like creating clusters or connecting to clusters make sure to setup credentials, more info at 'https://github.com/mongodb-js/mongodb-mcp-server'.",
                 };
                 return {
                     contents: [
                         {
                             text: JSON.stringify(result),
+                            mimeType: "application/json",
                             uri: uri.href,
                         },
                     ],
                 };
             }
         );
-        if (this.userConfig.connectionString) {
-            this.mcpServer.resource(
-                "connection-string",
-                "config://connection-string",
-                {
-                    description: "Preconfigured connection string that will be used as a default in the `connect` tool",
-                },
-                (uri) => {
-                    return {
-                        contents: [
-                            {
-                                text: `Preconfigured connection string: ${this.userConfig.connectionString}`,
-                                uri: uri.href,
-                            },
-                        ],
-                    };
-                }
-            );
-        }
     }
 
     private async validateConfig(): Promise<void> {
-        const isAtlasConfigured = this.userConfig.apiClientId && this.userConfig.apiClientSecret;
-        const isMongoDbConfigured = this.userConfig.connectionString;
-        if (!isAtlasConfigured && !isMongoDbConfigured) {
-            console.error(
-                "Either Atlas Client Id or a MongoDB connection string must be configured - you can provide them as environment variables or as startup arguments. \n" +
-                    "Provide the Atlas credentials as `MDB_MCP_API_CLIENT_ID` and `MDB_MCP_API_CLIENT_SECRET` environment variables or as `--apiClientId` and `--apiClientSecret` startup arguments. \n" +
-                    "Provide the MongoDB connection string as `MDB_MCP_CONNECTION_STRING` environment variable or as `--connectionString` startup argument."
-            );
-            throw new Error("Either Atlas Client Id or a MongoDB connection string must be configured");
-        }
-
         if (this.userConfig.connectionString) {
             try {
                 await this.session.connectToMongoDB(this.userConfig.connectionString, this.userConfig.connectOptions);

@@ -2,7 +2,13 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { PaginatedClusterDescription20240805, PaginatedOrgGroupView, Group } from "../../../common/atlas/openapi.js";
+import {
+    PaginatedClusterDescription20240805,
+    PaginatedOrgGroupView,
+    Group,
+    PaginatedFlexClusters20241113,
+} from "../../../common/atlas/openapi.js";
+import { formatCluster, formatFlexCluster } from "../../../common/atlas/cluster.js";
 
 export class ListClustersTool extends AtlasToolBase {
     protected name = "atlas-list-clusters";
@@ -73,15 +79,20 @@ ${rows}`,
         };
     }
 
-    private formatClustersTable(project: Group, clusters?: PaginatedClusterDescription20240805): CallToolResult {
-        if (!clusters?.results?.length) {
+    private formatClustersTable(
+        project: Group,
+        clusters?: PaginatedClusterDescription20240805,
+        flexClusters?: PaginatedFlexClusters20241113
+    ): CallToolResult {
+        // Check if both traditional clusters and flex clusters are absent
+        if (!clusters?.results?.length && !flexClusters?.results?.length) {
             throw new Error("No clusters found.");
         }
-        const rows = clusters.results
-            .map((cluster) => {
-                const connectionString = cluster.connectionStrings?.standard || "N/A";
-                const mongoDBVersion = cluster.mongoDBVersion || "N/A";
-                return `${cluster.name} | ${cluster.stateName} | ${mongoDBVersion} | ${connectionString}`;
+        const formattedClusters = clusters?.results?.map((cluster) => formatCluster(cluster)) || [];
+        const formattedFlexClusters = flexClusters?.results?.map((cluster) => formatFlexCluster(cluster)) || [];
+        const rows = [...formattedClusters, ...formattedFlexClusters]
+            .map((formattedCluster) => {
+                return `${formattedCluster.name || "Unknown"} | ${formattedCluster.instanceType} | ${formattedCluster.instanceSize || "N/A"} | ${formattedCluster.state || "UNKNOWN"} | ${formattedCluster.mongoDBVersion || "N/A"} | ${formattedCluster.connectionString || "N/A"}`;
             })
             .join("\n");
         return {
@@ -92,8 +103,8 @@ ${rows}`,
                 },
                 {
                     type: "text",
-                    text: `Cluster Name | State | MongoDB Version | Connection String
-----------------|----------------|----------------|----------------|----------------
+                    text: `Cluster Name | Cluster Type | Tier | State | MongoDB Version | Connection String
+----------------|----------------|----------------|----------------|----------------|----------------
 ${rows}`,
                 },
             ],

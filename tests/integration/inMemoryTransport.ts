@@ -2,7 +2,7 @@ import { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 import { JSONRPCMessage } from "@modelcontextprotocol/sdk/types.js";
 
 export class InMemoryTransport implements Transport {
-    private outputController: ReadableStreamDefaultController<JSONRPCMessage>;
+    private outputController: ReadableStreamDefaultController<JSONRPCMessage> | undefined;
 
     private startPromise: Promise<unknown>;
 
@@ -35,13 +35,13 @@ export class InMemoryTransport implements Transport {
     }
 
     send(message: JSONRPCMessage): Promise<void> {
-        this.outputController.enqueue(message);
+        this.outputController?.enqueue(message);
         return Promise.resolve();
     }
 
     // eslint-disable-next-line @typescript-eslint/require-await
     async close(): Promise<void> {
-        this.outputController.close();
+        this.outputController?.close();
         this.onclose?.();
     }
     onclose?: (() => void) | undefined;

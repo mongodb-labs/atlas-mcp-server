@@ -2,7 +2,7 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { ClusterDescription20240805 } from "../../../common/atlas/openapi.js";
+import { Cluster, inspectCluster } from "../../../common/atlas/cluster.js";
 
 export class InspectClusterTool extends AtlasToolBase {
     protected name = "atlas-inspect-cluster";
@@ -14,30 +14,19 @@ export class InspectClusterTool extends AtlasToolBase {
     };
 
     protected async execute({ projectId, clusterName }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        const cluster = await this.session.apiClient.getCluster({
-            params: {
-                path: {
-                    groupId: projectId,
-                    clusterName,
-                },
-            },
-        });
+        const cluster = await inspectCluster(this.session.apiClient, projectId, clusterName);
 
         return this.formatOutput(cluster);
     }
 
-    private formatOutput(cluster?: ClusterDescription20240805): CallToolResult {
-        if (!cluster) {
-            throw new Error("Cluster not found");
-        }
-
+    private formatOutput(formattedCluster: Cluster): CallToolResult {
         return {
             content: [
                 {
                     type: "text",
-                    text: `Cluster Name | State | MongoDB Version | Connection String
-----------------|----------------|----------------|----------------|----------------
-${cluster.name} | ${cluster.stateName} | ${cluster.mongoDBVersion || "N/A"} | ${cluster.connectionStrings?.standard || "N/A"}`,
+                    text: `Cluster Name | Cluster Type | Tier | State | MongoDB Version | Connection String
+----------------|----------------|----------------|----------------|----------------|----------------
+${formattedCluster.name || "Unknown"} | ${formattedCluster.instanceType} | ${formattedCluster.instanceSize || "N/A"} | ${formattedCluster.state || "UNKNOWN"} | ${formattedCluster.mongoDBVersion || "N/A"} | ${formattedCluster.connectionString || "N/A"}`,
                 },
             ],
         };

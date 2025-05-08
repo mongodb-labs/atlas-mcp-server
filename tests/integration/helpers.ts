@@ -5,6 +5,8 @@ import { UserConfig } from "../../src/config.js";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
+import { Telemetry } from "../../src/telemetry/telemetry.js";
+import { config } from "../../src/config.js";
 
 interface ParameterInfo {
     name: string;
@@ -19,6 +21,10 @@ export interface IntegrationTest {
     mcpClient: () => Client;
     mcpServer: () => Server;
 }
+export const defaultTestConfig: UserConfig = {
+    ...config,
+    telemetry: "disabled",
+};
 
 export function setupIntegrationTest(getUserConfig: () => UserConfig): IntegrationTest {
     let mcpClient: Client | undefined;
@@ -52,22 +58,20 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
         });
 
         userConfig.telemetry = "disabled";
+
+        const telemetry = Telemetry.create(session, userConfig);
+
         mcpServer = new Server({
             session,
             userConfig,
+            telemetry,
             mcpServer: new McpServer({
                 name: "test-server",
-                version: "1.2.3",
+                version: "5.2.3",
             }),
         });
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
-    });
-
-    beforeEach(() => {
-        if (mcpServer) {
-            mcpServer.userConfig.telemetry = "disabled";
-        }
     });
 
     afterEach(async () => {
@@ -119,7 +123,7 @@ export function getResponseElements(content: unknown | { content: unknown }): { 
         content = (content as { content: unknown }).content;
     }
 
-    expect(Array.isArray(content)).toBe(true);
+    expect(content).toBeArray();
 
     const response = content as { type: string; text: string }[];
     for (const item of response) {
@@ -223,6 +227,7 @@ export function validateThrowsForInvalidArguments(
 }
 
 /** Expects the argument being defined and asserts it */
-export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined> {
+export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined | null> {
     expect(arg).toBeDefined();
+    expect(arg).not.toBeNull();
 }

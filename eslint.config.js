@@ -29,7 +29,7 @@ export default defineConfig([
         files,
         languageOptions: {
             parserOptions: {
-                project: "./tsconfig.lint.json",
+                project: "./tsconfig.json",
                 tsconfigRootDir: import.meta.dirname,
             },
         },
@@ -48,7 +48,8 @@ export default defineConfig([
         "coverage",
         "global.d.ts",
         "eslint.config.js",
-        "jest.config.js",
+        "jest.config.ts",
+        "src/types/*.d.ts",
     ]),
     eslintPluginPrettierRecommended,
 ]);

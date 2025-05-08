@@ -25,9 +25,13 @@ function filterOpenapi(openapi: OpenAPIV3_1.Document): OpenAPIV3_1.Document {
         "createProject",
         "deleteProject",
         "listClusters",
+        "listFlexClusters",
         "getCluster",
+        "getFlexCluster",
         "createCluster",
+        "createFlexCluster",
         "deleteCluster",
+        "deleteFlexCluster",
         "listClustersForAllProjects",
         "createDatabaseUser",
         "deleteDatabaseUser",
@@ -43,11 +47,14 @@ function filterOpenapi(openapi: OpenAPIV3_1.Document): OpenAPIV3_1.Document {
     for (const path in openapi.paths) {
         const filteredMethods = {} as OpenAPIV3_1.PathItemObject;
         for (const method in openapi.paths[path]) {
+            // @ts-expect-error This is a workaround for the OpenAPI types
             if (allowedOperations.includes((openapi.paths[path][method] as { operationId: string }).operationId)) {
+                // @ts-expect-error This is a workaround for the OpenAPI types
                 filteredMethods[method] = openapi.paths[path][method] as OpenAPIV3_1.OperationObject;
             }
         }
         if (Object.keys(filteredMethods).length > 0) {
+            // @ts-expect-error This is a workaround for the OpenAPI types
             filteredPaths[path] = filteredMethods;
         }
     }

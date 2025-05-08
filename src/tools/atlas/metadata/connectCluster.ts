@@ -2,19 +2,15 @@ import { z } from "zod";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
-import { randomBytes } from "crypto";
-import { promisify } from "util";
+import { generateSecurePassword } from "../../../common/atlas/generatePassword.js";
+import logger, { LogId } from "../../../logger.js";
+import { inspectCluster } from "../../../common/atlas/cluster.js";
 
 const EXPIRY_MS = 1000 * 60 * 60 * 12; // 12 hours
 
-const randomBytesAsync = promisify(randomBytes);
-
-async function generateSecurePassword(): Promise<string> {
-    const buf = await randomBytesAsync(16);
-    const pass = buf.toString("base64url");
-    return pass;
+function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
 export class ConnectClusterTool extends AtlasToolBase {
     protected name = "atlas-connect-cluster";
     protected description = "Connect to MongoDB Atlas cluster";
@@ -27,22 +23,9 @@ export class ConnectClusterTool extends AtlasToolBase {
     protected async execute({ projectId, clusterName }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         await this.session.disconnect();
 
-        const cluster = await this.session.apiClient.getCluster({
-            params: {
-                path: {
-                    groupId: projectId,
-                    clusterName,
-                },
-            },
-        });
+        const cluster = await inspectCluster(this.session.apiClient, projectId, clusterName);
 
-        if (!cluster) {
-            throw new Error("Cluster not found");
-        }
-
-        const baseConnectionString = cluster.connectionStrings?.standardSrv || cluster.connectionStrings?.standard;
-
-        if (!baseConnectionString) {
+        if (!cluster.connectionString) {
             throw new Error("Connection string not available");
         }
 
@@ -94,13 +77,37 @@ export class ConnectClusterTool extends AtlasToolBase {
             expiryDate,
         };
 
-        const cn = new URL(baseConnectionString);
+        const cn = new URL(cluster.connectionString);
         cn.username = username;
         cn.password = password;
         cn.searchParams.set("authSource", "admin");
         const connectionString = cn.toString();
 
-        await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+        let lastError: Error | undefined = undefined;
+
+        for (let i = 0; i < 20; i++) {
+            try {
+                await this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+                lastError = undefined;
+                break;
+            } catch (err: unknown) {
+                const error = err instanceof Error ? err : new Error(String(err));
+
+                lastError = error;
+
+                logger.debug(
+                    LogId.atlasConnectFailure,
+                    "atlas-connect-cluster",
+                    `error connecting to cluster: ${error.message}`
+                );
+
+                await sleep(500); // wait for 500ms before retrying
+            }
+        }
+
+        if (lastError) {
+            throw lastError;
+        }
 
         return {
             content: [

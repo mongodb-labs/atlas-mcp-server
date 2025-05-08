@@ -1,96 +1,113 @@
 # MongoDB MCP Server
 
-A Model Context Protocol server for interacting with MongoDB Atlas. This project implements a Model Context Protocol (MCP) server enabling AI assistants to interact with MongoDB Atlas resources through natural language.
-
-> [!CAUTION]
-> Do not use this in production. This is a work in progress and is not intended for production use. It is meant for demonstration purposes only.
+A Model Context Protocol server for interacting with MongoDB Databases and MongoDB Atlas.
 
 ## 📚 Table of Contents
 
 - [🚀 Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-    - [VSCode](#vscode)
-    - [Claude Desktop](#claude)
+  - [Setup](#setup)
+    - [Quick Start](#quick-start)
 - [🛠️ Supported Tools](#supported-tools)
-  - [Tool List](#tool-list)
+  - [MongoDB Atlas Tools](#mongodb-atlas-tools)
+  - [MongoDB Database Tools](#mongodb-database-tools)
 - [⚙️ Configuration](#configuration)
   - [Configuration Options](#configuration-options)
   - [Atlas API Access](#atlas-api-access)
   - [Configuration Methods](#configuration-methods)
-- [👩‍💻 Client Integration](#client-integration)
-  - [VSCode](#vscode)
-  - [Claude](#claude)
+    - [Environment Variables](#environment-variables)
+    - [Command-Line Arguments](#command-line-arguments)
+    - [MCP Client Configuration](#mcp-configuration-file-examples)
 - [🤝 Contributing](#contributing)
 
 ## Prerequisites
 
 - Node.js (v20 or later)
-- MongoDB Atlas account
 
-## Installation
-
-### VSCode
-
-Prerequisites:
-
-- Node.js v20.x
-
-Step 1: Add the mcp server to VSCode configuration
-
-- Press `Cmd + Shift + P` and type `MCP: Add MCP Server` and select it.
-- Select command (Stdio).
-- Input command `npx -y mongodb-mcp-server`.
-- Choose between user / workspace
-- Add arguments to the file
-
-Note: the file should look like:
-
-```
-{
-    "servers": {
-        "MongoDB": {
-            "type": "stdio",
-            "command": "npx",
-            "args": [
-                "-y",
-                "mongodb-mcp-server"
-            ]
-        }
-    }
-}
+```shell
+node -v
 ```
 
-Notes: You can configure the server with atlas access, make sure to follow configuration section for more details.
+- A MongoDB connection string or Atlas API credentials, **_the Server will not start unless configured_**.
+  - **_Service Accounts Atlas API credentials_** are required to use the Atlas tools. You can create a service account in MongoDB Atlas and use its credentials for authentication. See [Atlas API Access](#atlas-api-access) for more details.
+  - If you have a MongoDB connection string, you can use it directly to connect to your MongoDB instance.
 
-Step 2: Try talking to github copilot
+## Setup
 
-- Can you connect to my mongodb instance?
+### Quick Start
 
-### Claude Desktop
+Most MCP clients require a configuration file to be created or modified to add the MCP server.
 
-Step 1: Install claude and login
+Note: The configuration file syntax can be different across clients. Please refer to the following links for the latest expected syntax:
 
-Note: follow instructions at https://claude.ai/download
+- **Windsurf**:https://docs.windsurf.com/windsurf/mcp
+- **VSCode**: https://code.visualstudio.com/docs/copilot/chat/mcp-servers
+- **Claude Desktop**: https://modelcontextprotocol.io/quickstart/user
+- **Cursor**: https://docs.cursor.com/context/model-context-protocol
 
-Step 2: Launch Claude Settings -> Developer -> Edit Config
+#### Option 1: Connection String args
 
-Paste the mcp server configuration into the file
+You can pass your connection string via args, make sure to use a valid username and password.
 
 ```json
 {
   "mcpServers": {
     "MongoDB": {
       "command": "npx",
-      "args": ["-y", "mongodb-mcp-server"]
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+      ]
     }
   }
 }
 ```
 
-Step 3: Close and Relaunch Claude Desktop and click on the hammer icon, the MongoDB MCP server should be detected.
+#### Option 2: Atlas API credentials args
 
-You may experiment asking `Can you connect to my mongodb instance?`.
+Use your Atlas API Service Accounts credentials. Must follow all the steps in [Atlas API Access](#atlas-api-access) section.
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--apiClientId",
+        "your-atlas-service-accounts-client-id",
+        "--apiClientSecret",
+        "your-atlas-service-accounts-client-secret"
+      ]
+    }
+  }
+}
+```
+
+### Option 3: Standalone Service using command arguments
+
+Start Server using npx command:
+
+```shell
+ npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"
+```
+
+- For a complete list of arguments see [Configuration Options](#configuration-options)
+- To configure your Atlas Service Accounts credentials please refer to [Atlas API Access](#atlas-api-access)
+
+#### Option 4: Standalone Service using environment variables
+
+```shell
+ npx -y mongodb-mcp-server
+```
+
+You can use environment variables in the config file or set them and run the server via npx.
+
+- Connection String via environment variables in the MCP file [example](#connection-string-with-environment-variables)
+- Atlas API credentials via environment variables in the MCP file [example](#atlas-api-credentials-with-environment-variables)
 
 ## 🛠️ Supported Tools
 
@@ -150,10 +167,11 @@ The MongoDB MCP Server can be configured using multiple methods, with the follow
 | `apiClientSecret`  | Atlas API client secret for authentication                                                                            |
 | `connectionString` | MongoDB connection string for direct database connections (optional users may choose to inform it on every tool call) |
 | `logPath`          | Folder to store logs                                                                                                  |
-| `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled.                            |
+| `disabledTools`    | An array of tool names, operation types, and/or categories of tools that will be disabled                             |
 | `readOnly`         | When set to true, only allows read and metadata operation types, disabling create/update/delete operations            |
+| `telemetry`        | When set to disabled, disables telemetry collection                                                                   |
 
-#### `logPath`
+#### Log Path
 
 Default log location is as follows:
 
@@ -196,6 +214,16 @@ You can enable read-only mode using:
 
 When read-only mode is active, you'll see a message in the server logs indicating which tools were prevented from registering due to this restriction.
 
+#### Telemetry
+
+The `telemetry` configuration option allows you to disable telemetry collection. When enabled, the MCP server will collect usage data and send it to MongoDB.
+
+You can disable telemetry using:
+
+- **Environment variable**: `export MDB_MCP_TELEMETRY=disabled`
+- **Command-line argument**: `--telemetry disabled`
+- **DO_NOT_TRACK environment variable**: `export DO_NOT_TRACK=1`
+
 ### Atlas API Access
 
 To use the Atlas API tools, you'll need to create a service account in MongoDB Atlas:
@@ -209,12 +237,14 @@ To use the Atlas API tools, you'll need to create a service account in MongoDB A
    - Select appropriate permissions (for full access, use Organization Owner)
    - Click "Create"
 
+To learn more about Service Accounts, check the [MongoDB Atlas documentation](https://www.mongodb.com/docs/atlas/api/service-accounts-overview/).
+
 2. **Save Client Credentials:**
 
    - After creation, you'll be shown the Client ID and Client Secret
    - **Important:** Copy and save the Client Secret immediately as it won't be displayed again
 
-3. **Add Access List Entry (Optional but recommended):**
+3. **Add Access List Entry:**
 
    - Add your IP address to the API access list
 
@@ -228,9 +258,9 @@ To use the Atlas API tools, you'll need to create a service account in MongoDB A
 Set environment variables with the prefix `MDB_MCP_` followed by the option name in uppercase with underscores:
 
 ```shell
-# Set Atlas API credentials
-export MDB_MCP_API_CLIENT_ID="your-atlas-client-id"
-export MDB_MCP_API_CLIENT_SECRET="your-atlas-client-secret"
+# Set Atlas API credentials (via Service Accounts)
+export MDB_MCP_API_CLIENT_ID="your-atlas-service-accounts-client-id"
+export MDB_MCP_API_CLIENT_SECRET="your-atlas-service-accounts-client-secret"
 
 # Set a custom MongoDB connection string
 export MDB_MCP_CONNECTION_STRING="mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
@@ -239,12 +269,87 @@ export MDB_MCP_LOG_PATH="/path/to/logs"
 
 ```
 
+#### MCP configuration file examples
+
+##### Connection String with environment variables
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": ["-y", "mongodb-mcp-server"],
+      "env": {
+        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+      }
+    }
+  }
+}
+```
+
+##### Atlas API credentials with environment variables
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": ["-y", "mongodb-mcp-server"],
+      "env": {
+        "MDB_MCP_API_CLIENT_ID": "your-atlas-service-accounts-client-id",
+        "MDB_MCP_API_CLIENT_SECRET": "your-atlas-service-accounts-client-secret"
+      }
+    }
+  }
+}
+```
+
 #### Command-Line Arguments
 
 Pass configuration options as command-line arguments when starting the server:
 
 ```shell
-npx -y mongodb-mcp-server --apiClientId="your-atlas-client-id" --apiClientSecret="your-atlas-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
+npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret" --connectionString="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" --logPath=/path/to/logs
+```
+
+#### MCP configuration file examples
+
+##### Connection String with command-line arguments
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+      ]
+    }
+  }
+}
+```
+
+##### Atlas API credentials with command-line arguments
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--apiClientId",
+        "your-atlas-service-accounts-client-id",
+        "--apiClientSecret",
+        "your-atlas-service-accounts-client-secret"
+      ]
+    }
+  }
+}
 ```
 
 ## 🤝 Contributing

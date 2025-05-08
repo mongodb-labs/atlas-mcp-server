@@ -1,5 +1,4 @@
-// TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when the connect tool is reenabled
-// import { ConnectTool } from "./metadata/connect.js";
+import { ConnectTool } from "./metadata/connect.js";
 import { ListCollectionsTool } from "./metadata/listCollections.js";
 import { CollectionIndexesTool } from "./read/collectionIndexes.js";
 import { ListDatabasesTool } from "./metadata/listDatabases.js";
@@ -21,8 +20,7 @@ import { CreateCollectionTool } from "./create/createCollection.js";
 import { LogsTool } from "./metadata/logs.js";
 
 export const MongoDbTools = [
-    // TODO: https://github.com/mongodb-js/mongodb-mcp-server/issues/141 - reenable when the connect tool is reenabled
-    // ConnectTool,
+    ConnectTool,
     ListCollectionsTool,
     ListDatabasesTool,
     CollectionIndexesTool,

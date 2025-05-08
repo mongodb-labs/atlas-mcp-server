@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ToolArgs, ToolBase, ToolCategory } from "../tool.js";
+import { ToolArgs, ToolBase, ToolCategory, TelemetryToolMetadata } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
@@ -72,5 +72,19 @@ export abstract class MongoDBToolBase extends ToolBase {
 
     protected connectToMongoDB(connectionString: string): Promise<void> {
         return this.session.connectToMongoDB(connectionString, this.config.connectOptions);
+    }
+
+    protected resolveTelemetryMetadata(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        args: ToolArgs<typeof this.argsShape>
+    ): TelemetryToolMetadata {
+        const metadata: TelemetryToolMetadata = {};
+
+        // Add projectId to the metadata if running a MongoDB operation to an Atlas cluster
+        if (this.session.connectedAtlasCluster?.projectId) {
+            metadata.projectId = this.session.connectedAtlasCluster.projectId;
+        }
+
+        return metadata;
     }
 }
