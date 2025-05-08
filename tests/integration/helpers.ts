@@ -78,8 +78,6 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
             }),
         });
 
-        // mock validation
-
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
     });
