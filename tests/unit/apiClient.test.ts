@@ -34,7 +34,7 @@ describe("ApiClient", () => {
             },
         });
 
-        // @ts-ignore - accessing private property for testing
+        // @ts-expect-error accessing private property for testing
         apiClient.getAccessToken = jest.fn().mockResolvedValue("mockToken");
     });
 
@@ -65,7 +65,7 @@ describe("ApiClient", () => {
                 response: new Response(),
             }));
 
-            // @ts-ignore - accessing private property for testing
+            // @ts-expect-error accessing private property for testing
             apiClient.client.GET = mockGet;
 
             const result = await apiClient.listProjects();
@@ -86,7 +86,7 @@ describe("ApiClient", () => {
                 response: new Response(),
             }));
 
-            // @ts-ignore - accessing private property for testing
+            // @ts-expect-error accessing private property for testing
             apiClient.client.GET = mockGet;
 
             await expect(apiClient.listProjects()).rejects.toThrow();
@@ -117,7 +117,7 @@ describe("ApiClient", () => {
             const mockFetch = jest.spyOn(global, "fetch");
             mockFetch.mockResolvedValueOnce(new Response(null, { status: 200 }));
 
-            // @ts-ignore - accessing private property for testing
+            // @ts-expect-error accessing private property for testing
             apiClient.getAccessToken = jest.fn().mockResolvedValue(undefined);
 
             await apiClient.sendEvents(mockEvents);
@@ -162,7 +162,7 @@ describe("ApiClient", () => {
                 .mockResolvedValueOnce(new Response(null, { status: 500 }));
 
             const mockToken = "test-token";
-            // @ts-ignore - accessing private property for testing
+            // @ts-expect-error accessing private property for testing
             apiClient.getAccessToken = jest.fn().mockResolvedValue(mockToken);
 
             await expect(apiClient.sendEvents(mockEvents)).rejects.toThrow();
