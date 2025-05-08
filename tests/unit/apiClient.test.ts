@@ -59,7 +59,7 @@ describe("ApiClient", () => {
                 totalCount: 2,
             };
 
-            const mockGet = jest.fn().mockImplementation(async () => ({
+            const mockGet = jest.fn().mockImplementation(() => ({
                 data: mockProjects,
                 error: null,
                 response: new Response(),
@@ -80,7 +80,7 @@ describe("ApiClient", () => {
                 detail: "Something went wrong",
             };
 
-            const mockGet = jest.fn().mockImplementation(async () => ({
+            const mockGet = jest.fn().mockImplementation(() => ({
                 data: null,
                 error: mockError,
                 response: new Response(),
