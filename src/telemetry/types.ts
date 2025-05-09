@@ -2,7 +2,7 @@
  * Result type constants for telemetry events
  */
 export type TelemetryResult = "success" | "failure";
-export type ServerCommand = "start" | "stop";
+export type ServerCommand = "start" | "stop" | "connect";
 export type TelemetryBoolSet = "true" | "false";
 
 /**

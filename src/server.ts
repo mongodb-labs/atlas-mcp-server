@@ -35,7 +35,18 @@ export class Server {
     }
 
     async connect(transport: Transport): Promise<void> {
+        try {
+            await this.setupAndConnect(transport);
+        } catch (error) {
+            this.emitServerEvent("stop", Date.now() - this.startTime, error as Error);
+            throw error;
+        }
+    }
+
+    private async setupAndConnect(transport: Transport): Promise<void> {
         this.mcpServer.server.registerCapabilities({ logging: {} });
+        await this.setServerCallbacks(transport);
+        this.emitServerEvent("start", Date.now() - this.startTime);
 
         this.registerTools();
         this.registerResources();
@@ -64,9 +75,16 @@ export class Server {
         });
 
         await initializeLogger(this.mcpServer, this.userConfig.logPath);
+        await this.validateConfig();
 
         await this.mcpServer.connect(transport);
+    }
 
+    /**
+     * Sets up the MCP serve instance by registering capabilities and setting up event listeners.
+     * @param transport - The transport to use for connecting to the server.
+     */
+    async setServerCallbacks(transport: Transport) {
         this.mcpServer.server.oninitialized = () => {
             this.session.setAgentRunner(this.mcpServer.server.getClientVersion());
             this.session.sessionId = new ObjectId().toString();
@@ -74,10 +92,10 @@ export class Server {
             logger.info(
                 LogId.serverInitialized,
                 "server",
-                `Server started with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
+                `Server connected with transport ${transport.constructor.name} and agent runner ${this.session.agentRunner?.name}`
             );
 
-            this.emitServerEvent("start", Date.now() - this.startTime);
+            this.emitServerEvent("connect", Date.now() - this.startTime);
         };
 
         this.mcpServer.server.onclose = () => {
@@ -88,9 +106,7 @@ export class Server {
         this.mcpServer.server.onerror = (error: Error) => {
             const closeTime = Date.now();
             this.emitServerEvent("stop", Date.now() - closeTime, error);
-        };
-
-        await this.validateConfig();
+        };            
     }
 
     async close(): Promise<void> {
@@ -101,7 +117,7 @@ export class Server {
 
     /**
      * Emits a server event
-     * @param command - The server command (e.g., "start", "stop", "register", "deregister")
+     * @param command - The server command (e.g., "start", "stop", "connect")
      * @param additionalProperties - Additional properties specific to the event
      */
     private emitServerEvent(command: ServerCommand, commandDuration: number, error?: Error) {
@@ -117,7 +133,7 @@ export class Server {
             },
         };
 
-        if (command === "start") {
+        if (command === "start" || command === "connect") {
             event.properties.startup_time_ms = commandDuration;
             event.properties.read_only_mode = this.userConfig.readOnly || false;
             event.properties.disabled_tools = this.userConfig.disabledTools || [];
