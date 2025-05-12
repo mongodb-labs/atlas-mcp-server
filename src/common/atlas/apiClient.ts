@@ -365,5 +365,13 @@ export class ApiClient {
         return data;
     }
 
+    async listAlerts(options: FetchOptions<operations["listAlerts"]>) {
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/alerts", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
+    }
+
     // DO NOT EDIT. This is auto-generated code.
 }
