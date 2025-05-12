@@ -3,20 +3,6 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { AtlasToolBase } from "../atlasTool.js";
 import { ToolArgs, OperationType } from "../../tool.js";
 
-interface Alert {
-    id: string;
-    status: string;
-    created: string;
-    updated: string;
-    eventTypeName: string;
-    summary: string;
-}
-
-interface AlertResponse {
-    results: Alert[];
-    totalCount: number;
-}
-
 export class ListAlertsTool extends AtlasToolBase {
     protected name = "atlas-list-alerts";
     protected description = "List MongoDB Atlas alerts";
@@ -26,13 +12,13 @@ export class ListAlertsTool extends AtlasToolBase {
     };
 
     protected async execute({ projectId }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
-        const data = (await this.session.apiClient.listAlerts({
+        const data = await this.session.apiClient.listAlerts({
             params: {
                 path: {
                     groupId: projectId,
                 },
             },
-        })) as AlertResponse;
+        });
 
         if (!data?.results?.length) {
             throw new Error("No alerts found in your MongoDB Atlas project.");
@@ -40,14 +26,14 @@ export class ListAlertsTool extends AtlasToolBase {
 
         // Format alerts as a table
         const output =
-            `Alert ID | Status | Created | Updated | Type | Summary
+            `Alert ID | Status | Created | Updated | Type | Comment
 ----------|---------|----------|----------|------|--------
 ` +
             data.results
                 .map((alert) => {
                     const created = alert.created ? new Date(alert.created).toLocaleString() : "N/A";
                     const updated = alert.updated ? new Date(alert.updated).toLocaleString() : "N/A";
-                    return `${alert.id} | ${alert.status} | ${created} | ${updated} | ${alert.eventTypeName} | ${alert.summary}`;
+                    return `${alert.id} | ${alert.status} | ${created} | ${updated} | ${alert.eventTypeName} | ${alert.acknowledgementComment}`;
                 })
                 .join("\n");
 

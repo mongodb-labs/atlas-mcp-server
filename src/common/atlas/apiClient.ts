@@ -239,6 +239,14 @@ export class ApiClient {
         }
     }
 
+    async listAlerts(options: FetchOptions<operations["listAlerts"]>) {
+        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/alerts", options);
+        if (error) {
+            throw ApiClientError.fromError(response, error);
+        }
+        return data;
+    }
+
     async listClusters(options: FetchOptions<operations["listClusters"]>) {
         const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/clusters", options);
         if (error) {
@@ -270,7 +278,6 @@ export class ApiClient {
             "/api/atlas/v2/groups/{groupId}/clusters/{clusterName}",
             options
         );
-
         if (error) {
             throw ApiClientError.fromError(response, error);
         }
@@ -359,14 +366,6 @@ export class ApiClient {
 
     async listOrganizationProjects(options: FetchOptions<operations["listOrganizationProjects"]>) {
         const { data, error, response } = await this.client.GET("/api/atlas/v2/orgs/{orgId}/groups", options);
-        if (error) {
-            throw ApiClientError.fromError(response, error);
-        }
-        return data;
-    }
-
-    async listAlerts(options: FetchOptions<operations["listAlerts"]>) {
-        const { data, error, response } = await this.client.GET("/api/atlas/v2/groups/{groupId}/alerts", options);
         if (error) {
             throw ApiClientError.fromError(response, error);
         }
