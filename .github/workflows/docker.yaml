@@ -1,5 +1,4 @@
-# See RELEASING.md#DockerImage for more details about the steps in this workflow.
-name: Daily Release AtlasCLI Docker Image
+name: Daily Release Docker Image
 on:
   schedule:
     - cron: "0 1 * * *" # Every day at 1:00 AM
@@ -46,5 +45,5 @@ jobs:
     #     uses: imjohnbo/issue-bot@572eed14422c4d6ca37e870f97e7da209422f5bd
     #     with:
     #       labels: failed-release
-    #       title: Release Failure for Atlas CLI Docker Image ${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+    #       title: Release Failure for Docker Image ${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
     #       body: See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
