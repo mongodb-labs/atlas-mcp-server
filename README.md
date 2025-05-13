@@ -3,7 +3,8 @@
 A Model Context Protocol server for interacting with MongoDB Databases and MongoDB Atlas.
 
 This is a branch cut for the search team to collaborate on MCP server changes made during
-Skunkworks 2025. Please make your PRs against the `search-skunkworks-2025` branch.
+Skunkworks 2025. Please make your PRs against the `search-skunkworks-2025` branch instead of
+the main branch during skunkworks.
 
 ## 📚 Table of Contents
 
