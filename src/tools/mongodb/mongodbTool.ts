@@ -10,6 +10,12 @@ export const DbOperationArgs = {
     collection: z.string().describe("Collection name"),
 };
 
+export const SearchIndexOperationArgs = {
+    database: z.string().describe("Database name"),
+    collection: z.string().describe("Collection name"),
+    searchIndexName: z.string().describe("Search Index or Vector Search Index name"), 
+};
+
 export abstract class MongoDBToolBase extends ToolBase {
     protected category: ToolCategory = "mongodb";
 
