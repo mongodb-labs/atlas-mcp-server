@@ -4,13 +4,16 @@ on:
     - cron: "0 1 * * *" # Every day at 1:00 AM
   workflow_dispatch: # Run the action manually
   pull_request: # TODO: delete this before merging
+permissions:
+  contents: read
+  issues: write
 jobs:
   build_images:
-    name: Build and publish docker image to staging registry
+    name: Build and publish docker image
     runs-on: ubuntu-latest
     env:
       IMAGE_REPOSITORY: docker.io/mongodb/apix_test
-      TAG_PREFIX: mongodb-mcp-server
+      TAG_PREFIX: mongodb-mcp-server-
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
         with:
@@ -47,3 +50,4 @@ jobs:
     #       labels: failed-release
     #       title: Release Failure for Docker Image ${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
     #       body: See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    # TODO: enable before merging
