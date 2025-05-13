@@ -1,10 +1,10 @@
 import { describeWithMongoDB } from "../mongodbHelpers.js";
 
 import {
-  databaseCollectionParameters,
-  databaseCollectionInvalidArgs,
-  validateThrowsForInvalidArguments,
-  validateToolMetadata,
+    databaseCollectionParameters,
+    databaseCollectionInvalidArgs,
+    validateThrowsForInvalidArguments,
+    validateToolMetadata,
 } from "../../../helpers.js";
 
 describeWithMongoDB("collectionSearchIndexes tool", (integration) => {
