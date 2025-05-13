@@ -30,8 +30,8 @@ export class CollectionSearchIndexesTool extends MongoDBToolBase {
       content: [
         {
           text: indexName
-              ? `Found ${indexes.length} search indexes  in the collection "${collection}" with name "${indexName}":`
-              : `Found ${indexes.length} search indexes  in the collection "${collection}"`,
+              ? `Found ${indexes.length} search indexes in the collection "${collection}" with name "${indexName}":`
+              : `Found ${indexes.length} search indexes in the collection "${collection}"`,
           type: "text",
         },
         ...(indexes.map((indexDefinition) => {
