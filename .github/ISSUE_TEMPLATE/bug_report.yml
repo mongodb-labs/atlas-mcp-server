@@ -7,6 +7,14 @@ body:
   - type: markdown
     attributes:
       value: "Please fill out the following details to help us address the issue."
+  - type: textarea
+    id: version
+    attributes:
+      label: "Version"
+      description: "Please provide the version of the MCP Server where the bug occurred. (e.g., 0.1.0, main branch sha, etc.)"
+      placeholder: "e.g., 0.1.0"
+    validations:
+      required: true
   - type: checkboxes
     id: app
     attributes:

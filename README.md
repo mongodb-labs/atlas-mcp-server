@@ -87,9 +87,24 @@ Use your Atlas API Service Accounts credentials. Must follow all the steps in [A
 }
 ```
 
-#### Other options
+### Option 3: Standalone Service using command arguments
 
-Alternatively you can use environment variables in the config file or set them and run the server via npx.
+Start Server using npx command:
+
+```shell
+ npx -y mongodb-mcp-server --apiClientId="your-atlas-service-accounts-client-id" --apiClientSecret="your-atlas-service-accounts-client-secret"
+```
+
+- For a complete list of arguments see [Configuration Options](#configuration-options)
+- To configure your Atlas Service Accounts credentials please refer to [Atlas API Access](#atlas-api-access)
+
+#### Option 4: Standalone Service using environment variables
+
+```shell
+ npx -y mongodb-mcp-server
+```
+
+You can use environment variables in the config file or set them and run the server via npx.
 
 - Connection String via environment variables in the MCP file [example](#connection-string-with-environment-variables)
 - Atlas API credentials via environment variables in the MCP file [example](#atlas-api-credentials-with-environment-variables)

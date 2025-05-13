@@ -7,6 +7,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { Session } from "../../src/session.js";
 import { Telemetry } from "../../src/telemetry/telemetry.js";
 import { config } from "../../src/config.js";
+import { jest } from "@jest/globals";
 
 interface ParameterInfo {
     name: string;
@@ -57,6 +58,13 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
             apiClientSecret: userConfig.apiClientSecret,
         });
 
+        // Mock hasValidAccessToken for tests
+        if (userConfig.apiClientId && userConfig.apiClientSecret) {
+            const mockFn = jest.fn<() => Promise<boolean>>().mockResolvedValue(true);
+            // @ts-expect-error accessing private property for testing
+            session.apiClient.validateAccessToken = mockFn;
+        }
+
         userConfig.telemetry = "disabled";
 
         const telemetry = Telemetry.create(session, userConfig);
@@ -70,6 +78,7 @@ export function setupIntegrationTest(getUserConfig: () => UserConfig): Integrati
                 version: "5.2.3",
             }),
         });
+
         await mcpServer.connect(serverTransport);
         await mcpClient.connect(clientTransport);
     });
@@ -227,6 +236,7 @@ export function validateThrowsForInvalidArguments(
 }
 
 /** Expects the argument being defined and asserts it */
-export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined> {
+export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined | null> {
     expect(arg).toBeDefined();
+    expect(arg).not.toBeNull();
 }

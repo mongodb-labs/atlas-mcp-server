@@ -89,6 +89,10 @@ export class ApiClient {
         return !!(this.oauth2Client && this.accessToken);
     }
 
+    public async validateAccessToken(): Promise<void> {
+        await this.getAccessToken();
+    }
+
     public async getIpInfo(): Promise<{
         currentIpv4Address: string;
     }> {
@@ -114,22 +118,59 @@ export class ApiClient {
         }>;
     }
 
-    async sendEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
-        let endpoint = "api/private/unauth/telemetry/events";
+    public async sendEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
+        if (!this.options.credentials) {
+            await this.sendUnauthEvents(events);
+            return;
+        }
+
+        try {
+            await this.sendAuthEvents(events);
+        } catch (error) {
+            if (error instanceof ApiClientError) {
+                if (error.response.status !== 401) {
+                    throw error;
+                }
+            }
+
+            // send unauth events if any of the following are true:
+            // 1: the token is not valid (not ApiClientError)
+            // 2: if the api responded with 401 (ApiClientError with status 401)
+            await this.sendUnauthEvents(events);
+        }
+    }
+
+    private async sendAuthEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
+        const accessToken = await this.getAccessToken();
+        if (!accessToken) {
+            throw new Error("No access token available");
+        }
+        const authUrl = new URL("api/private/v1.0/telemetry/events", this.options.baseUrl);
+        const response = await fetch(authUrl, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "User-Agent": this.options.userAgent,
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify(events),
+        });
+
+        if (!response.ok) {
+            throw await ApiClientError.fromResponse(response);
+        }
+    }
+
+    private async sendUnauthEvents(events: TelemetryEvent<CommonProperties>[]): Promise<void> {
         const headers: Record<string, string> = {
             Accept: "application/json",
             "Content-Type": "application/json",
             "User-Agent": this.options.userAgent,
         };
 
-        const accessToken = await this.getAccessToken();
-        if (accessToken) {
-            endpoint = "api/private/v1.0/telemetry/events";
-            headers["Authorization"] = `Bearer ${accessToken}`;
-        }
-
-        const url = new URL(endpoint, this.options.baseUrl);
-        const response = await fetch(url, {
+        const unauthUrl = new URL("api/private/unauth/telemetry/events", this.options.baseUrl);
+        const response = await fetch(unauthUrl, {
             method: "POST",
             headers,
             body: JSON.stringify(events),
@@ -245,6 +286,7 @@ export class ApiClient {
             "/api/atlas/v2/groups/{groupId}/clusters/{clusterName}",
             options
         );
+
         if (error) {
             throw ApiClientError.fromError(response, error);
         }
