@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version-file: package.json
+          node-version: 20
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
       - name: Get version
@@ -55,7 +55,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version-file: package.json
+          node-version: 20
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
       - name: Build package
