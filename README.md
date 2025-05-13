@@ -125,7 +125,7 @@ You can use environment variables in the config file or set them and run the ser
 - `atlas-inspect-access-list` - Inspect IP/CIDR ranges with access to MongoDB Atlas clusters
 - `atlas-create-access-list` - Configure IP/CIDR access list for MongoDB Atlas clusters
 - `atlas-list-db-users` - List MongoDB Atlas database users
-- `atlas-create-db-user` - List MongoDB Atlas database users
+- `atlas-create-db-user` - Creates a MongoDB Atlas database user
 
 NOTE: atlas tools are only available when you set credentials on [configuration](#configuration) section.
 
