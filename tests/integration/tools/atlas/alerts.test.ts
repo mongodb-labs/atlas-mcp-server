@@ -34,7 +34,7 @@ describeWithAtlas("alerts", (integration) => {
                     expect(alert).toHaveProperty("Created");
                     expect(alert).toHaveProperty("Updated");
                     expect(alert).toHaveProperty("Type");
-                    expect(alert).toHaveProperty("Summary");
+                    expect(alert).toHaveProperty("Comment");
                 }
             });
         });
