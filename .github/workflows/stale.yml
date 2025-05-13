@@ -15,11 +15,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
-      - uses: mongodb-js/devtools-shared/actions/setup-bot-token@main
-        id: app-token
-        with:
-          app-id: ${{ vars.DEVTOOLS_BOT_APP_ID }}
-          private-key: ${{ secrets.DEVTOOLS_BOT_PRIVATE_KEY }}
       - uses: actions/stale@v9
         id: stale
         with:
