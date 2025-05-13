@@ -1,6 +1,9 @@
-# MongoDB MCP Server
+# MongoDB MCP Server (Search Skunkworks 2025 Branch)
 
 A Model Context Protocol server for interacting with MongoDB Databases and MongoDB Atlas.
+
+This is a branch cut for the search team to collaborate on MCP server changes made during
+Skunkworks 2025. Please make your PRs against the `search-skunkworks-2025` branch.
 
 ## 📚 Table of Contents
 
