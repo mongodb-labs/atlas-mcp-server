@@ -1,0 +1,50 @@
+# See RELEASING.md#DockerImage for more details about the steps in this workflow.
+name: Daily Release AtlasCLI Docker Image
+on:
+  schedule:
+    - cron: "0 1 * * *" # Every day at 1:00 AM
+  workflow_dispatch: # Run the action manually
+  pull_request: # TODO: delete this before merging
+jobs:
+  build_images:
+    name: Build and publish docker image to staging registry
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_REPOSITORY: docker.io/mongodb/apix_test
+      TAG_PREFIX: mongodb-mcp-server
+    steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+        with:
+          config: ${{ vars.PERMISSIONS_CONFIG }}
+      - name: Check out code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - name: Set properties
+        id: set-properties
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          VERSION=$(npm pkg get version | tr -d '"')
+          echo "DATE=${DATE}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
+      - name: Login to Docker Hub
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
+        with:
+          username: "${{ secrets.DOCKERHUB_USER }}"
+          password: "${{ secrets.DOCKERHUB_SECRET }}"
+      - name: Build and push image to dockerhub staging registry
+        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          tags:
+            ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}, ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+          file: Dockerfile
+          push: true
+    #   - name: Create Issue
+    #     if: ${{ failure() }}
+    #     uses: imjohnbo/issue-bot@572eed14422c4d6ca37e870f97e7da209422f5bd
+    #     with:
+    #       labels: failed-release
+    #       title: Release Failure for Atlas CLI Docker Image ${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+    #       body: See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
