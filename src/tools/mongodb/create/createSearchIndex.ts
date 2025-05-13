@@ -2,13 +2,14 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { DbOperationArgs, MongoDBToolBase, SearchIndexArgs } from "../mongodbTool.js";
 import { OperationType, ToolArgs } from "../../tool.js";
 
+const SEARCH_INDEX_TYPE = "search";
+
 export class CreateSearchIndexTool extends MongoDBToolBase {
     protected name = "create-search-index";
     protected description = "Create an Atlas Search index for a collection";
     protected argsShape = {
         ...DbOperationArgs,
         name: SearchIndexArgs.name,
-        type: SearchIndexArgs.type,
         analyzer: SearchIndexArgs.analyzer,
         mappings: SearchIndexArgs.mappings,
     };
@@ -19,7 +20,6 @@ export class CreateSearchIndexTool extends MongoDBToolBase {
         database,
         collection,
         name,
-        type,
         analyzer,
         mappings,
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
@@ -27,7 +27,7 @@ export class CreateSearchIndexTool extends MongoDBToolBase {
         const indexes = await provider.createSearchIndexes(database, collection, [
             {
                 name,
-                type,
+                type: SEARCH_INDEX_TYPE,
                 definition: {
                     analyzer,
                     mappings,
@@ -38,7 +38,7 @@ export class CreateSearchIndexTool extends MongoDBToolBase {
         return {
             content: [
                 {
-                    text: `Created the index "${indexes[0]}" on collection "${collection}" in database "${database}"`,
+                    text: `Created the search index "${indexes[0]}" on collection "${collection}" in database "${database}"`,
                     type: "text",
                 },
             ],

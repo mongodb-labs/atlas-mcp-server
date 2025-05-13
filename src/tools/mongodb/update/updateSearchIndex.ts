@@ -4,7 +4,7 @@ import { OperationType, ToolArgs } from "../../tool.js";
 
 export class UpdateSearchIndexTool extends MongoDBToolBase {
     protected name = "update-search-index";
-    protected description = "Updates a search index for a collection";
+    protected description = "Updates an Atlas Search index for a collection";
     protected argsShape = {
         ...DbOperationArgs,
         name: SearchIndexArgs.name,
@@ -32,7 +32,7 @@ export class UpdateSearchIndexTool extends MongoDBToolBase {
         return {
             content: [
                 {
-                    text: `Successfully updated index "${name}" on collection "${collection}" in database "${database}"`,
+                    text: `Successfully updated search index "${name}" on collection "${collection}" in database "${database}"`,
                     type: "text",
                 },
             ],

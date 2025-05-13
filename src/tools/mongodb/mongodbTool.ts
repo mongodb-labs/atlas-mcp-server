@@ -12,7 +12,6 @@ export const DbOperationArgs = {
 
 export const SearchIndexArgs = {
     name: z.string().describe("The name of the index"),
-    type: z.enum(["search", "vectorSearch"]).optional().default("search").describe("The type of the index"),
     analyzer: z
         .string()
         .optional()
@@ -42,7 +41,6 @@ export const SearchIndexArgs = {
                                     "document",
                                     "embeddedDocuments",
                                     "geo",
-                                    "knnVector",
                                     "number",
                                     "objectId",
                                     "string",
@@ -61,7 +59,7 @@ export const SearchIndexArgs = {
                 .describe("The field mapping definitions. If `dynamic` is set to false, this is required."),
         })
         .describe(
-            "Document describing the index to create. The definition syntax depends on whether you create a standard search index or a Vector Search index."
+            "Document describing the index to create."
         ),
 };
 
