@@ -58,9 +58,7 @@ export const SearchIndexArgs = {
                 .optional()
                 .describe("The field mapping definitions. If `dynamic` is set to false, this is required."),
         })
-        .describe(
-            "Document describing the index to create."
-        ),
+        .describe("Document describing the index to create."),
 };
 
 export abstract class MongoDBToolBase extends ToolBase {
