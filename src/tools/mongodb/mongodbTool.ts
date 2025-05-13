@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ToolArgs, ToolBase, ToolCategory, TelemetryToolMetadata } from "../tool.js";
+import { TelemetryToolMetadata, ToolArgs, ToolBase, ToolCategory } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
@@ -8,6 +8,61 @@ import logger, { LogId } from "../../logger.js";
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
     collection: z.string().describe("Collection name"),
+};
+
+export const SearchIndexArgs = {
+    name: z.string().describe("The name of the index"),
+    type: z.enum(["search", "vectorSearch"]).optional().default("search").describe("The type of the index"),
+    analyzer: z
+        .string()
+        .optional()
+        .default("lucene.standard")
+        .describe(
+            "The analyzer to use for the index. Can be one of the built-in lucene analyzers (`lucene.standard`, `lucene.simple`, `lucene.whitespace`, `lucene.keyword`), a language-specific analyzer, such as `lucene.cjk` or `lucene.czech`, or a custom analyzer defined in the Atlas UI."
+        ),
+    mappings: z
+        .object({
+            dynamic: z
+                .boolean()
+                .optional()
+                .default(false)
+                .describe(
+                    "Enables or disables dynamic mapping of fields for this index. If set to true, Atlas Search recursively indexes all dynamically indexable fields. If set to false, you must specify individual fields to index using mappings.fields."
+                ),
+            fields: z
+                .record(
+                    z.string().describe("The field name"),
+                    z
+                        .object({
+                            type: z
+                                .enum([
+                                    "autocomplete",
+                                    "boolean",
+                                    "date",
+                                    "document",
+                                    "embeddedDocuments",
+                                    "geo",
+                                    "knnVector",
+                                    "number",
+                                    "objectId",
+                                    "string",
+                                    "token",
+                                    "uuid",
+                                ])
+                                .describe("The field type"),
+                        })
+                        .passthrough()
+
+                        .describe(
+                            "The field index definition. It must contain the field type, as well as any additional options for that field type."
+                        )
+                )
+                .optional()
+                .describe("The field mapping definitions. If `dynamic` is set to false, this is required."),
+        })
+        .describe(
+            "Document describing the index to create. The definition syntax depends on whether you create a standard search index or a Vector Search index."
+        ),
 };
 
 export abstract class MongoDBToolBase extends ToolBase {
