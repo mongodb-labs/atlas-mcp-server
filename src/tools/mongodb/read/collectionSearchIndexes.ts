@@ -15,7 +15,7 @@ export const ListSearchIndexesArgs = {
 
 export class CollectionSearchIndexesTool extends MongoDBToolBase {
     protected name = "collection-search-indexes";
-    protected description = "List one or all search indexes on a collection";
+    protected description = "Describe the search indexes for a collection";
     protected argsShape = {
         ...DbOperationArgs,
         ...ListSearchIndexesArgs,
