@@ -33,7 +33,8 @@ export class ListAlertsTool extends AtlasToolBase {
                 .map((alert) => {
                     const created = alert.created ? new Date(alert.created).toLocaleString() : "N/A";
                     const updated = alert.updated ? new Date(alert.updated).toLocaleString() : "N/A";
-                    return `${alert.id} | ${alert.status} | ${created} | ${updated} | ${alert.eventTypeName} | ${alert.acknowledgementComment}`;
+                    const comment = alert.acknowledgementComment ?? "N/A";
+                    return `${alert.id} | ${alert.status} | ${created} | ${updated} | ${alert.eventTypeName} | ${comment}`;
                 })
                 .join("\n");
 
