@@ -18,6 +18,7 @@ import { DropCollectionTool } from "./delete/dropCollection.js";
 import { ExplainTool } from "./metadata/explain.js";
 import { CreateCollectionTool } from "./create/createCollection.js";
 import { LogsTool } from "./metadata/logs.js";
+import { CollectionSearchIndexesTool } from "./read/collectionSearchIndexes.js";
 import { DropSearchIndexTool } from "./delete/dropSearchIndex.js";
 
 export const MongoDbTools = [
@@ -25,6 +26,7 @@ export const MongoDbTools = [
     ListCollectionsTool,
     ListDatabasesTool,
     CollectionIndexesTool,
+    CollectionSearchIndexesTool,
     CreateIndexTool,
     CollectionSchemaTool,
     FindTool,
