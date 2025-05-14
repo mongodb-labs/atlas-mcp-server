@@ -5,7 +5,7 @@ import { OperationType, ToolArgs } from "../../tool.js";
 const VECTOR_INDEX_TYPE = "vectorSearch";
 export class CreateVectorIndexTool extends MongoDBToolBase {
     protected name = "create-vector-index";
-    protected description = "Create an Atlas Search vector for a collection";
+    protected description = "Create an Atlas Vector Search Index for a collection.";
     protected argsShape = {
         ...DbOperationArgs,
         name: VectorIndexArgs.name,
