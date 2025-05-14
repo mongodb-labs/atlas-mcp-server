@@ -1,10 +1,9 @@
-import { describeWithMongoDB } from "../mongodbHelpers.js";
-
+import { describeWithMongoDB } from "../../mongodb/mongodbHelpers.js";
 import {
-    databaseCollectionParameters,
     databaseCollectionInvalidArgs,
     validateThrowsForInvalidArguments,
     validateToolMetadata,
+    collectionWithSearchIndexParameters,
 } from "../../../helpers.js";
 
 describeWithMongoDB("collectionSearchIndexes tool", (integration) => {
@@ -12,7 +11,7 @@ describeWithMongoDB("collectionSearchIndexes tool", (integration) => {
         integration,
         "collection-search-indexes",
         "Describe the search indexes for a collection",
-        databaseCollectionParameters
+        collectionWithSearchIndexParameters
     );
     validateThrowsForInvalidArguments(integration, "collection-search-indexes", databaseCollectionInvalidArgs);
 

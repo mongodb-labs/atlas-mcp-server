@@ -34,12 +34,12 @@ export class CollectionSearchIndexesTool extends MongoDBToolBase {
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
 
-        const indexes: SearchIndex[] = (await provider.getSearchIndexes(database, collection, indexName)).map(
-            (doc) => ({
-                name: doc.name,
-                latestDefinition: doc.latestDefinition,
-            })
-        );
+        const indexes: SearchIndex[] = (
+            (await provider.getSearchIndexes(database, collection, indexName)) as SearchIndex[]
+        ).map((doc) => ({
+            name: doc.name,
+            latestDefinition: doc.latestDefinition,
+        }));
 
         return {
             content: [
