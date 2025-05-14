@@ -260,6 +260,6 @@ function validateToolAnnotations(tool: ToolInfo, name: string, description: stri
         case "create":
         case "update":
             expect(tool.annotations.readOnlyHint).toBe(false);
-            expect(tool.annotations.destructiveHint).toBe(false);   
+            expect(tool.annotations.destructiveHint).toBe(false);
     }
 }
