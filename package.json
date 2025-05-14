@@ -60,7 +60,7 @@
     "yaml": "^2.7.1"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@modelcontextprotocol/sdk": "^1.11.2",
     "@mongodb-js/device-id": "^0.2.1",
     "@mongodb-js/devtools-connect": "^3.7.2",
     "@mongosh/service-provider-node-driver": "^3.6.0",

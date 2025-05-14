@@ -34,7 +34,9 @@ export class ApiClient {
 
     private getAccessToken = async () => {
         if (this.oauth2Client && (!this.accessToken || this.accessToken.expired())) {
-            this.accessToken = await this.oauth2Client.getToken({});
+            this.accessToken = await this.oauth2Client.getToken({
+                agent: this.options.userAgent,
+            });
         }
         return this.accessToken?.token.access_token as string | undefined;
     };

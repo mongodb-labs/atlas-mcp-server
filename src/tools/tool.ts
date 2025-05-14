@@ -1,6 +1,6 @@
 import { z, type ZodRawShape, type ZodNever, AnyZodObject } from "zod";
 import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { ToolAnnotationsSchema, type CallToolResult, type ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger, { LogId } from "../logger.js";
 import { Telemetry } from "../telemetry/telemetry.js";
@@ -27,13 +27,17 @@ export abstract class ToolBase {
 
     protected abstract argsShape: ZodRawShape;
 
+    protected abstract annotations: ToolAnnotations;
+
     protected abstract execute(...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<CallToolResult>;
 
     constructor(
         protected readonly session: Session,
         protected readonly config: UserConfig,
         protected readonly telemetry: Telemetry
-    ) {}
+    ) {
+        this.updateAnnotations();
+    }
 
     public register(server: McpServer): void {
         if (!this.verifyAllowed()) {
@@ -56,7 +60,7 @@ export abstract class ToolBase {
             }
         };
 
-        server.tool(this.name, this.description, this.argsShape, callback);
+        server.tool(this.name, this.description, this.argsShape, this.annotations, callback);
 
         // This is very similar to RegisteredTool.update, but without the bugs around the name.
         // In the upstream update method, the name is captured in the closure and not updated when
@@ -130,6 +134,19 @@ export abstract class ToolBase {
             ],
             isError: true,
         };
+    }
+
+    protected updateAnnotations() {
+        this.annotations: ToolAnnotationsSchema =  {
+            description: this.description,
+        };
+        if (this.operationType === "read") {
+            this.annotations.readOnlyHint = true;
+        }
+
+        if (this.operationType == "delete") {
+            this.annotations.destructiveHint = true;
+        }
     }
 
     protected abstract resolveTelemetryMetadata(
