@@ -65,6 +65,8 @@ You can pass your connection string via args, make sure to use a valid username 
 }
 ```
 
+NOTE: The connection string can be configured to connect to any MongoDB cluster, whether it's a local instance or an Atlas cluster.
+
 #### Option 2: Atlas API credentials args
 
 Use your Atlas API Service Accounts credentials. Must follow all the steps in [Atlas API Access](#atlas-api-access) section.
