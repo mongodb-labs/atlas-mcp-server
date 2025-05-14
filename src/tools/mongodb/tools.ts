@@ -18,6 +18,8 @@ import { DropCollectionTool } from "./delete/dropCollection.js";
 import { ExplainTool } from "./metadata/explain.js";
 import { CreateCollectionTool } from "./create/createCollection.js";
 import { LogsTool } from "./metadata/logs.js";
+import { CreateVectorIndexTool } from "./create/createVectorIndex.js";
+import { UpdateVectorIndexTool } from "./update/updateVectorIndex.js";
 import { CollectionSearchIndexesTool } from "./read/collectionSearchIndexes.js";
 import { DropSearchIndexTool } from "./delete/dropSearchIndex.js";
 
@@ -43,5 +45,7 @@ export const MongoDbTools = [
     ExplainTool,
     CreateCollectionTool,
     LogsTool,
+    CreateVectorIndexTool,
+    UpdateVectorIndexTool,
     DropSearchIndexTool,
 ];
