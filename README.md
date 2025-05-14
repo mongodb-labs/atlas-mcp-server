@@ -58,7 +58,7 @@ You can pass your connection string via args, make sure to use a valid username 
         "-y",
         "mongodb-mcp-server",
         "--connectionString",
-        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+        "mongodb://localhost:27017/myDatabase"
       ]
     }
   }
