@@ -20,12 +20,14 @@ import { CreateCollectionTool } from "./create/createCollection.js";
 import { LogsTool } from "./metadata/logs.js";
 import { CreateVectorIndexTool } from "./create/createVectorIndex.js";
 import { UpdateVectorIndexTool } from "./update/updateVectorIndex.js";
+import { CollectionSearchIndexesTool } from "./read/collectionSearchIndexes.js";
 
 export const MongoDbTools = [
     ConnectTool,
     ListCollectionsTool,
     ListDatabasesTool,
     CollectionIndexesTool,
+    CollectionSearchIndexesTool,
     CreateIndexTool,
     CollectionSchemaTool,
     FindTool,
@@ -42,7 +44,6 @@ export const MongoDbTools = [
     ExplainTool,
     CreateCollectionTool,
     LogsTool,
-
     CreateVectorIndexTool,
     UpdateVectorIndexTool,
 ];

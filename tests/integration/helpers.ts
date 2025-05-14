@@ -182,6 +182,17 @@ export const databaseCollectionParameters: ParameterInfo[] = [
     { name: "collection", type: "string", description: "Collection name", required: true },
 ];
 
+export const collectionWithSearchIndexParameters: ParameterInfo[] = [
+    ...databaseCollectionParameters,
+    {
+        name: "indexName",
+        type: "string",
+        description:
+            "The name of the index to return information about. Returns all indexes on collection if not provided.",
+        required: false,
+    },
+];
+
 export const databaseCollectionInvalidArgs = [
     {},
     { database: "test" },
