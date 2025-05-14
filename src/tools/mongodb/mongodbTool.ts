@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ToolArgs, ToolBase, ToolCategory, TelemetryToolMetadata } from "../tool.js";
+import { TelemetryToolMetadata, ToolArgs, ToolBase, ToolCategory } from "../tool.js";
 import { NodeDriverServiceProvider } from "@mongosh/service-provider-node-driver";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { ErrorCodes, MongoDBError } from "../../errors.js";
@@ -8,6 +8,51 @@ import logger, { LogId } from "../../logger.js";
 export const DbOperationArgs = {
     database: z.string().describe("Database name"),
     collection: z.string().describe("Collection name"),
+};
+
+export enum VectorFieldType {
+    VECTOR = "vector",
+    FILTER = "filter",
+}
+export const VectorIndexArgs = {
+    name: z.string().describe("The name of the index"),
+    vectorDefinition: z
+        .object({
+            path: z
+                .string()
+                .describe(
+                    "Name of the field to index. For nested fields, use dot notation to specify path to embedded fields."
+                ),
+            numDimensions: z
+                .number()
+                .int()
+                .min(1)
+                .max(8192)
+                .describe("Number of vector dimensions to enforce at index-time and query-time."),
+            similarity: z
+                .enum(["euclidean", "cosine", "dotProduct"])
+                .describe("Vector similarity function to use to search for top K-nearest neighbors."),
+            quantization: z
+                .enum(["none", "scalar", "binary"])
+                .default("none")
+                .optional()
+                .describe(
+                    "Automatic vector quantization. Use this setting only if your embeddings are float or double vectors."
+                ),
+        })
+        .describe("The vector index definition."),
+    filterFields: z
+        .array(
+            z.object({
+                path: z
+                    .string()
+                    .describe(
+                        "Name of the field to filter by. For nested fields, use dot notation to specify path to embedded fields."
+                    ),
+            })
+        )
+        .optional()
+        .describe("Additional indexed fields that pre-filter data."),
 };
 
 export abstract class MongoDBToolBase extends ToolBase {
