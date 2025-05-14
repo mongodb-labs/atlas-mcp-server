@@ -19,6 +19,7 @@ import { ExplainTool } from "./metadata/explain.js";
 import { CreateCollectionTool } from "./create/createCollection.js";
 import { LogsTool } from "./metadata/logs.js";
 import { CollectionSearchIndexesTool } from "./read/collectionSearchIndexes.js";
+import { DropSearchIndexTool } from "./delete/dropSearchIndex.js";
 
 export const MongoDbTools = [
     ConnectTool,
@@ -42,4 +43,5 @@ export const MongoDbTools = [
     ExplainTool,
     CreateCollectionTool,
     LogsTool,
+    DropSearchIndexTool,
 ];
