@@ -12,6 +12,10 @@ export const ListSearchIndexesArgs = {
             "The name of the index to return information about. Returns all indexes on collection if not provided."
         ),
 };
+export interface SearchIndex {
+    name: string;
+    latestDefinition: Record<string, unknown>;
+}
 
 export class CollectionSearchIndexesTool extends MongoDBToolBase {
     protected name = "collection-search-indexes";
@@ -29,7 +33,13 @@ export class CollectionSearchIndexesTool extends MongoDBToolBase {
         indexName,
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
-        const indexes = await provider.getSearchIndexes(database, collection, indexName);
+
+        const indexes: SearchIndex[] = (await provider.getSearchIndexes(database, collection, indexName)).map(
+            (doc) => ({
+                name: doc.name,
+                latestDefinition: doc.latestDefinition,
+            })
+        );
 
         return {
             content: [
@@ -41,7 +51,7 @@ export class CollectionSearchIndexesTool extends MongoDBToolBase {
                 },
                 ...(indexes.map((indexDefinition) => {
                     return {
-                        text: `Name "${indexDefinition.name}", definition: ${JSON.stringify(indexDefinition.latestDefinition)}`,
+                        text: `\nName: "${indexDefinition.name}"\nDefinition: ${JSON.stringify(indexDefinition.latestDefinition, null, 2)}\n`,
                         type: "text",
                     };
                 }) as { text: string; type: "text" }[]),
