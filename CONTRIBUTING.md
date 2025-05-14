@@ -55,7 +55,7 @@ This project implements a Model Context Protocol (MCP) server for MongoDB and Mo
    npm run inspect
    ```
 
-4. Commit your changes with a descriptive commit message
+4. Commit your changes using [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) format.
 
 ## Adding tests to the MCP Server
 
