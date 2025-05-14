@@ -81,14 +81,17 @@ export abstract class ToolBase {
         this.update = (updates: { name?: string; description?: string; inputSchema?: AnyZodObject }) => {
             const tools = server["_registeredTools"] as { [toolName: string]: RegisteredTool };
             const existingTool = tools[this.name];
+            existingTool.annotations = this.annotations;
 
             if (updates.name && updates.name !== this.name) {
+                existingTool.annotations.title = updates.name;
                 delete tools[this.name];
                 this.name = updates.name;
                 tools[this.name] = existingTool;
             }
 
             if (updates.description) {
+                existingTool.annotations.description = updates.description;
                 existingTool.description = updates.description;
                 this.description = updates.description;
             }

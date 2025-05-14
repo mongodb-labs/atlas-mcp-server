@@ -206,6 +206,9 @@ export function validateToolMetadata(
         expectDefined(tool);
         expect(tool.description).toBe(description);
 
+        expectDefined(tool.annotations);
+        // expect(tool.annotations.title).toBe(name);
+        expect(tool.annotations.description).toBe(description);
         const toolParameters = getParameters(tool);
         expect(toolParameters).toHaveLength(parameters.length);
         expect(toolParameters).toIncludeAllMembers(parameters);
