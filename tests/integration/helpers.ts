@@ -206,9 +206,7 @@ export function validateToolMetadata(
         expectDefined(tool);
         expect(tool.description).toBe(description);
 
-        expectDefined(tool.annotations);
-        expect(tool.annotations.title).toBe(name);
-        expect(tool.annotations.description).toBe(description);
+        validateToolAnnotations(tool, name, description);
         const toolParameters = getParameters(tool);
         expect(toolParameters).toHaveLength(parameters.length);
         expect(toolParameters).toIncludeAllMembers(parameters);
@@ -242,4 +240,26 @@ export function validateThrowsForInvalidArguments(
 export function expectDefined<T>(arg: T): asserts arg is Exclude<T, undefined | null> {
     expect(arg).toBeDefined();
     expect(arg).not.toBeNull();
+}
+
+function validateToolAnnotations(tool: ToolInfo, name: string, description: string): void {
+    expectDefined(tool.annotations);
+    expect(tool.annotations.title).toBe(name);
+    expect(tool.annotations.description).toBe(description);
+
+    switch (tool.operationType) {
+        case "read":
+        case "metadata":
+            expect(tool.annotations.readOnlyHint).toBe(true);
+            expect(tool.annotations.destructiveHint).toBe(false);
+            break;
+        case "delete":
+            expect(tool.annotations.readOnlyHint).toBe(false);
+            expect(tool.annotations.destructiveHint).toBe(true);
+            break;
+        case "create":
+        case "update":
+            expect(tool.annotations.readOnlyHint).toBe(false);
+            expect(tool.annotations.destructiveHint).toBe(false);   
+    }
 }
