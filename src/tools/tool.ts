@@ -1,6 +1,6 @@
 import { z, type ZodRawShape, type ZodNever, AnyZodObject } from "zod";
 import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ToolAnnotationsSchema, type CallToolResult, type ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolResult, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger, { LogId } from "../logger.js";
 import { Telemetry } from "../telemetry/telemetry.js";
