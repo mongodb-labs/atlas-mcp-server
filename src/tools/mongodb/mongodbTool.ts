@@ -61,6 +61,70 @@ export const SearchIndexArgs = {
         .describe("Document describing the index to create."),
 };
 
+export enum VectorFieldType {
+    VECTOR = "vector",
+    FILTER = "filter",
+}
+export const VectorIndexArgs = {
+    name: z.string().describe("The name of the index"),
+    vectorDefinition: z
+        .object({
+            path: z
+                .string()
+                .min(1)
+                .describe(
+                    "Name of the field to index. For nested fields, use dot notation to specify path to embedded fields."
+                ),
+            numDimensions: z
+                .number()
+                .int()
+                .min(1)
+                .max(8192)
+                .describe("Number of vector dimensions to enforce at index-time and query-time."),
+            similarity: z
+                .enum(["euclidean", "cosine", "dotProduct"])
+                .describe("Vector similarity function to use to search for top K-nearest neighbors."),
+            quantization: z
+                .enum(["none", "scalar", "binary"])
+                .default("none")
+                .optional()
+                .describe(
+                    "Automatic vector quantization. Use this setting only if your embeddings are float or double vectors."
+                ),
+        })
+        .describe("The vector index definition."),
+    filterFields: z
+        .array(
+            z.object({
+                path: z
+                    .string()
+                    .min(1)
+                    .describe(
+                        "Name of the field to filter by. For nested fields, use dot notation to specify path to embedded fields."
+                    ),
+            })
+        )
+        .optional()
+        .describe("Additional indexed fields that pre-filter data."),
+};
+
+type VectorDefinitionType = z.infer<typeof VectorIndexArgs.vectorDefinition>;
+type FilterFieldsType = z.infer<typeof VectorIndexArgs.filterFields>;
+export function buildVectorFields(vectorDefinition: VectorDefinitionType, filterFields: FilterFieldsType): object[] {
+    const typedVectorField = { ...vectorDefinition, type: VectorFieldType.VECTOR };
+    const typedFilterFields = (filterFields ?? []).map((f) => ({
+        ...f,
+        type: VectorFieldType.FILTER,
+    }));
+    return [typedVectorField, ...typedFilterFields];
+}
+
+export const SearchIndexOperationArgs = {
+    database: z.string().describe("Database name"),
+    collection: z.string().describe("Collection name"),
+    searchIndexName: z.string().describe("Search Index or Vector Search Index name"),
+};
+
 export abstract class MongoDBToolBase extends ToolBase {
     protected category: ToolCategory = "mongodb";
 

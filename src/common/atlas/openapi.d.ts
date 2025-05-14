@@ -116,6 +116,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/atlas/v2/groups/{groupId}/alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Return All Alerts from One Project
+         * @description Returns all alerts. These alerts apply to all components in one project. You receive an alert when a monitored component meets or exceeds a value you set. To use this resource, the requesting Service Account or API Key must have the Project Read Only role.
+         *
+         *     This resource remains under revision and may change.
+         */
+        get: operations["listAlerts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/atlas/v2/groups/{groupId}/clusters": {
         parameters: {
             query?: never;
@@ -628,6 +650,7 @@ export interface components {
             /** @description Flag that indicates whether the instance size may scale down via reactive auto-scaling. MongoDB Cloud requires this parameter if **replicationSpecs[n].regionConfigs[m].autoScaling.compute.enabled** is `true`. If you enable this option, specify a value for **replicationSpecs[n].regionConfigs[m].autoScaling.compute.minInstanceSize**. */
             scaleDownEnabled?: boolean;
         };
+        AlertViewForNdsGroup: components["schemas"]["AppServiceAlertView"] | components["schemas"]["ClusterAlertView"] | components["schemas"]["HostAlertViewForNdsGroup"] | components["schemas"]["HostMetricAlert"] | components["schemas"]["ReplicaSetAlertViewForNdsGroup"] | components["schemas"]["StreamProcessorAlertViewForNdsGroup"] | components["schemas"]["DefaultAlertViewForNdsGroup"];
         /** @description Object that contains the identifying characteristics of the Amazon Web Services (AWS) Key Management Service (KMS). This field always returns a null value. */
         ApiAtlasCloudProviderAccessFeatureUsageFeatureIdView: Record<string, never> | null;
         /** @description Group of settings that configures a subset of the advanced configuration details. */
@@ -697,6 +720,87 @@ export interface components {
             /** @description Application error message returned with this error. */
             readonly reason?: string;
         };
+        /**
+         * App Services Alerts
+         * @description App Services alert notifies different activities about a BAAS application.
+         */
+        AppServiceAlertView: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            eventTypeName: components["schemas"]["AppServiceEventTypeViewAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * App Services Event Types
+         * @description Incident that triggered this alert.
+         * @example DEPLOYMENT_FAILURE
+         * @enum {string}
+         */
+        AppServiceEventTypeViewAlertable: "URL_CONFIRMATION" | "SUCCESSFUL_DEPLOY" | "DEPLOYMENT_FAILURE" | "DEPLOYMENT_MODEL_CHANGE_SUCCESS" | "DEPLOYMENT_MODEL_CHANGE_FAILURE" | "REQUEST_RATE_LIMIT" | "LOG_FORWARDER_FAILURE" | "OUTSIDE_REALM_METRIC_THRESHOLD" | "SYNC_FAILURE" | "TRIGGER_FAILURE" | "TRIGGER_AUTO_RESUMED";
         /** @description Details that describe the organization. */
         AtlasOrganization: {
             /**
@@ -1738,6 +1842,85 @@ export interface components {
             regionName?: ("US_GOV_WEST_1" | "US_GOV_EAST_1" | "US_EAST_1" | "US_EAST_2" | "US_WEST_1" | "US_WEST_2" | "CA_CENTRAL_1" | "EU_NORTH_1" | "EU_WEST_1" | "EU_WEST_2" | "EU_WEST_3" | "EU_CENTRAL_1" | "EU_CENTRAL_2" | "AP_EAST_1" | "AP_NORTHEAST_1" | "AP_NORTHEAST_2" | "AP_NORTHEAST_3" | "AP_SOUTHEAST_1" | "AP_SOUTHEAST_2" | "AP_SOUTHEAST_3" | "AP_SOUTHEAST_4" | "AP_SOUTH_1" | "AP_SOUTH_2" | "SA_EAST_1" | "CN_NORTH_1" | "CN_NORTHWEST_1" | "ME_SOUTH_1" | "ME_CENTRAL_1" | "AF_SOUTH_1" | "EU_SOUTH_1" | "EU_SOUTH_2" | "IL_CENTRAL_1" | "CA_WEST_1" | "AP_SOUTHEAST_5" | "AP_SOUTHEAST_7" | "MX_CENTRAL_1" | "GLOBAL") | ("US_CENTRAL" | "US_EAST" | "US_EAST_2" | "US_NORTH_CENTRAL" | "US_WEST" | "US_SOUTH_CENTRAL" | "EUROPE_NORTH" | "EUROPE_WEST" | "US_WEST_CENTRAL" | "US_WEST_2" | "US_WEST_3" | "CANADA_EAST" | "CANADA_CENTRAL" | "BRAZIL_SOUTH" | "BRAZIL_SOUTHEAST" | "AUSTRALIA_CENTRAL" | "AUSTRALIA_CENTRAL_2" | "AUSTRALIA_EAST" | "AUSTRALIA_SOUTH_EAST" | "GERMANY_WEST_CENTRAL" | "GERMANY_NORTH" | "SWEDEN_CENTRAL" | "SWEDEN_SOUTH" | "SWITZERLAND_NORTH" | "SWITZERLAND_WEST" | "UK_SOUTH" | "UK_WEST" | "NORWAY_EAST" | "NORWAY_WEST" | "INDIA_CENTRAL" | "INDIA_SOUTH" | "INDIA_WEST" | "CHINA_EAST" | "CHINA_NORTH" | "ASIA_EAST" | "JAPAN_EAST" | "JAPAN_WEST" | "ASIA_SOUTH_EAST" | "KOREA_CENTRAL" | "KOREA_SOUTH" | "FRANCE_CENTRAL" | "FRANCE_SOUTH" | "SOUTH_AFRICA_NORTH" | "SOUTH_AFRICA_WEST" | "UAE_CENTRAL" | "UAE_NORTH" | "QATAR_CENTRAL") | ("EASTERN_US" | "EASTERN_US_AW" | "US_EAST_4" | "US_EAST_4_AW" | "US_EAST_5" | "US_EAST_5_AW" | "US_WEST_2" | "US_WEST_2_AW" | "US_WEST_3" | "US_WEST_3_AW" | "US_WEST_4" | "US_WEST_4_AW" | "US_SOUTH_1" | "US_SOUTH_1_AW" | "CENTRAL_US" | "CENTRAL_US_AW" | "WESTERN_US" | "WESTERN_US_AW" | "NORTH_AMERICA_NORTHEAST_1" | "NORTH_AMERICA_NORTHEAST_2" | "NORTH_AMERICA_SOUTH_1" | "SOUTH_AMERICA_EAST_1" | "SOUTH_AMERICA_WEST_1" | "WESTERN_EUROPE" | "EUROPE_NORTH_1" | "EUROPE_WEST_2" | "EUROPE_WEST_3" | "EUROPE_WEST_4" | "EUROPE_WEST_6" | "EUROPE_WEST_8" | "EUROPE_WEST_9" | "EUROPE_WEST_10" | "EUROPE_WEST_12" | "EUROPE_SOUTHWEST_1" | "EUROPE_CENTRAL_2" | "MIDDLE_EAST_CENTRAL_1" | "MIDDLE_EAST_CENTRAL_2" | "MIDDLE_EAST_WEST_1" | "AUSTRALIA_SOUTHEAST_1" | "AUSTRALIA_SOUTHEAST_2" | "AFRICA_SOUTH_1" | "EASTERN_ASIA_PACIFIC" | "NORTHEASTERN_ASIA_PACIFIC" | "SOUTHEASTERN_ASIA_PACIFIC" | "ASIA_EAST_2" | "ASIA_NORTHEAST_2" | "ASIA_NORTHEAST_3" | "ASIA_SOUTH_1" | "ASIA_SOUTH_2" | "ASIA_SOUTHEAST_2");
         } & (components["schemas"]["AWSRegionConfig20240805"] | components["schemas"]["AzureRegionConfig20240805"] | components["schemas"]["GCPRegionConfig20240805"] | components["schemas"]["TenantRegionConfig20240805"]);
         /**
+         * Cluster Alerts
+         * @description Cluster alert notifies different activities and conditions about cluster of mongod hosts.
+         */
+        ClusterAlertView: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            eventTypeName: components["schemas"]["ClusterEventTypeViewAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
          * Cluster Connection Strings
          * @description Collection of Uniform Resource Locators that point to the MongoDB database.
          */
@@ -1941,6 +2124,13 @@ export interface components {
             /** @description Region where the private endpoint is deployed. */
             readonly region?: string;
         };
+        /**
+         * Cluster Event Types
+         * @description Event type that triggers an alert.
+         * @example CLUSTER_MONGOS_IS_MISSING
+         * @enum {string}
+         */
+        ClusterEventTypeViewAlertable: "CLUSTER_MONGOS_IS_MISSING" | "CLUSTER_AGENT_IN_CRASH_LOOP";
         ClusterFlexProviderSettings: Omit<components["schemas"]["ClusterProviderSettings"], "providerName"> & {
             /**
              * @description Cloud service provider on which MongoDB Cloud provisioned the multi-tenant host. The resource returns this parameter when **providerSettings.providerName** is `FLEX` and **providerSetting.instanceSizeName** is `FLEX`.
@@ -2468,6 +2658,120 @@ export interface components {
             name?: string;
             provider: string;
         } & (components["schemas"]["DataLakeS3StoreSettings"] | components["schemas"]["DataLakeDLSAWSStore"] | components["schemas"]["DataLakeDLSAzureStore"] | components["schemas"]["DataLakeDLSGCPStore"] | components["schemas"]["DataLakeAtlasStoreInstance"] | components["schemas"]["DataLakeHTTPStore"] | components["schemas"]["DataLakeAzureBlobStore"] | components["schemas"]["DataLakeGoogleCloudStorageStore"]);
+        DataMetricAlertView: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            currentValue?: components["schemas"]["DataMetricValueView"];
+            eventTypeName: components["schemas"]["HostMetricEventTypeViewAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Hostname and port of the host to which this alert applies. The resource returns this parameter for alerts of events impacting hosts or replica sets.
+             * @example cloud-test.mongodb.com:27017
+             */
+            readonly hostnameAndPort?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Name of the metric against which Atlas checks the configured `metricThreshold.threshold`.
+             *
+             *     To learn more about the available metrics, see <a href="https://www.mongodb.com/docs/atlas/reference/alert-host-metrics/#std-label-measurement-types" target="_blank">Host Metrics</a>.
+             *
+             *     **NOTE**: If you set eventTypeName to OUTSIDE_SERVERLESS_METRIC_THRESHOLD, you can specify only metrics available for serverless. To learn more, see <a href="https://dochub.mongodb.org/core/alert-config-serverless-measurements" target="_blank">Serverless Measurements</a>.
+             * @example ASSERT_USER
+             */
+            readonly metricName?: string;
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description Name of the replica set to which this alert applies. The response returns this parameter for alerts of events impacting backups, hosts, or replica sets.
+             * @example event-replica-set
+             */
+            readonly replicaSetName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * Data Metric Units
+         * @description Element used to express the quantity. This can be an element of time, storage capacity, and the like.
+         * @example BYTES
+         * @enum {string}
+         */
+        DataMetricUnits: "BITS" | "KILOBITS" | "MEGABITS" | "GIGABITS" | "BYTES" | "KILOBYTES" | "MEGABYTES" | "GIGABYTES" | "TERABYTES" | "PETABYTES";
+        /**
+         * Data Metric Value
+         * @description Measurement of the **metricName** recorded at the time of the event.
+         */
+        DataMetricValueView: {
+            /**
+             * Format: double
+             * @description Amount of the **metricName** recorded at the time of the event. This value triggered the alert.
+             */
+            readonly number?: number;
+            units?: components["schemas"]["DataMetricUnits"];
+        };
         /** @description Settings to configure the region where you wish to store your archived data. */
         DataProcessRegionView: {
             /**
@@ -2550,6 +2854,81 @@ export interface components {
              */
             nodeCount?: number;
         } & (components["schemas"]["AWSHardwareSpec20240805"] | components["schemas"]["AzureHardwareSpec20240805"] | components["schemas"]["GCPHardwareSpec20240805"]);
+        /**
+         * Any Other Alerts
+         * @description Other alerts which don't have extra details beside of basic one.
+         */
+        DefaultAlertViewForNdsGroup: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            /** @description Incident that triggered this alert. */
+            readonly eventTypeName: ("CREDIT_CARD_ABOUT_TO_EXPIRE" | "PENDING_INVOICE_OVER_THRESHOLD" | "DAILY_BILL_OVER_THRESHOLD") | ("CPS_SNAPSHOT_STARTED" | "CPS_SNAPSHOT_SUCCESSFUL" | "CPS_SNAPSHOT_FAILED" | "CPS_CONCURRENT_SNAPSHOT_FAILED_WILL_RETRY" | "CPS_SNAPSHOT_BEHIND" | "CPS_COPY_SNAPSHOT_STARTED" | "CPS_COPY_SNAPSHOT_FAILED" | "CPS_COPY_SNAPSHOT_FAILED_WILL_RETRY" | "CPS_COPY_SNAPSHOT_SUCCESSFUL" | "CPS_PREV_SNAPSHOT_OLD" | "CPS_SNAPSHOT_FALLBACK_SUCCESSFUL" | "CPS_SNAPSHOT_FALLBACK_FAILED" | "CPS_RESTORE_SUCCESSFUL" | "CPS_EXPORT_SUCCESSFUL" | "CPS_RESTORE_FAILED" | "CPS_EXPORT_FAILED" | "CPS_AUTO_EXPORT_FAILED" | "CPS_SNAPSHOT_DOWNLOAD_REQUEST_FAILED" | "CPS_OPLOG_BEHIND" | "CPS_OPLOG_CAUGHT_UP") | ("AWS_ENCRYPTION_KEY_NEEDS_ROTATION" | "AZURE_ENCRYPTION_KEY_NEEDS_ROTATION" | "GCP_ENCRYPTION_KEY_NEEDS_ROTATION" | "AWS_ENCRYPTION_KEY_INVALID" | "AZURE_ENCRYPTION_KEY_INVALID" | "GCP_ENCRYPTION_KEY_INVALID") | ("FTS_INDEX_DELETION_FAILED" | "FTS_INDEX_BUILD_COMPLETE" | "FTS_INDEX_BUILD_FAILED" | "FTS_INDEXES_RESTORE_FAILED" | "FTS_INDEXES_SYNONYM_MAPPING_INVALID") | ("USERS_WITHOUT_MULTI_FACTOR_AUTH" | "ENCRYPTION_AT_REST_KMS_NETWORK_ACCESS_DENIED" | "ENCRYPTION_AT_REST_CONFIG_NO_LONGER_VALID") | ("CLUSTER_INSTANCE_STOP_START" | "CLUSTER_INSTANCE_RESYNC_REQUESTED" | "CLUSTER_INSTANCE_UPDATE_REQUESTED" | "SAMPLE_DATASET_LOAD_REQUESTED" | "TENANT_UPGRADE_TO_SERVERLESS_SUCCESSFUL" | "TENANT_UPGRADE_TO_SERVERLESS_FAILED" | "NETWORK_PERMISSION_ENTRY_ADDED" | "NETWORK_PERMISSION_ENTRY_REMOVED" | "NETWORK_PERMISSION_ENTRY_UPDATED") | ("MAINTENANCE_IN_ADVANCED" | "MAINTENANCE_AUTO_DEFERRED" | "MAINTENANCE_STARTED" | "MAINTENANCE_NO_LONGER_NEEDED") | ("NDS_X509_USER_AUTHENTICATION_CUSTOMER_CA_EXPIRATION_CHECK" | "NDS_X509_USER_AUTHENTICATION_CUSTOMER_CRL_EXPIRATION_CHECK" | "NDS_X509_USER_AUTHENTICATION_MANAGED_USER_CERTS_EXPIRATION_CHECK") | ("ONLINE_ARCHIVE_INSUFFICIENT_INDEXES_CHECK" | "ONLINE_ARCHIVE_MAX_CONSECUTIVE_OFFLOAD_WINDOWS_CHECK") | "OUTSIDE_SERVERLESS_METRIC_THRESHOLD" | "OUTSIDE_FLEX_METRIC_THRESHOLD" | ("JOINED_GROUP" | "REMOVED_FROM_GROUP" | "USER_ROLES_CHANGED_AUDIT") | ("TAGS_MODIFIED" | "CLUSTER_TAGS_MODIFIED" | "GROUP_TAGS_MODIFIED") | ("STREAM_PROCESSOR_STATE_IS_FAILED" | "OUTSIDE_STREAM_PROCESSOR_METRIC_THRESHOLD") | ("COMPUTE_AUTO_SCALE_INITIATED_BASE" | "COMPUTE_AUTO_SCALE_INITIATED_ANALYTICS" | "COMPUTE_AUTO_SCALE_SCALE_DOWN_FAIL_BASE" | "COMPUTE_AUTO_SCALE_SCALE_DOWN_FAIL_ANALYTICS" | "COMPUTE_AUTO_SCALE_MAX_INSTANCE_SIZE_FAIL_BASE" | "COMPUTE_AUTO_SCALE_MAX_INSTANCE_SIZE_FAIL_ANALYTICS" | "COMPUTE_AUTO_SCALE_OPLOG_FAIL_BASE" | "COMPUTE_AUTO_SCALE_OPLOG_FAIL_ANALYTICS" | "DISK_AUTO_SCALE_INITIATED" | "DISK_AUTO_SCALE_MAX_DISK_SIZE_FAIL" | "DISK_AUTO_SCALE_OPLOG_FAIL" | "PREDICTIVE_COMPUTE_AUTO_SCALE_INITIATED_BASE" | "PREDICTIVE_COMPUTE_AUTO_SCALE_MAX_INSTANCE_SIZE_FAIL_BASE" | "PREDICTIVE_COMPUTE_AUTO_SCALE_OPLOG_FAIL_BASE") | ("CPS_DATA_PROTECTION_ENABLE_REQUESTED" | "CPS_DATA_PROTECTION_ENABLED" | "CPS_DATA_PROTECTION_UPDATE_REQUESTED" | "CPS_DATA_PROTECTION_UPDATED" | "CPS_DATA_PROTECTION_DISABLE_REQUESTED" | "CPS_DATA_PROTECTION_DISABLED" | "CPS_DATA_PROTECTION_APPROVED_FOR_DISABLEMENT") | "RESOURCE_POLICY_VIOLATED";
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
         DefaultScheduleView: Omit<WithRequired<components["schemas"]["OnlineArchiveSchedule"], "type">, "type"> & {
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -3240,6 +3619,221 @@ export interface components {
             diskSizeGB?: number;
         } & (components["schemas"]["AWSHardwareSpec20240805"] | components["schemas"]["AzureHardwareSpec20240805"] | components["schemas"]["GCPHardwareSpec20240805"] | components["schemas"]["TenantHardwareSpec20240805"]);
         /**
+         * Host Alerts
+         * @description Host alert notifies about activities on mongod host.
+         */
+        HostAlertViewForNdsGroup: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            eventTypeName: components["schemas"]["HostEventTypeViewForNdsGroupAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Hostname and port of the host to which this alert applies. The resource returns this parameter for alerts of events impacting hosts or replica sets.
+             * @example cloud-test.mongodb.com:27017
+             */
+            readonly hostnameAndPort?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description Name of the replica set to which this alert applies. The response returns this parameter for alerts of events impacting backups, hosts, or replica sets.
+             * @example event-replica-set
+             */
+            readonly replicaSetName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * Host Event Types
+         * @description Event type that triggers an alert.
+         * @example HOST_DOWN
+         * @enum {string}
+         */
+        HostEventTypeViewForNdsGroupAlertable: "HOST_DOWN" | "HOST_HAS_INDEX_SUGGESTIONS" | "HOST_MONGOT_CRASHING_OOM" | "HOST_MONGOT_STOP_REPLICATION" | "HOST_NOT_ENOUGH_DISK_SPACE" | "SSH_KEY_NDS_HOST_ACCESS_REQUESTED" | "SSH_KEY_NDS_HOST_ACCESS_REFRESHED" | "PUSH_BASED_LOG_EXPORT_STOPPED" | "PUSH_BASED_LOG_EXPORT_DROPPED_LOG" | "HOST_VERSION_BEHIND" | "VERSION_BEHIND" | "HOST_EXPOSED" | "HOST_SSL_CERTIFICATE_STALE" | "HOST_SECURITY_CHECKUP_NOT_MET";
+        /**
+         * Host Metric Alerts
+         * @description Host Metric Alert notifies about changes of measurements or metrics for mongod host.
+         */
+        HostMetricAlert: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            currentValue?: components["schemas"]["HostMetricValue"];
+            eventTypeName: components["schemas"]["HostMetricEventTypeViewAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Hostname and port of the host to which this alert applies. The resource returns this parameter for alerts of events impacting hosts or replica sets.
+             * @example cloud-test.mongodb.com:27017
+             */
+            readonly hostnameAndPort?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Name of the metric against which Atlas checks the configured `metricThreshold.threshold`.
+             *
+             *     To learn more about the available metrics, see <a href="https://www.mongodb.com/docs/atlas/reference/alert-host-metrics/#std-label-measurement-types" target="_blank">Host Metrics</a>.
+             *
+             *     **NOTE**: If you set eventTypeName to OUTSIDE_SERVERLESS_METRIC_THRESHOLD, you can specify only metrics available for serverless. To learn more, see <a href="https://dochub.mongodb.org/core/alert-config-serverless-measurements" target="_blank">Serverless Measurements</a>.
+             * @example ASSERT_USER
+             */
+            readonly metricName?: string;
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description Name of the replica set to which this alert applies. The response returns this parameter for alerts of events impacting backups, hosts, or replica sets.
+             * @example event-replica-set
+             */
+            readonly replicaSetName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * Host Metric Event Types
+         * @description Event type that triggers an alert.
+         * @example OUTSIDE_METRIC_THRESHOLD
+         * @enum {string}
+         */
+        HostMetricEventTypeViewAlertable: "OUTSIDE_METRIC_THRESHOLD";
+        /** @description Value of the metric that triggered the alert. The resource returns this parameter for alerts of events impacting hosts. */
+        HostMetricValue: {
+            /**
+             * Format: double
+             * @description Amount of the **metricName** recorded at the time of the event. This value triggered the alert.
+             */
+            readonly number?: number;
+            /**
+             * @description Element used to express the quantity in **currentValue.number**. This can be an element of time, storage capacity, and the like. This metric triggered the alert.
+             * @enum {string}
+             */
+            readonly units?: "bits" | "Kbits" | "Mbits" | "Gbits" | "bytes" | "KB" | "MB" | "GB" | "TB" | "PB" | "nsec" | "msec" | "sec" | "min" | "hours" | "million minutes" | "days" | "requests" | "1000 requests" | "GB seconds" | "GB hours" | "GB days" | "RPU" | "thousand RPU" | "million RPU" | "WPU" | "thousand WPU" | "million WPU" | "count" | "thousand" | "million" | "billion";
+        };
+        /**
          * Ingestion Destination
          * @description Ingestion destination of a Data Lake Pipeline.
          */
@@ -3306,7 +3900,7 @@ export interface components {
              * @description Human-readable description of the service that this line item provided. This Stock Keeping Unit (SKU) could be the instance type, a support charge, advanced security, or another service.
              * @enum {string}
              */
-            readonly sku?: "CLASSIC_BACKUP_OPLOG" | "CLASSIC_BACKUP_STORAGE" | "CLASSIC_BACKUP_SNAPSHOT_CREATE" | "CLASSIC_BACKUP_DAILY_MINIMUM" | "CLASSIC_BACKUP_FREE_TIER" | "CLASSIC_COUPON" | "BACKUP_STORAGE_FREE_TIER" | "BACKUP_STORAGE" | "FLEX_CONSULTING" | "CLOUD_MANAGER_CLASSIC" | "CLOUD_MANAGER_BASIC_FREE_TIER" | "CLOUD_MANAGER_BASIC" | "CLOUD_MANAGER_PREMIUM" | "CLOUD_MANAGER_FREE_TIER" | "CLOUD_MANAGER_STANDARD_FREE_TIER" | "CLOUD_MANAGER_STANDARD_ANNUAL" | "CLOUD_MANAGER_STANDARD" | "CLOUD_MANAGER_FREE_TRIAL" | "ATLAS_INSTANCE_M0" | "ATLAS_INSTANCE_M2" | "ATLAS_INSTANCE_M5" | "ATLAS_AWS_INSTANCE_M10" | "ATLAS_AWS_INSTANCE_M20" | "ATLAS_AWS_INSTANCE_M30" | "ATLAS_AWS_INSTANCE_M40" | "ATLAS_AWS_INSTANCE_M50" | "ATLAS_AWS_INSTANCE_M60" | "ATLAS_AWS_INSTANCE_M80" | "ATLAS_AWS_INSTANCE_M100" | "ATLAS_AWS_INSTANCE_M140" | "ATLAS_AWS_INSTANCE_M200" | "ATLAS_AWS_INSTANCE_M300" | "ATLAS_AWS_INSTANCE_M40_LOW_CPU" | "ATLAS_AWS_INSTANCE_M50_LOW_CPU" | "ATLAS_AWS_INSTANCE_M60_LOW_CPU" | "ATLAS_AWS_INSTANCE_M80_LOW_CPU" | "ATLAS_AWS_INSTANCE_M200_LOW_CPU" | "ATLAS_AWS_INSTANCE_M300_LOW_CPU" | "ATLAS_AWS_INSTANCE_M400_LOW_CPU" | "ATLAS_AWS_INSTANCE_M700_LOW_CPU" | "ATLAS_AWS_INSTANCE_M40_NVME" | "ATLAS_AWS_INSTANCE_M50_NVME" | "ATLAS_AWS_INSTANCE_M60_NVME" | "ATLAS_AWS_INSTANCE_M80_NVME" | "ATLAS_AWS_INSTANCE_M200_NVME" | "ATLAS_AWS_INSTANCE_M400_NVME" | "ATLAS_AWS_INSTANCE_M10_PAUSED" | "ATLAS_AWS_INSTANCE_M20_PAUSED" | "ATLAS_AWS_INSTANCE_M30_PAUSED" | "ATLAS_AWS_INSTANCE_M40_PAUSED" | "ATLAS_AWS_INSTANCE_M50_PAUSED" | "ATLAS_AWS_INSTANCE_M60_PAUSED" | "ATLAS_AWS_INSTANCE_M80_PAUSED" | "ATLAS_AWS_INSTANCE_M100_PAUSED" | "ATLAS_AWS_INSTANCE_M140_PAUSED" | "ATLAS_AWS_INSTANCE_M200_PAUSED" | "ATLAS_AWS_INSTANCE_M300_PAUSED" | "ATLAS_AWS_INSTANCE_M40_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M50_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M60_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M80_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M200_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M300_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M400_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M700_LOW_CPU_PAUSED" | "ATLAS_AWS_SEARCH_INSTANCE_S20_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S30_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S40_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S50_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S60_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S70_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S80_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S30_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S40_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S50_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S60_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S80_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S90_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S100_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S110_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S40_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S50_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S60_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S80_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S90_STORAGE_NVME" | "ATLAS_AWS_STORAGE_PROVISIONED" | "ATLAS_AWS_STORAGE_STANDARD" | "ATLAS_AWS_STORAGE_STANDARD_GP3" | "ATLAS_AWS_STORAGE_IOPS" | "ATLAS_AWS_DATA_TRANSFER_SAME_REGION" | "ATLAS_AWS_DATA_TRANSFER_DIFFERENT_REGION" | "ATLAS_AWS_DATA_TRANSFER_INTERNET" | "ATLAS_AWS_BACKUP_SNAPSHOT_STORAGE" | "ATLAS_AWS_BACKUP_DOWNLOAD_VM" | "ATLAS_AWS_BACKUP_DOWNLOAD_VM_STORAGE" | "ATLAS_AWS_BACKUP_DOWNLOAD_VM_STORAGE_IOPS" | "ATLAS_AWS_PRIVATE_ENDPOINT" | "ATLAS_AWS_PRIVATE_ENDPOINT_CAPACITY_UNITS" | "ATLAS_GCP_SEARCH_INSTANCE_S20_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S30_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S40_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S50_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S60_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S70_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S80_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S30_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S40_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S50_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S60_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S70_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S80_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S90_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S100_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S110_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S120_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S130_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S140_MEMORY_LOCALSSD" | "ATLAS_GCP_INSTANCE_M10" | "ATLAS_GCP_INSTANCE_M20" | "ATLAS_GCP_INSTANCE_M30" | "ATLAS_GCP_INSTANCE_M40" | "ATLAS_GCP_INSTANCE_M50" | "ATLAS_GCP_INSTANCE_M60" | "ATLAS_GCP_INSTANCE_M80" | "ATLAS_GCP_INSTANCE_M140" | "ATLAS_GCP_INSTANCE_M200" | "ATLAS_GCP_INSTANCE_M250" | "ATLAS_GCP_INSTANCE_M300" | "ATLAS_GCP_INSTANCE_M400" | "ATLAS_GCP_INSTANCE_M40_LOW_CPU" | "ATLAS_GCP_INSTANCE_M50_LOW_CPU" | "ATLAS_GCP_INSTANCE_M60_LOW_CPU" | "ATLAS_GCP_INSTANCE_M80_LOW_CPU" | "ATLAS_GCP_INSTANCE_M200_LOW_CPU" | "ATLAS_GCP_INSTANCE_M300_LOW_CPU" | "ATLAS_GCP_INSTANCE_M400_LOW_CPU" | "ATLAS_GCP_INSTANCE_M600_LOW_CPU" | "ATLAS_GCP_INSTANCE_M10_PAUSED" | "ATLAS_GCP_INSTANCE_M20_PAUSED" | "ATLAS_GCP_INSTANCE_M30_PAUSED" | "ATLAS_GCP_INSTANCE_M40_PAUSED" | "ATLAS_GCP_INSTANCE_M50_PAUSED" | "ATLAS_GCP_INSTANCE_M60_PAUSED" | "ATLAS_GCP_INSTANCE_M80_PAUSED" | "ATLAS_GCP_INSTANCE_M140_PAUSED" | "ATLAS_GCP_INSTANCE_M200_PAUSED" | "ATLAS_GCP_INSTANCE_M250_PAUSED" | "ATLAS_GCP_INSTANCE_M300_PAUSED" | "ATLAS_GCP_INSTANCE_M400_PAUSED" | "ATLAS_GCP_INSTANCE_M40_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M50_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M60_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M80_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M200_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M300_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M400_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M600_LOW_CPU_PAUSED" | "ATLAS_GCP_DATA_TRANSFER_INTERNET" | "ATLAS_GCP_STORAGE_SSD" | "ATLAS_GCP_DATA_TRANSFER_INTER_CONNECT" | "ATLAS_GCP_DATA_TRANSFER_INTER_ZONE" | "ATLAS_GCP_DATA_TRANSFER_INTER_REGION" | "ATLAS_GCP_DATA_TRANSFER_GOOGLE" | "ATLAS_GCP_BACKUP_SNAPSHOT_STORAGE" | "ATLAS_GCP_BACKUP_DOWNLOAD_VM" | "ATLAS_GCP_BACKUP_DOWNLOAD_VM_STORAGE" | "ATLAS_GCP_PRIVATE_ENDPOINT" | "ATLAS_GCP_PRIVATE_ENDPOINT_CAPACITY_UNITS" | "ATLAS_GCP_SNAPSHOT_COPY_DATA_TRANSFER" | "ATLAS_AZURE_INSTANCE_M10" | "ATLAS_AZURE_INSTANCE_M20" | "ATLAS_AZURE_INSTANCE_M30" | "ATLAS_AZURE_INSTANCE_M40" | "ATLAS_AZURE_INSTANCE_M50" | "ATLAS_AZURE_INSTANCE_M60" | "ATLAS_AZURE_INSTANCE_M80" | "ATLAS_AZURE_INSTANCE_M90" | "ATLAS_AZURE_INSTANCE_M200" | "ATLAS_AZURE_INSTANCE_R40" | "ATLAS_AZURE_INSTANCE_R50" | "ATLAS_AZURE_INSTANCE_R60" | "ATLAS_AZURE_INSTANCE_R80" | "ATLAS_AZURE_INSTANCE_R200" | "ATLAS_AZURE_INSTANCE_R300" | "ATLAS_AZURE_INSTANCE_R400" | "ATLAS_AZURE_INSTANCE_M60_NVME" | "ATLAS_AZURE_INSTANCE_M80_NVME" | "ATLAS_AZURE_INSTANCE_M200_NVME" | "ATLAS_AZURE_INSTANCE_M300_NVME" | "ATLAS_AZURE_INSTANCE_M400_NVME" | "ATLAS_AZURE_INSTANCE_M600_NVME" | "ATLAS_AZURE_INSTANCE_M10_PAUSED" | "ATLAS_AZURE_INSTANCE_M20_PAUSED" | "ATLAS_AZURE_INSTANCE_M30_PAUSED" | "ATLAS_AZURE_INSTANCE_M40_PAUSED" | "ATLAS_AZURE_INSTANCE_M50_PAUSED" | "ATLAS_AZURE_INSTANCE_M60_PAUSED" | "ATLAS_AZURE_INSTANCE_M80_PAUSED" | "ATLAS_AZURE_INSTANCE_M90_PAUSED" | "ATLAS_AZURE_INSTANCE_M200_PAUSED" | "ATLAS_AZURE_INSTANCE_R40_PAUSED" | "ATLAS_AZURE_INSTANCE_R50_PAUSED" | "ATLAS_AZURE_INSTANCE_R60_PAUSED" | "ATLAS_AZURE_INSTANCE_R80_PAUSED" | "ATLAS_AZURE_INSTANCE_R200_PAUSED" | "ATLAS_AZURE_INSTANCE_R300_PAUSED" | "ATLAS_AZURE_INSTANCE_R400_PAUSED" | "ATLAS_AZURE_SEARCH_INSTANCE_S20_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S30_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S40_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S50_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S60_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S70_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S80_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S40_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S50_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S60_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S80_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S90_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S100_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S110_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S130_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S135_MEMORY_LOCALSSD" | "ATLAS_AZURE_STORAGE_P2" | "ATLAS_AZURE_STORAGE_P3" | "ATLAS_AZURE_STORAGE_P4" | "ATLAS_AZURE_STORAGE_P6" | "ATLAS_AZURE_STORAGE_P10" | "ATLAS_AZURE_STORAGE_P15" | "ATLAS_AZURE_STORAGE_P20" | "ATLAS_AZURE_STORAGE_P30" | "ATLAS_AZURE_STORAGE_P40" | "ATLAS_AZURE_STORAGE_P50" | "ATLAS_AZURE_DATA_TRANSFER" | "ATLAS_AZURE_DATA_TRANSFER_REGIONAL_VNET_IN" | "ATLAS_AZURE_DATA_TRANSFER_REGIONAL_VNET_OUT" | "ATLAS_AZURE_DATA_TRANSFER_GLOBAL_VNET_IN" | "ATLAS_AZURE_DATA_TRANSFER_GLOBAL_VNET_OUT" | "ATLAS_AZURE_DATA_TRANSFER_AVAILABILITY_ZONE_IN" | "ATLAS_AZURE_DATA_TRANSFER_AVAILABILITY_ZONE_OUT" | "ATLAS_AZURE_DATA_TRANSFER_INTER_REGION_INTRA_CONTINENT" | "ATLAS_AZURE_DATA_TRANSFER_INTER_REGION_INTER_CONTINENT" | "ATLAS_AZURE_BACKUP_SNAPSHOT_STORAGE" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P2" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P3" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P4" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P6" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P10" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P15" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P20" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P30" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P40" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P50" | "ATLAS_AZURE_STANDARD_STORAGE" | "ATLAS_AZURE_EXTENDED_STANDARD_IOPS" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_EXTENDED_IOPS" | "ATLAS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE" | "ATLAS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_EXTENDED_IOPS" | "ATLAS_BI_CONNECTOR" | "ATLAS_ADVANCED_SECURITY" | "ATLAS_ENTERPRISE_AUDITING" | "ATLAS_FREE_SUPPORT" | "ATLAS_SUPPORT" | "ATLAS_NDS_BACKFILL_SUPPORT" | "STITCH_DATA_DOWNLOADED_FREE_TIER" | "STITCH_DATA_DOWNLOADED" | "STITCH_COMPUTE_FREE_TIER" | "STITCH_COMPUTE" | "CREDIT" | "MINIMUM_CHARGE" | "CHARTS_DATA_DOWNLOADED_FREE_TIER" | "CHARTS_DATA_DOWNLOADED" | "ATLAS_DATA_LAKE_AWS_DATA_RETURNED_SAME_REGION" | "ATLAS_DATA_LAKE_AWS_DATA_RETURNED_DIFFERENT_REGION" | "ATLAS_DATA_LAKE_AWS_DATA_RETURNED_INTERNET" | "ATLAS_DATA_LAKE_AWS_DATA_SCANNED" | "ATLAS_DATA_LAKE_AWS_DATA_TRANSFERRED_FROM_DIFFERENT_REGION" | "ATLAS_NDS_AWS_DATA_LAKE_STORAGE_ACCESS" | "ATLAS_NDS_AWS_DATA_LAKE_STORAGE" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_SAME_REGION" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_SAME_CONTINENT" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_DIFFERENT_CONTINENT" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_INTERNET" | "ATLAS_DATA_FEDERATION_GCP_DATA_RETURNED_SAME_REGION" | "ATLAS_DATA_FEDERATION_GCP_DATA_RETURNED_DIFFERENT_REGION" | "ATLAS_DATA_FEDERATION_GCP_DATA_RETURNED_INTERNET" | "ATLAS_DATA_FEDERATION_AZURE_DATA_SCANNED" | "ATLAS_NDS_AZURE_DATA_LAKE_STORAGE_ACCESS" | "ATLAS_NDS_AZURE_DATA_LAKE_STORAGE" | "ATLAS_DATA_FEDERATION_GCP_DATA_SCANNED" | "ATLAS_NDS_GCP_DATA_LAKE_STORAGE_ACCESS" | "ATLAS_NDS_GCP_DATA_LAKE_STORAGE" | "ATLAS_NDS_AWS_OBJECT_STORAGE_ACCESS" | "ATLAS_NDS_AWS_COMPRESSED_OBJECT_STORAGE" | "ATLAS_NDS_AZURE_OBJECT_STORAGE_ACCESS" | "ATLAS_NDS_AZURE_OBJECT_STORAGE" | "ATLAS_NDS_AZURE_COMPRESSED_OBJECT_STORAGE" | "ATLAS_NDS_GCP_OBJECT_STORAGE_ACCESS" | "ATLAS_NDS_GCP_OBJECT_STORAGE" | "ATLAS_NDS_GCP_COMPRESSED_OBJECT_STORAGE" | "ATLAS_ARCHIVE_ACCESS_PARTITION_LOCATE" | "ATLAS_NDS_AWS_PIT_RESTORE_STORAGE_FREE_TIER" | "ATLAS_NDS_AWS_PIT_RESTORE_STORAGE" | "ATLAS_NDS_GCP_PIT_RESTORE_STORAGE_FREE_TIER" | "ATLAS_NDS_GCP_PIT_RESTORE_STORAGE" | "ATLAS_NDS_AZURE_PIT_RESTORE_STORAGE_FREE_TIER" | "ATLAS_NDS_AZURE_PIT_RESTORE_STORAGE" | "ATLAS_NDS_AZURE_PRIVATE_ENDPOINT_CAPACITY_UNITS" | "ATLAS_NDS_AZURE_CMK_PRIVATE_NETWORKING" | "ATLAS_NDS_AWS_CMK_PRIVATE_NETWORKING" | "ATLAS_NDS_AWS_OBJECT_STORAGE" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_UPLOAD" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_UPLOAD" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_M40" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_M50" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_M60" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P2" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P3" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P4" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P6" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P10" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P15" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P20" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P30" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P40" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P50" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_M40" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_M50" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_M60" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_STORAGE" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_STORAGE_IOPS" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_M40" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_M50" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_M60" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_STORAGE" | "ATLAS_NDS_AWS_SERVERLESS_RPU" | "ATLAS_NDS_AWS_SERVERLESS_WPU" | "ATLAS_NDS_AWS_SERVERLESS_STORAGE" | "ATLAS_NDS_AWS_SERVERLESS_CONTINUOUS_BACKUP" | "ATLAS_NDS_AWS_SERVERLESS_BACKUP_RESTORE_VM" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_PREVIEW" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_REGIONAL" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_CROSS_REGION" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_INTERNET" | "ATLAS_NDS_GCP_SERVERLESS_RPU" | "ATLAS_NDS_GCP_SERVERLESS_WPU" | "ATLAS_NDS_GCP_SERVERLESS_STORAGE" | "ATLAS_NDS_GCP_SERVERLESS_CONTINUOUS_BACKUP" | "ATLAS_NDS_GCP_SERVERLESS_BACKUP_RESTORE_VM" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_PREVIEW" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_REGIONAL" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_CROSS_REGION" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_INTERNET" | "ATLAS_NDS_AZURE_SERVERLESS_RPU" | "ATLAS_NDS_AZURE_SERVERLESS_WPU" | "ATLAS_NDS_AZURE_SERVERLESS_STORAGE" | "ATLAS_NDS_AZURE_SERVERLESS_CONTINUOUS_BACKUP" | "ATLAS_NDS_AZURE_SERVERLESS_BACKUP_RESTORE_VM" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_PREVIEW" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_REGIONAL" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_CROSS_REGION" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_INTERNET" | "REALM_APP_REQUESTS_FREE_TIER" | "REALM_APP_REQUESTS" | "REALM_APP_COMPUTE_FREE_TIER" | "REALM_APP_COMPUTE" | "REALM_APP_SYNC_FREE_TIER" | "REALM_APP_SYNC" | "REALM_APP_DATA_TRANSFER_FREE_TIER" | "REALM_APP_DATA_TRANSFER" | "GCP_SNAPSHOT_COPY_DISK" | "ATLAS_AWS_STREAM_PROCESSING_INSTANCE_SP10" | "ATLAS_AWS_STREAM_PROCESSING_INSTANCE_SP30" | "ATLAS_AWS_STREAM_PROCESSING_INSTANCE_SP50" | "ATLAS_AZURE_STREAM_PROCESSING_INSTANCE_SP10" | "ATLAS_AZURE_STREAM_PROCESSING_INSTANCE_SP30" | "ATLAS_AZURE_STREAM_PROCESSING_INSTANCE_SP50" | "ATLAS_AWS_STREAM_PROCESSING_DATA_TRANSFER" | "ATLAS_AZURE_STREAM_PROCESSING_DATA_TRANSFER" | "ATLAS_AWS_STREAM_PROCESSING_VPC_PEERING" | "ATLAS_AZURE_STREAM_PROCESSING_PRIVATELINK" | "ATLAS_AWS_STREAM_PROCESSING_PRIVATELINK" | "ATLAS_FLEX_AWS_100_USAGE_HOURS" | "ATLAS_FLEX_AWS_200_USAGE_HOURS" | "ATLAS_FLEX_AWS_300_USAGE_HOURS" | "ATLAS_FLEX_AWS_400_USAGE_HOURS" | "ATLAS_FLEX_AWS_500_USAGE_HOURS" | "ATLAS_FLEX_AZURE_100_USAGE_HOURS" | "ATLAS_FLEX_AZURE_200_USAGE_HOURS" | "ATLAS_FLEX_AZURE_300_USAGE_HOURS" | "ATLAS_FLEX_AZURE_400_USAGE_HOURS" | "ATLAS_FLEX_AZURE_500_USAGE_HOURS" | "ATLAS_FLEX_GCP_100_USAGE_HOURS" | "ATLAS_FLEX_GCP_200_USAGE_HOURS" | "ATLAS_FLEX_GCP_300_USAGE_HOURS" | "ATLAS_FLEX_GCP_400_USAGE_HOURS" | "ATLAS_FLEX_GCP_500_USAGE_HOURS";
+            readonly sku?: "CLASSIC_BACKUP_OPLOG" | "CLASSIC_BACKUP_STORAGE" | "CLASSIC_BACKUP_SNAPSHOT_CREATE" | "CLASSIC_BACKUP_DAILY_MINIMUM" | "CLASSIC_BACKUP_FREE_TIER" | "CLASSIC_COUPON" | "BACKUP_STORAGE_FREE_TIER" | "BACKUP_STORAGE" | "FLEX_CONSULTING" | "CLOUD_MANAGER_CLASSIC" | "CLOUD_MANAGER_BASIC_FREE_TIER" | "CLOUD_MANAGER_BASIC" | "CLOUD_MANAGER_PREMIUM" | "CLOUD_MANAGER_FREE_TIER" | "CLOUD_MANAGER_STANDARD_FREE_TIER" | "CLOUD_MANAGER_STANDARD_ANNUAL" | "CLOUD_MANAGER_STANDARD" | "CLOUD_MANAGER_FREE_TRIAL" | "ATLAS_INSTANCE_M0" | "ATLAS_INSTANCE_M2" | "ATLAS_INSTANCE_M5" | "ATLAS_AWS_INSTANCE_M10" | "ATLAS_AWS_INSTANCE_M20" | "ATLAS_AWS_INSTANCE_M30" | "ATLAS_AWS_INSTANCE_M40" | "ATLAS_AWS_INSTANCE_M50" | "ATLAS_AWS_INSTANCE_M60" | "ATLAS_AWS_INSTANCE_M80" | "ATLAS_AWS_INSTANCE_M100" | "ATLAS_AWS_INSTANCE_M140" | "ATLAS_AWS_INSTANCE_M200" | "ATLAS_AWS_INSTANCE_M300" | "ATLAS_AWS_INSTANCE_M40_LOW_CPU" | "ATLAS_AWS_INSTANCE_M50_LOW_CPU" | "ATLAS_AWS_INSTANCE_M60_LOW_CPU" | "ATLAS_AWS_INSTANCE_M80_LOW_CPU" | "ATLAS_AWS_INSTANCE_M200_LOW_CPU" | "ATLAS_AWS_INSTANCE_M300_LOW_CPU" | "ATLAS_AWS_INSTANCE_M400_LOW_CPU" | "ATLAS_AWS_INSTANCE_M700_LOW_CPU" | "ATLAS_AWS_INSTANCE_M40_NVME" | "ATLAS_AWS_INSTANCE_M50_NVME" | "ATLAS_AWS_INSTANCE_M60_NVME" | "ATLAS_AWS_INSTANCE_M80_NVME" | "ATLAS_AWS_INSTANCE_M200_NVME" | "ATLAS_AWS_INSTANCE_M400_NVME" | "ATLAS_AWS_INSTANCE_M10_PAUSED" | "ATLAS_AWS_INSTANCE_M20_PAUSED" | "ATLAS_AWS_INSTANCE_M30_PAUSED" | "ATLAS_AWS_INSTANCE_M40_PAUSED" | "ATLAS_AWS_INSTANCE_M50_PAUSED" | "ATLAS_AWS_INSTANCE_M60_PAUSED" | "ATLAS_AWS_INSTANCE_M80_PAUSED" | "ATLAS_AWS_INSTANCE_M100_PAUSED" | "ATLAS_AWS_INSTANCE_M140_PAUSED" | "ATLAS_AWS_INSTANCE_M200_PAUSED" | "ATLAS_AWS_INSTANCE_M300_PAUSED" | "ATLAS_AWS_INSTANCE_M40_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M50_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M60_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M80_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M200_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M300_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M400_LOW_CPU_PAUSED" | "ATLAS_AWS_INSTANCE_M700_LOW_CPU_PAUSED" | "ATLAS_AWS_SEARCH_INSTANCE_S20_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S30_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S40_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S50_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S60_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S70_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S80_COMPUTE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S30_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S40_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S50_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S60_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S80_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S90_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S100_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S110_MEMORY_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S40_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S50_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S60_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S80_STORAGE_NVME" | "ATLAS_AWS_SEARCH_INSTANCE_S90_STORAGE_NVME" | "ATLAS_AWS_STORAGE_PROVISIONED" | "ATLAS_AWS_STORAGE_STANDARD" | "ATLAS_AWS_STORAGE_STANDARD_GP3" | "ATLAS_AWS_STORAGE_IOPS" | "ATLAS_AWS_DATA_TRANSFER_SAME_REGION" | "ATLAS_AWS_DATA_TRANSFER_DIFFERENT_REGION" | "ATLAS_AWS_DATA_TRANSFER_INTERNET" | "ATLAS_AWS_BACKUP_SNAPSHOT_STORAGE" | "ATLAS_AWS_BACKUP_DOWNLOAD_VM" | "ATLAS_AWS_BACKUP_DOWNLOAD_VM_STORAGE" | "ATLAS_AWS_BACKUP_DOWNLOAD_VM_STORAGE_IOPS" | "ATLAS_AWS_PRIVATE_ENDPOINT" | "ATLAS_AWS_PRIVATE_ENDPOINT_CAPACITY_UNITS" | "ATLAS_GCP_SEARCH_INSTANCE_S20_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S30_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S40_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S50_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S60_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S70_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S80_COMPUTE_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S30_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S40_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S50_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S60_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S70_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S80_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S90_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S100_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S110_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S120_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S130_MEMORY_LOCALSSD" | "ATLAS_GCP_SEARCH_INSTANCE_S140_MEMORY_LOCALSSD" | "ATLAS_GCP_INSTANCE_M10" | "ATLAS_GCP_INSTANCE_M20" | "ATLAS_GCP_INSTANCE_M30" | "ATLAS_GCP_INSTANCE_M40" | "ATLAS_GCP_INSTANCE_M50" | "ATLAS_GCP_INSTANCE_M60" | "ATLAS_GCP_INSTANCE_M80" | "ATLAS_GCP_INSTANCE_M140" | "ATLAS_GCP_INSTANCE_M200" | "ATLAS_GCP_INSTANCE_M250" | "ATLAS_GCP_INSTANCE_M300" | "ATLAS_GCP_INSTANCE_M400" | "ATLAS_GCP_INSTANCE_M40_LOW_CPU" | "ATLAS_GCP_INSTANCE_M50_LOW_CPU" | "ATLAS_GCP_INSTANCE_M60_LOW_CPU" | "ATLAS_GCP_INSTANCE_M80_LOW_CPU" | "ATLAS_GCP_INSTANCE_M200_LOW_CPU" | "ATLAS_GCP_INSTANCE_M300_LOW_CPU" | "ATLAS_GCP_INSTANCE_M400_LOW_CPU" | "ATLAS_GCP_INSTANCE_M600_LOW_CPU" | "ATLAS_GCP_INSTANCE_M10_PAUSED" | "ATLAS_GCP_INSTANCE_M20_PAUSED" | "ATLAS_GCP_INSTANCE_M30_PAUSED" | "ATLAS_GCP_INSTANCE_M40_PAUSED" | "ATLAS_GCP_INSTANCE_M50_PAUSED" | "ATLAS_GCP_INSTANCE_M60_PAUSED" | "ATLAS_GCP_INSTANCE_M80_PAUSED" | "ATLAS_GCP_INSTANCE_M140_PAUSED" | "ATLAS_GCP_INSTANCE_M200_PAUSED" | "ATLAS_GCP_INSTANCE_M250_PAUSED" | "ATLAS_GCP_INSTANCE_M300_PAUSED" | "ATLAS_GCP_INSTANCE_M400_PAUSED" | "ATLAS_GCP_INSTANCE_M40_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M50_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M60_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M80_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M200_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M300_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M400_LOW_CPU_PAUSED" | "ATLAS_GCP_INSTANCE_M600_LOW_CPU_PAUSED" | "ATLAS_GCP_DATA_TRANSFER_INTERNET" | "ATLAS_GCP_STORAGE_SSD" | "ATLAS_GCP_DATA_TRANSFER_INTER_CONNECT" | "ATLAS_GCP_DATA_TRANSFER_INTER_ZONE" | "ATLAS_GCP_DATA_TRANSFER_INTER_REGION" | "ATLAS_GCP_DATA_TRANSFER_GOOGLE" | "ATLAS_GCP_BACKUP_SNAPSHOT_STORAGE" | "ATLAS_GCP_BACKUP_DOWNLOAD_VM" | "ATLAS_GCP_BACKUP_DOWNLOAD_VM_STORAGE" | "ATLAS_GCP_PRIVATE_ENDPOINT" | "ATLAS_GCP_PRIVATE_ENDPOINT_CAPACITY_UNITS" | "ATLAS_GCP_SNAPSHOT_COPY_DATA_TRANSFER" | "ATLAS_AZURE_INSTANCE_M10" | "ATLAS_AZURE_INSTANCE_M20" | "ATLAS_AZURE_INSTANCE_M30" | "ATLAS_AZURE_INSTANCE_M40" | "ATLAS_AZURE_INSTANCE_M50" | "ATLAS_AZURE_INSTANCE_M60" | "ATLAS_AZURE_INSTANCE_M80" | "ATLAS_AZURE_INSTANCE_M90" | "ATLAS_AZURE_INSTANCE_M200" | "ATLAS_AZURE_INSTANCE_R40" | "ATLAS_AZURE_INSTANCE_R50" | "ATLAS_AZURE_INSTANCE_R60" | "ATLAS_AZURE_INSTANCE_R80" | "ATLAS_AZURE_INSTANCE_R200" | "ATLAS_AZURE_INSTANCE_R300" | "ATLAS_AZURE_INSTANCE_R400" | "ATLAS_AZURE_INSTANCE_M60_NVME" | "ATLAS_AZURE_INSTANCE_M80_NVME" | "ATLAS_AZURE_INSTANCE_M200_NVME" | "ATLAS_AZURE_INSTANCE_M300_NVME" | "ATLAS_AZURE_INSTANCE_M400_NVME" | "ATLAS_AZURE_INSTANCE_M600_NVME" | "ATLAS_AZURE_INSTANCE_M10_PAUSED" | "ATLAS_AZURE_INSTANCE_M20_PAUSED" | "ATLAS_AZURE_INSTANCE_M30_PAUSED" | "ATLAS_AZURE_INSTANCE_M40_PAUSED" | "ATLAS_AZURE_INSTANCE_M50_PAUSED" | "ATLAS_AZURE_INSTANCE_M60_PAUSED" | "ATLAS_AZURE_INSTANCE_M80_PAUSED" | "ATLAS_AZURE_INSTANCE_M90_PAUSED" | "ATLAS_AZURE_INSTANCE_M200_PAUSED" | "ATLAS_AZURE_INSTANCE_R40_PAUSED" | "ATLAS_AZURE_INSTANCE_R50_PAUSED" | "ATLAS_AZURE_INSTANCE_R60_PAUSED" | "ATLAS_AZURE_INSTANCE_R80_PAUSED" | "ATLAS_AZURE_INSTANCE_R200_PAUSED" | "ATLAS_AZURE_INSTANCE_R300_PAUSED" | "ATLAS_AZURE_INSTANCE_R400_PAUSED" | "ATLAS_AZURE_SEARCH_INSTANCE_S20_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S30_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S40_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S50_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S60_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S70_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S80_COMPUTE_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S40_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S50_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S60_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S80_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S90_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S100_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S110_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S130_MEMORY_LOCALSSD" | "ATLAS_AZURE_SEARCH_INSTANCE_S135_MEMORY_LOCALSSD" | "ATLAS_AZURE_STORAGE_P2" | "ATLAS_AZURE_STORAGE_P3" | "ATLAS_AZURE_STORAGE_P4" | "ATLAS_AZURE_STORAGE_P6" | "ATLAS_AZURE_STORAGE_P10" | "ATLAS_AZURE_STORAGE_P15" | "ATLAS_AZURE_STORAGE_P20" | "ATLAS_AZURE_STORAGE_P30" | "ATLAS_AZURE_STORAGE_P40" | "ATLAS_AZURE_STORAGE_P50" | "ATLAS_AZURE_DATA_TRANSFER" | "ATLAS_AZURE_DATA_TRANSFER_REGIONAL_VNET_IN" | "ATLAS_AZURE_DATA_TRANSFER_REGIONAL_VNET_OUT" | "ATLAS_AZURE_DATA_TRANSFER_GLOBAL_VNET_IN" | "ATLAS_AZURE_DATA_TRANSFER_GLOBAL_VNET_OUT" | "ATLAS_AZURE_DATA_TRANSFER_AVAILABILITY_ZONE_IN" | "ATLAS_AZURE_DATA_TRANSFER_AVAILABILITY_ZONE_OUT" | "ATLAS_AZURE_DATA_TRANSFER_INTER_REGION_INTRA_CONTINENT" | "ATLAS_AZURE_DATA_TRANSFER_INTER_REGION_INTER_CONTINENT" | "ATLAS_AZURE_BACKUP_SNAPSHOT_STORAGE" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P2" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P3" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P4" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P6" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P10" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P15" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P20" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P30" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P40" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_P50" | "ATLAS_AZURE_STANDARD_STORAGE" | "ATLAS_AZURE_EXTENDED_STANDARD_IOPS" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE" | "ATLAS_AZURE_BACKUP_DOWNLOAD_VM_STORAGE_EXTENDED_IOPS" | "ATLAS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE" | "ATLAS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_EXTENDED_IOPS" | "ATLAS_BI_CONNECTOR" | "ATLAS_ADVANCED_SECURITY" | "ATLAS_ENTERPRISE_AUDITING" | "ATLAS_FREE_SUPPORT" | "ATLAS_SUPPORT" | "ATLAS_NDS_BACKFILL_SUPPORT" | "STITCH_DATA_DOWNLOADED_FREE_TIER" | "STITCH_DATA_DOWNLOADED" | "STITCH_COMPUTE_FREE_TIER" | "STITCH_COMPUTE" | "CREDIT" | "MINIMUM_CHARGE" | "CHARTS_DATA_DOWNLOADED_FREE_TIER" | "CHARTS_DATA_DOWNLOADED" | "ATLAS_DATA_LAKE_AWS_DATA_RETURNED_SAME_REGION" | "ATLAS_DATA_LAKE_AWS_DATA_RETURNED_DIFFERENT_REGION" | "ATLAS_DATA_LAKE_AWS_DATA_RETURNED_INTERNET" | "ATLAS_DATA_LAKE_AWS_DATA_SCANNED" | "ATLAS_DATA_LAKE_AWS_DATA_TRANSFERRED_FROM_DIFFERENT_REGION" | "ATLAS_NDS_AWS_DATA_LAKE_STORAGE_ACCESS" | "ATLAS_NDS_AWS_DATA_LAKE_STORAGE" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_SAME_REGION" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_SAME_CONTINENT" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_DIFFERENT_CONTINENT" | "ATLAS_DATA_FEDERATION_AZURE_DATA_RETURNED_INTERNET" | "ATLAS_DATA_FEDERATION_GCP_DATA_RETURNED_SAME_REGION" | "ATLAS_DATA_FEDERATION_GCP_DATA_RETURNED_DIFFERENT_REGION" | "ATLAS_DATA_FEDERATION_GCP_DATA_RETURNED_INTERNET" | "ATLAS_DATA_FEDERATION_AZURE_DATA_SCANNED" | "ATLAS_NDS_AZURE_DATA_LAKE_STORAGE_ACCESS" | "ATLAS_NDS_AZURE_DATA_LAKE_STORAGE" | "ATLAS_DATA_FEDERATION_GCP_DATA_SCANNED" | "ATLAS_NDS_GCP_DATA_LAKE_STORAGE_ACCESS" | "ATLAS_NDS_GCP_DATA_LAKE_STORAGE" | "ATLAS_NDS_AWS_OBJECT_STORAGE_ACCESS" | "ATLAS_NDS_AWS_COMPRESSED_OBJECT_STORAGE" | "ATLAS_NDS_AZURE_OBJECT_STORAGE_ACCESS" | "ATLAS_NDS_AZURE_OBJECT_STORAGE" | "ATLAS_NDS_AZURE_COMPRESSED_OBJECT_STORAGE" | "ATLAS_NDS_GCP_OBJECT_STORAGE_ACCESS" | "ATLAS_NDS_GCP_OBJECT_STORAGE" | "ATLAS_NDS_GCP_COMPRESSED_OBJECT_STORAGE" | "ATLAS_ARCHIVE_ACCESS_PARTITION_LOCATE" | "ATLAS_NDS_AWS_PIT_RESTORE_STORAGE_FREE_TIER" | "ATLAS_NDS_AWS_PIT_RESTORE_STORAGE" | "ATLAS_NDS_GCP_PIT_RESTORE_STORAGE_FREE_TIER" | "ATLAS_NDS_GCP_PIT_RESTORE_STORAGE" | "ATLAS_NDS_AZURE_PIT_RESTORE_STORAGE_FREE_TIER" | "ATLAS_NDS_AZURE_PIT_RESTORE_STORAGE" | "ATLAS_NDS_AZURE_PRIVATE_ENDPOINT_CAPACITY_UNITS" | "ATLAS_NDS_AZURE_CMK_PRIVATE_NETWORKING" | "ATLAS_NDS_AWS_CMK_PRIVATE_NETWORKING" | "ATLAS_NDS_AWS_OBJECT_STORAGE" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_UPLOAD" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_UPLOAD" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_M40" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_M50" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_M60" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P2" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P3" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P4" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P6" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P10" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P15" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P20" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P30" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P40" | "ATLAS_NDS_AZURE_SNAPSHOT_EXPORT_VM_STORAGE_P50" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_M40" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_M50" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_M60" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_STORAGE" | "ATLAS_NDS_AWS_SNAPSHOT_EXPORT_VM_STORAGE_IOPS" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_M40" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_M50" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_M60" | "ATLAS_NDS_GCP_SNAPSHOT_EXPORT_VM_STORAGE" | "ATLAS_NDS_AWS_SERVERLESS_RPU" | "ATLAS_NDS_AWS_SERVERLESS_WPU" | "ATLAS_NDS_AWS_SERVERLESS_STORAGE" | "ATLAS_NDS_AWS_SERVERLESS_CONTINUOUS_BACKUP" | "ATLAS_NDS_AWS_SERVERLESS_BACKUP_RESTORE_VM" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_PREVIEW" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_REGIONAL" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_CROSS_REGION" | "ATLAS_NDS_AWS_SERVERLESS_DATA_TRANSFER_INTERNET" | "ATLAS_NDS_GCP_SERVERLESS_RPU" | "ATLAS_NDS_GCP_SERVERLESS_WPU" | "ATLAS_NDS_GCP_SERVERLESS_STORAGE" | "ATLAS_NDS_GCP_SERVERLESS_CONTINUOUS_BACKUP" | "ATLAS_NDS_GCP_SERVERLESS_BACKUP_RESTORE_VM" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_PREVIEW" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_REGIONAL" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_CROSS_REGION" | "ATLAS_NDS_GCP_SERVERLESS_DATA_TRANSFER_INTERNET" | "ATLAS_NDS_AZURE_SERVERLESS_RPU" | "ATLAS_NDS_AZURE_SERVERLESS_WPU" | "ATLAS_NDS_AZURE_SERVERLESS_STORAGE" | "ATLAS_NDS_AZURE_SERVERLESS_CONTINUOUS_BACKUP" | "ATLAS_NDS_AZURE_SERVERLESS_BACKUP_RESTORE_VM" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_PREVIEW" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_REGIONAL" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_CROSS_REGION" | "ATLAS_NDS_AZURE_SERVERLESS_DATA_TRANSFER_INTERNET" | "REALM_APP_REQUESTS_FREE_TIER" | "REALM_APP_REQUESTS" | "REALM_APP_COMPUTE_FREE_TIER" | "REALM_APP_COMPUTE" | "REALM_APP_SYNC_FREE_TIER" | "REALM_APP_SYNC" | "REALM_APP_DATA_TRANSFER_FREE_TIER" | "REALM_APP_DATA_TRANSFER" | "GCP_SNAPSHOT_COPY_DISK" | "ATLAS_AWS_STREAM_PROCESSING_INSTANCE_SP10" | "ATLAS_AWS_STREAM_PROCESSING_INSTANCE_SP30" | "ATLAS_AWS_STREAM_PROCESSING_INSTANCE_SP50" | "ATLAS_AZURE_STREAM_PROCESSING_INSTANCE_SP10" | "ATLAS_AZURE_STREAM_PROCESSING_INSTANCE_SP30" | "ATLAS_AZURE_STREAM_PROCESSING_INSTANCE_SP50" | "ATLAS_AWS_STREAM_PROCESSING_DATA_TRANSFER" | "ATLAS_AZURE_STREAM_PROCESSING_DATA_TRANSFER" | "ATLAS_AWS_STREAM_PROCESSING_VPC_PEERING" | "ATLAS_AZURE_STREAM_PROCESSING_PRIVATELINK" | "ATLAS_AWS_STREAM_PROCESSING_PRIVATELINK" | "ATLAS_FLEX_AWS_100_USAGE_HOURS" | "ATLAS_FLEX_AWS_200_USAGE_HOURS" | "ATLAS_FLEX_AWS_300_USAGE_HOURS" | "ATLAS_FLEX_AWS_400_USAGE_HOURS" | "ATLAS_FLEX_AWS_500_USAGE_HOURS" | "ATLAS_FLEX_AZURE_100_USAGE_HOURS" | "ATLAS_FLEX_AZURE_200_USAGE_HOURS" | "ATLAS_FLEX_AZURE_300_USAGE_HOURS" | "ATLAS_FLEX_AZURE_400_USAGE_HOURS" | "ATLAS_FLEX_AZURE_500_USAGE_HOURS" | "ATLAS_FLEX_GCP_100_USAGE_HOURS" | "ATLAS_FLEX_GCP_200_USAGE_HOURS" | "ATLAS_FLEX_GCP_300_USAGE_HOURS" | "ATLAS_FLEX_GCP_400_USAGE_HOURS" | "ATLAS_FLEX_GCP_500_USAGE_HOURS" | "ATLAS_FLEX_AWS_LEGACY_100_USAGE_HOURS" | "ATLAS_FLEX_AWS_LEGACY_200_USAGE_HOURS" | "ATLAS_FLEX_AWS_LEGACY_300_USAGE_HOURS" | "ATLAS_FLEX_AWS_LEGACY_400_USAGE_HOURS" | "ATLAS_FLEX_AWS_LEGACY_500_USAGE_HOURS" | "ATLAS_FLEX_AZURE_LEGACY_100_USAGE_HOURS" | "ATLAS_FLEX_AZURE_LEGACY_200_USAGE_HOURS" | "ATLAS_FLEX_AZURE_LEGACY_300_USAGE_HOURS" | "ATLAS_FLEX_AZURE_LEGACY_400_USAGE_HOURS" | "ATLAS_FLEX_AZURE_LEGACY_500_USAGE_HOURS" | "ATLAS_FLEX_GCP_LEGACY_100_USAGE_HOURS" | "ATLAS_FLEX_GCP_LEGACY_200_USAGE_HOURS" | "ATLAS_FLEX_GCP_LEGACY_300_USAGE_HOURS" | "ATLAS_FLEX_GCP_LEGACY_400_USAGE_HOURS" | "ATLAS_FLEX_GCP_LEGACY_500_USAGE_HOURS";
             /**
              * Format: date-time
              * @description Date and time when MongoDB Cloud began charging for this line item. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
@@ -3417,6 +4011,120 @@ export interface components {
             ipAddress?: string;
             /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
             readonly links?: components["schemas"]["Link"][];
+        };
+        NumberMetricAlertView: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            currentValue?: components["schemas"]["NumberMetricValueView"];
+            eventTypeName: components["schemas"]["HostMetricEventTypeViewAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Hostname and port of the host to which this alert applies. The resource returns this parameter for alerts of events impacting hosts or replica sets.
+             * @example cloud-test.mongodb.com:27017
+             */
+            readonly hostnameAndPort?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Name of the metric against which Atlas checks the configured `metricThreshold.threshold`.
+             *
+             *     To learn more about the available metrics, see <a href="https://www.mongodb.com/docs/atlas/reference/alert-host-metrics/#std-label-measurement-types" target="_blank">Host Metrics</a>.
+             *
+             *     **NOTE**: If you set eventTypeName to OUTSIDE_SERVERLESS_METRIC_THRESHOLD, you can specify only metrics available for serverless. To learn more, see <a href="https://dochub.mongodb.org/core/alert-config-serverless-measurements" target="_blank">Serverless Measurements</a>.
+             * @example ASSERT_USER
+             */
+            readonly metricName?: string;
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description Name of the replica set to which this alert applies. The response returns this parameter for alerts of events impacting backups, hosts, or replica sets.
+             * @example event-replica-set
+             */
+            readonly replicaSetName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * Number Metric Units
+         * @description Element used to express the quantity. This can be an element of time, storage capacity, and the like.
+         * @example COUNT
+         * @enum {string}
+         */
+        NumberMetricUnits: "COUNT" | "THOUSAND" | "MILLION" | "BILLION";
+        /**
+         * Number Metric Value
+         * @description Measurement of the **metricName** recorded at the time of the event.
+         */
+        NumberMetricValueView: {
+            /**
+             * Format: double
+             * @description Amount of the **metricName** recorded at the time of the event. This value triggered the alert.
+             */
+            readonly number?: number;
+            units?: components["schemas"]["NumberMetricUnits"];
         };
         /**
          * On-Demand Cloud Provider Snapshot Source
@@ -3565,6 +4273,17 @@ export interface components {
             /** @description One or more organization-level roles assigned to the MongoDB Cloud user. */
             orgRoles?: ("ORG_OWNER" | "ORG_GROUP_CREATOR" | "ORG_BILLING_ADMIN" | "ORG_BILLING_READ_ONLY" | "ORG_READ_ONLY" | "ORG_MEMBER")[];
         };
+        PaginatedAlertView: {
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /** @description List of returned documents that MongoDB Cloud provides when completing this request. */
+            readonly results?: components["schemas"]["AlertViewForNdsGroup"][];
+            /**
+             * Format: int32
+             * @description Total number of documents available. MongoDB Cloud omits this value if `includeCount` is set to `false`. The total number is an estimate and may not be exact.
+             */
+            readonly totalCount?: number;
+        };
         /** @description List of MongoDB Database users granted access to databases in the specified project. */
         PaginatedApiAtlasDatabaseUserView: {
             /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
@@ -3671,6 +4390,223 @@ export interface components {
              */
             type: "PERIODIC_CPS";
         };
+        RawMetricAlertView: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            currentValue?: components["schemas"]["RawMetricValueView"];
+            eventTypeName: components["schemas"]["HostMetricEventTypeViewAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Hostname and port of the host to which this alert applies. The resource returns this parameter for alerts of events impacting hosts or replica sets.
+             * @example cloud-test.mongodb.com:27017
+             */
+            readonly hostnameAndPort?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Name of the metric against which Atlas checks the configured `metricThreshold.threshold`.
+             *
+             *     To learn more about the available metrics, see <a href="https://www.mongodb.com/docs/atlas/reference/alert-host-metrics/#std-label-measurement-types" target="_blank">Host Metrics</a>.
+             *
+             *     **NOTE**: If you set eventTypeName to OUTSIDE_SERVERLESS_METRIC_THRESHOLD, you can specify only metrics available for serverless. To learn more, see <a href="https://dochub.mongodb.org/core/alert-config-serverless-measurements" target="_blank">Serverless Measurements</a>.
+             * @example ASSERT_USER
+             */
+            readonly metricName?: string;
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description Name of the replica set to which this alert applies. The response returns this parameter for alerts of events impacting backups, hosts, or replica sets.
+             * @example event-replica-set
+             */
+            readonly replicaSetName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * Raw Metric Units
+         * @description Element used to express the quantity. This can be an element of time, storage capacity, and the like.
+         * @default RAW
+         * @enum {string}
+         */
+        RawMetricUnits: "RAW";
+        /**
+         * Raw Metric Value
+         * @description Measurement of the **metricName** recorded at the time of the event.
+         */
+        RawMetricValueView: {
+            /**
+             * Format: double
+             * @description Amount of the **metricName** recorded at the time of the event. This value triggered the alert.
+             */
+            readonly number?: number;
+            units?: components["schemas"]["RawMetricUnits"];
+        };
+        /**
+         * ReplicaSet Alerts
+         * @description ReplicaSet alert notifies about different activities on replica set of mongod instances.
+         */
+        ReplicaSetAlertViewForNdsGroup: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            eventTypeName: components["schemas"]["ReplicaSetEventTypeViewForNdsGroupAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Hostname and port of the host to which this alert applies. The resource returns this parameter for alerts of events impacting hosts or replica sets.
+             * @example cloud-test.mongodb.com:27017
+             */
+            readonly hostnameAndPort?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /** @description List of unique 24-hexadecimal character strings that identify the replica set members that are not in PRIMARY nor SECONDARY state. */
+            readonly nonRunningHostIds?: string[];
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the parent cluster to which this alert applies. The parent cluster contains the sharded nodes. MongoDB Cloud returns this parameter only for alerts of events impacting sharded clusters.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly parentClusterId?: string;
+            /**
+             * @description Name of the replica set to which this alert applies. The response returns this parameter for alerts of events impacting backups, hosts, or replica sets.
+             * @example event-replica-set
+             */
+            readonly replicaSetName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * ReplicaSet Event Types
+         * @description Incident that triggered this alert.
+         * @example NO_PRIMARY
+         * @enum {string}
+         */
+        ReplicaSetEventTypeViewForNdsGroupAlertable: "REPLICATION_OPLOG_WINDOW_RUNNING_OUT" | "NO_PRIMARY" | "PRIMARY_ELECTED" | "TOO_MANY_ELECTIONS" | "TOO_FEW_HEALTHY_MEMBERS" | "TOO_MANY_UNHEALTHY_MEMBERS";
         /**
          * Replication Specifications
          * @description Details that explain how MongoDB Cloud replicates data on the specified MongoDB database.
@@ -3961,6 +4897,100 @@ export interface components {
              * @enum {string}
              */
             providerName: "AWS" | "AZURE";
+        };
+        /**
+         * Stream Processor Alerts
+         * @description Stream Processor alert notifies about activities on Stream Processor in AtlasStreams.
+         */
+        StreamProcessorAlertViewForNdsGroup: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            eventTypeName: components["schemas"]["HostEventTypeViewForNdsGroupAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * @description The name of the Stream Processing Instance to which this alert applies. The resource returns this parameter for alerts of events impacting Stream Processing Instances.
+             * @example foobar
+             */
+            readonly instanceName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description The error message associated with the Stream Processor to which this alert applies.
+             * @example MongoServerError: Failed to start stream processor: (Location77175) Could not connect to the Kafka topic with kafka error code: -195, message: Local: Broker transport failure.: (Location77175)
+             */
+            readonly processorErrorMsg?: string;
+            /**
+             * @description The name of the Stream Processor to which this alert applies. The resource returns this parameter for alerts of events impacting Stream Processors.
+             * @example foobar
+             */
+            readonly processorName?: string;
+            /**
+             * @description The state of the Stream Processor to which this alert applies. The resource returns this parameter for alerts of events impacting Stream Processors.
+             * @example STARTED
+             */
+            readonly processorState?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
         };
         /** @description AWS configurations for AWS-based connection types. */
         StreamsAWSConnectionConfig: {
@@ -4397,6 +5427,120 @@ export interface components {
             synonymMappingStatus?: "FAILED" | "BUILDING" | "READY";
             /** @description List of synonym statuses by mapping. */
             synonymMappingStatusDetail?: components["schemas"]["SynonymMappingStatusDetailMap"][];
+        };
+        TimeMetricAlertView: {
+            /**
+             * Format: date-time
+             * @description Date and time until which this alert has been acknowledged. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if a MongoDB User previously acknowledged this alert.
+             *
+             *     - To acknowledge this alert forever, set the parameter value to 100 years in the future.
+             *
+             *     - To unacknowledge a previously acknowledged alert, do not set this parameter value.
+             */
+            acknowledgedUntil?: string;
+            /**
+             * @description Comment that a MongoDB Cloud user submitted when acknowledging the alert.
+             * @example Expiration on 3/19.  Silencing for 7days.
+             */
+            acknowledgementComment?: string;
+            /**
+             * Format: email
+             * @description MongoDB Cloud username of the person who acknowledged the alert. The response returns this parameter if a MongoDB Cloud user previously acknowledged this alert.
+             */
+            readonly acknowledgingUsername?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the alert configuration that sets this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly alertConfigId: string;
+            /**
+             * @description Human-readable label that identifies the cluster to which this alert applies. This resource returns this parameter for alerts of events impacting backups, replica sets, or sharded clusters.
+             * @example cluster1
+             */
+            readonly clusterName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time when MongoDB Cloud created this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly created: string;
+            currentValue?: components["schemas"]["TimeMetricValueView"];
+            eventTypeName: components["schemas"]["HostMetricEventTypeViewAlertable"];
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies the project that owns this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly groupId?: string;
+            /**
+             * @description Hostname and port of the host to which this alert applies. The resource returns this parameter for alerts of events impacting hosts or replica sets.
+             * @example cloud-test.mongodb.com:27017
+             */
+            readonly hostnameAndPort?: string;
+            /**
+             * @description Unique 24-hexadecimal digit string that identifies this alert.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly id: string;
+            /**
+             * Format: date-time
+             * @description Date and time that any notifications were last sent for this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter if MongoDB Cloud has sent notifications for this alert.
+             */
+            readonly lastNotified?: string;
+            /** @description List of one or more Uniform Resource Locators (URLs) that point to API sub-resources, related API resources, or both. RFC 5988 outlines these relationships. */
+            readonly links?: components["schemas"]["Link"][];
+            /**
+             * @description Name of the metric against which Atlas checks the configured `metricThreshold.threshold`.
+             *
+             *     To learn more about the available metrics, see <a href="https://www.mongodb.com/docs/atlas/reference/alert-host-metrics/#std-label-measurement-types" target="_blank">Host Metrics</a>.
+             *
+             *     **NOTE**: If you set eventTypeName to OUTSIDE_SERVERLESS_METRIC_THRESHOLD, you can specify only metrics available for serverless. To learn more, see <a href="https://dochub.mongodb.org/core/alert-config-serverless-measurements" target="_blank">Serverless Measurements</a>.
+             * @example ASSERT_USER
+             */
+            readonly metricName?: string;
+            /**
+             * @description Unique 24-hexadecimal character string that identifies the organization that owns the project to which this alert applies.
+             * @example 32b6e34b3d91647abb20e7b8
+             */
+            readonly orgId?: string;
+            /**
+             * @description Name of the replica set to which this alert applies. The response returns this parameter for alerts of events impacting backups, hosts, or replica sets.
+             * @example event-replica-set
+             */
+            readonly replicaSetName?: string;
+            /**
+             * Format: date-time
+             * @description Date and time that this alert changed to `"status" : "CLOSED"`. This parameter expresses its value in the ISO 8601 timestamp format in UTC. The resource returns this parameter once `"status" : "CLOSED"`.
+             */
+            readonly resolved?: string;
+            /**
+             * @description State of this alert at the time you requested its details.
+             * @example OPEN
+             * @enum {string}
+             */
+            readonly status: "CANCELLED" | "CLOSED" | "OPEN" | "TRACKING";
+            /**
+             * Format: date-time
+             * @description Date and time when someone last updated this alert. This parameter expresses its value in the ISO 8601 timestamp format in UTC.
+             */
+            readonly updated: string;
+        };
+        /**
+         * Time Metric Units
+         * @description Element used to express the quantity. This can be an element of time, storage capacity, and the like.
+         * @default HOURS
+         * @enum {string}
+         */
+        TimeMetricUnits: "NANOSECONDS" | "MILLISECONDS" | "MILLION_MINUTES" | "SECONDS" | "MINUTES" | "HOURS" | "DAYS";
+        /**
+         * Time Metric Value
+         * @description Measurement of the **metricName** recorded at the time of the event.
+         */
+        TimeMetricValueView: {
+            /**
+             * Format: double
+             * @description Amount of the **metricName** recorded at the time of the event. This value triggered the alert.
+             */
+            readonly number?: number;
+            units?: components["schemas"]["TimeMetricUnits"];
         };
         /**
          * englishPossessive
@@ -5189,11 +6333,14 @@ export type AwsRegionConfig = components['schemas']['AWSRegionConfig'];
 export type AwsRegionConfig20240805 = components['schemas']['AWSRegionConfig20240805'];
 export type AdvancedAutoScalingSettings = components['schemas']['AdvancedAutoScalingSettings'];
 export type AdvancedComputeAutoScaling = components['schemas']['AdvancedComputeAutoScaling'];
+export type AlertViewForNdsGroup = components['schemas']['AlertViewForNdsGroup'];
 export type ApiAtlasCloudProviderAccessFeatureUsageFeatureIdView = components['schemas']['ApiAtlasCloudProviderAccessFeatureUsageFeatureIdView'];
 export type ApiAtlasClusterAdvancedConfigurationView = components['schemas']['ApiAtlasClusterAdvancedConfigurationView'];
 export type ApiAtlasFtsAnalyzersViewManual = components['schemas']['ApiAtlasFTSAnalyzersViewManual'];
 export type ApiAtlasFtsMappingsViewManual = components['schemas']['ApiAtlasFTSMappingsViewManual'];
 export type ApiError = components['schemas']['ApiError'];
+export type AppServiceAlertView = components['schemas']['AppServiceAlertView'];
+export type AppServiceEventTypeViewAlertable = components['schemas']['AppServiceEventTypeViewAlertable'];
 export type AtlasOrganization = components['schemas']['AtlasOrganization'];
 export type AtlasSearchAnalyzer = components['schemas']['AtlasSearchAnalyzer'];
 export type AzureCloudProviderContainer = components['schemas']['AzureCloudProviderContainer'];
@@ -5238,10 +6385,12 @@ export type CloudProviderContainer = components['schemas']['CloudProviderContain
 export type CloudProviderGcpAutoScaling = components['schemas']['CloudProviderGCPAutoScaling'];
 export type CloudRegionConfig = components['schemas']['CloudRegionConfig'];
 export type CloudRegionConfig20240805 = components['schemas']['CloudRegionConfig20240805'];
+export type ClusterAlertView = components['schemas']['ClusterAlertView'];
 export type ClusterConnectionStrings = components['schemas']['ClusterConnectionStrings'];
 export type ClusterDescription20240805 = components['schemas']['ClusterDescription20240805'];
 export type ClusterDescriptionConnectionStringsPrivateEndpoint = components['schemas']['ClusterDescriptionConnectionStringsPrivateEndpoint'];
 export type ClusterDescriptionConnectionStringsPrivateEndpointEndpoint = components['schemas']['ClusterDescriptionConnectionStringsPrivateEndpointEndpoint'];
+export type ClusterEventTypeViewAlertable = components['schemas']['ClusterEventTypeViewAlertable'];
 export type ClusterFlexProviderSettings = components['schemas']['ClusterFlexProviderSettings'];
 export type ClusterFreeAutoScaling = components['schemas']['ClusterFreeAutoScaling'];
 export type ClusterFreeProviderSettings = components['schemas']['ClusterFreeProviderSettings'];
@@ -5272,11 +6421,15 @@ export type DataLakeHttpStore = components['schemas']['DataLakeHTTPStore'];
 export type DataLakePipelinesPartitionField = components['schemas']['DataLakePipelinesPartitionField'];
 export type DataLakeS3StoreSettings = components['schemas']['DataLakeS3StoreSettings'];
 export type DataLakeStoreSettings = components['schemas']['DataLakeStoreSettings'];
+export type DataMetricAlertView = components['schemas']['DataMetricAlertView'];
+export type DataMetricUnits = components['schemas']['DataMetricUnits'];
+export type DataMetricValueView = components['schemas']['DataMetricValueView'];
 export type DataProcessRegionView = components['schemas']['DataProcessRegionView'];
 export type DatabaseUserRole = components['schemas']['DatabaseUserRole'];
 export type DateCriteriaView = components['schemas']['DateCriteriaView'];
 export type DedicatedHardwareSpec = components['schemas']['DedicatedHardwareSpec'];
 export type DedicatedHardwareSpec20240805 = components['schemas']['DedicatedHardwareSpec20240805'];
+export type DefaultAlertViewForNdsGroup = components['schemas']['DefaultAlertViewForNdsGroup'];
 export type DefaultScheduleView = components['schemas']['DefaultScheduleView'];
 export type DiskBackupSnapshotAwsExportBucketRequest = components['schemas']['DiskBackupSnapshotAWSExportBucketRequest'];
 export type DiskBackupSnapshotAwsExportBucketResponse = components['schemas']['DiskBackupSnapshotAWSExportBucketResponse'];
@@ -5312,12 +6465,20 @@ export type GroupRoleAssignment = components['schemas']['GroupRoleAssignment'];
 export type GroupUserResponse = components['schemas']['GroupUserResponse'];
 export type HardwareSpec = components['schemas']['HardwareSpec'];
 export type HardwareSpec20240805 = components['schemas']['HardwareSpec20240805'];
+export type HostAlertViewForNdsGroup = components['schemas']['HostAlertViewForNdsGroup'];
+export type HostEventTypeViewForNdsGroupAlertable = components['schemas']['HostEventTypeViewForNdsGroupAlertable'];
+export type HostMetricAlert = components['schemas']['HostMetricAlert'];
+export type HostMetricEventTypeViewAlertable = components['schemas']['HostMetricEventTypeViewAlertable'];
+export type HostMetricValue = components['schemas']['HostMetricValue'];
 export type IngestionSink = components['schemas']['IngestionSink'];
 export type IngestionSource = components['schemas']['IngestionSource'];
 export type InvoiceLineItem = components['schemas']['InvoiceLineItem'];
 export type Link = components['schemas']['Link'];
 export type MonthlyScheduleView = components['schemas']['MonthlyScheduleView'];
 export type NetworkPermissionEntry = components['schemas']['NetworkPermissionEntry'];
+export type NumberMetricAlertView = components['schemas']['NumberMetricAlertView'];
+export type NumberMetricUnits = components['schemas']['NumberMetricUnits'];
+export type NumberMetricValueView = components['schemas']['NumberMetricValueView'];
 export type OnDemandCpsSnapshotSource = components['schemas']['OnDemandCpsSnapshotSource'];
 export type OnlineArchiveSchedule = components['schemas']['OnlineArchiveSchedule'];
 export type OrgActiveUserResponse = components['schemas']['OrgActiveUserResponse'];
@@ -5325,6 +6486,7 @@ export type OrgGroup = components['schemas']['OrgGroup'];
 export type OrgPendingUserResponse = components['schemas']['OrgPendingUserResponse'];
 export type OrgUserResponse = components['schemas']['OrgUserResponse'];
 export type OrgUserRolesResponse = components['schemas']['OrgUserRolesResponse'];
+export type PaginatedAlertView = components['schemas']['PaginatedAlertView'];
 export type PaginatedApiAtlasDatabaseUserView = components['schemas']['PaginatedApiAtlasDatabaseUserView'];
 export type PaginatedAtlasGroupView = components['schemas']['PaginatedAtlasGroupView'];
 export type PaginatedClusterDescription20240805 = components['schemas']['PaginatedClusterDescription20240805'];
@@ -5333,6 +6495,11 @@ export type PaginatedNetworkAccessView = components['schemas']['PaginatedNetwork
 export type PaginatedOrgGroupView = components['schemas']['PaginatedOrgGroupView'];
 export type PaginatedOrganizationView = components['schemas']['PaginatedOrganizationView'];
 export type PeriodicCpsSnapshotSource = components['schemas']['PeriodicCpsSnapshotSource'];
+export type RawMetricAlertView = components['schemas']['RawMetricAlertView'];
+export type RawMetricUnits = components['schemas']['RawMetricUnits'];
+export type RawMetricValueView = components['schemas']['RawMetricValueView'];
+export type ReplicaSetAlertViewForNdsGroup = components['schemas']['ReplicaSetAlertViewForNdsGroup'];
+export type ReplicaSetEventTypeViewForNdsGroupAlertable = components['schemas']['ReplicaSetEventTypeViewForNdsGroupAlertable'];
 export type ReplicationSpec20240805 = components['schemas']['ReplicationSpec20240805'];
 export type ResourceTag = components['schemas']['ResourceTag'];
 export type SearchHostStatusDetail = components['schemas']['SearchHostStatusDetail'];
@@ -5348,6 +6515,7 @@ export type SearchSynonymMappingDefinition = components['schemas']['SearchSynony
 export type ServerlessAwsTenantEndpointUpdate = components['schemas']['ServerlessAWSTenantEndpointUpdate'];
 export type ServerlessAzureTenantEndpointUpdate = components['schemas']['ServerlessAzureTenantEndpointUpdate'];
 export type ServerlessTenantEndpointUpdate = components['schemas']['ServerlessTenantEndpointUpdate'];
+export type StreamProcessorAlertViewForNdsGroup = components['schemas']['StreamProcessorAlertViewForNdsGroup'];
 export type StreamsAwsConnectionConfig = components['schemas']['StreamsAWSConnectionConfig'];
 export type StreamsAwsLambdaConnection = components['schemas']['StreamsAWSLambdaConnection'];
 export type StreamsClusterConnection = components['schemas']['StreamsClusterConnection'];
@@ -5372,6 +6540,9 @@ export type TextSearchIndexCreateRequest = components['schemas']['TextSearchInde
 export type TextSearchIndexDefinition = components['schemas']['TextSearchIndexDefinition'];
 export type TextSearchIndexResponse = components['schemas']['TextSearchIndexResponse'];
 export type TextSearchIndexStatusDetail = components['schemas']['TextSearchIndexStatusDetail'];
+export type TimeMetricAlertView = components['schemas']['TimeMetricAlertView'];
+export type TimeMetricUnits = components['schemas']['TimeMetricUnits'];
+export type TimeMetricValueView = components['schemas']['TimeMetricValueView'];
 export type TokenFilterEnglishPossessive = components['schemas']['TokenFilterEnglishPossessive'];
 export type TokenFilterFlattenGraph = components['schemas']['TokenFilterFlattenGraph'];
 export type TokenFilterPorterStemming = components['schemas']['TokenFilterPorterStemming'];
@@ -5728,6 +6899,49 @@ export interface operations {
                     "application/vnd.atlas.2023-01-01+json": unknown;
                 };
             };
+            401: components["responses"]["unauthorized"];
+            403: components["responses"]["forbidden"];
+            404: components["responses"]["notFound"];
+            500: components["responses"]["internalServerError"];
+        };
+    };
+    listAlerts: {
+        parameters: {
+            query?: {
+                /** @description Flag that indicates whether Application wraps the response in an `envelope` JSON object. Some API clients cannot access the HTTP response headers or status code. To remediate this, set envelope=true in the query. Endpoints that return a list of results use the results object as an envelope. Application adds the status parameter to the response body. */
+                envelope?: components["parameters"]["envelope"];
+                /** @description Flag that indicates whether the response returns the total number of items (**totalCount**) in the response. */
+                includeCount?: components["parameters"]["includeCount"];
+                /** @description Number of items that the response returns per page. */
+                itemsPerPage?: components["parameters"]["itemsPerPage"];
+                /** @description Number of the page that displays the current set of the total objects that the response returns. */
+                pageNum?: components["parameters"]["pageNum"];
+                /** @description Flag that indicates whether the response body should be in the prettyprint format. */
+                pretty?: components["parameters"]["pretty"];
+                /** @description Status of the alerts to return. Omit to return all alerts in all statuses. */
+                status?: "OPEN" | "TRACKING" | "CLOSED";
+            };
+            header?: never;
+            path: {
+                /** @description Unique 24-hexadecimal digit string that identifies your project. Use the [/groups](#tag/Projects/operation/listProjects) endpoint to retrieve all projects to which the authenticated user has access.
+                 *
+                 *     **NOTE**: Groups and projects are synonymous terms. Your group id is the same as your project id. For existing groups, your group/project id remains the same. The resource and corresponding endpoints use the term groups. */
+                groupId: components["parameters"]["groupId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.atlas.2023-01-01+json": components["schemas"]["PaginatedAlertView"];
+                };
+            };
+            400: components["responses"]["badRequest"];
             401: components["responses"]["unauthorized"];
             403: components["responses"]["forbidden"];
             404: components["responses"]["notFound"];

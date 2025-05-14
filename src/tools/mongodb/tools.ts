@@ -20,12 +20,17 @@ import { CreateCollectionTool } from "./create/createCollection.js";
 import { LogsTool } from "./metadata/logs.js";
 import { CreateSearchIndexTool } from "./create/createSearchIndex.js";
 import { UpdateSearchIndexTool } from "./update/updateSearchIndex.js";
+import { CreateVectorIndexTool } from "./create/createVectorIndex.js";
+import { UpdateVectorIndexTool } from "./update/updateVectorIndex.js";
+import { CollectionSearchIndexesTool } from "./read/collectionSearchIndexes.js";
+import { DropSearchIndexTool } from "./delete/dropSearchIndex.js";
 
 export const MongoDbTools = [
     ConnectTool,
     ListCollectionsTool,
     ListDatabasesTool,
     CollectionIndexesTool,
+    CollectionSearchIndexesTool,
     CreateIndexTool,
     CollectionSchemaTool,
     FindTool,
@@ -44,4 +49,7 @@ export const MongoDbTools = [
     LogsTool,
     CreateSearchIndexTool,
     UpdateSearchIndexTool,
+    CreateVectorIndexTool,
+    UpdateVectorIndexTool,
+    DropSearchIndexTool,
 ];
