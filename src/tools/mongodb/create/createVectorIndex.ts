@@ -1,10 +1,5 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import {
-    buildVectorFields,
-    DbOperationArgs,
-    MongoDBToolBase,
-    VectorIndexArgs,
-} from "../mongodbTool.js";
+import { buildVectorFields, DbOperationArgs, MongoDBToolBase, VectorIndexArgs } from "../mongodbTool.js";
 import { OperationType, ToolArgs } from "../../tool.js";
 
 const VECTOR_INDEX_TYPE = "vectorSearch";
