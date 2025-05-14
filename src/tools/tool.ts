@@ -33,11 +33,23 @@ export abstract class ToolBase {
             description: this.description,
         };
 
-        if (this.operationType === "read" || this.operationType === "metadata") {
-            annotations.readOnlyHint = true;
-            annotations.destructiveHint = false;
-        } else {
-            annotations.destructiveHint = this.operationType === "delete";
+        switch (this.operationType) {
+            case "read":
+            case "metadata":
+                annotations.readOnlyHint = true;
+                annotations.destructiveHint = false;
+                break;
+            case "delete":
+                annotations.readOnlyHint = false;
+                annotations.destructiveHint = true;
+                break;
+            case "create":
+            case "update":
+                annotations.destructiveHint = false;
+                annotations.readOnlyHint = false;
+                break;
+            default:
+                break;
         }
 
         return annotations;
