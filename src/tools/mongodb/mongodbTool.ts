@@ -55,6 +55,17 @@ export const VectorIndexArgs = {
         .describe("Additional indexed fields that pre-filter data."),
 };
 
+type VectorDefinitionType = z.infer<typeof VectorIndexArgs.vectorDefinition>;
+type FilterFieldsType = z.infer<typeof VectorIndexArgs.filterFields>;
+export function buildVectorFields(vectorDefinition: VectorDefinitionType, filterFields: FilterFieldsType): object[] {
+    const typedVectorField = { ...vectorDefinition, type: VectorFieldType.VECTOR };
+    const typedFilterFields = (filterFields ?? []).map((f) => ({
+        ...f,
+        type: VectorFieldType.FILTER,
+    }));
+    return [typedVectorField, ...typedFilterFields];
+}
+
 export abstract class MongoDBToolBase extends ToolBase {
     protected category: ToolCategory = "mongodb";
 

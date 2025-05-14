@@ -1,8 +1,8 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
+    buildVectorFields,
     DbOperationArgs,
     MongoDBToolBase,
-    VectorFieldType,
     VectorIndexArgs,
 } from "../mongodbTool.js";
 import { OperationType, ToolArgs } from "../../tool.js";
@@ -29,17 +29,11 @@ export class CreateVectorIndexTool extends MongoDBToolBase {
     }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
 
-        const typedVectorField = { ...vectorDefinition, type: VectorFieldType.VECTOR };
-        const typedFilterFields =
-            filterFields?.map((v) => ({
-                ...v,
-                type: VectorFieldType.FILTER,
-            })) || [];
         const indexes = await provider.createSearchIndexes(database, collection, [
             {
                 name,
                 type: VECTOR_INDEX_TYPE,
-                definition: { fields: [typedVectorField, ...typedFilterFields] },
+                definition: { fields: buildVectorFields(vectorDefinition, filterFields) },
             },
         ]);
 
