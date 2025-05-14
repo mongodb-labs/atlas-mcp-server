@@ -35,10 +35,9 @@ export abstract class ToolBase {
 
         if (this.operationType === "read" || this.operationType === "metadata") {
             annotations.readOnlyHint = true;
-        }
-
-        if (this.operationType === "delete") {
-            annotations.destructiveHint = true;
+            annotations.destructiveHint = false;
+        } else {
+            annotations.destructiveHint = this.operationType === "delete";
         }
 
         return annotations;
