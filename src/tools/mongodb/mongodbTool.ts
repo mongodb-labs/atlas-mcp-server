@@ -20,6 +20,7 @@ export const VectorIndexArgs = {
         .object({
             path: z
                 .string()
+                .min(1)
                 .describe(
                     "Name of the field to index. For nested fields, use dot notation to specify path to embedded fields."
                 ),
@@ -46,6 +47,7 @@ export const VectorIndexArgs = {
             z.object({
                 path: z
                     .string()
+                    .min(1)
                     .describe(
                         "Name of the field to filter by. For nested fields, use dot notation to specify path to embedded fields."
                     ),
