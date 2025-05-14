@@ -27,7 +27,22 @@ export abstract class ToolBase {
 
     protected abstract argsShape: ZodRawShape;
 
-    protected abstract annotations: ToolAnnotations;
+    protected get annotations(): ToolAnnotations {
+        const annotations: ToolAnnotations = {
+            title: this.name,
+            description: this.description,
+        };
+
+        if (this.operationType === "read" || this.operationType === "metadata") {
+            annotations.readOnlyHint = true;
+        }
+
+        if (this.operationType === "delete") {
+            annotations.destructiveHint = true;
+        }
+
+        return annotations;
+    }
 
     protected abstract execute(...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<CallToolResult>;
 
@@ -35,9 +50,7 @@ export abstract class ToolBase {
         protected readonly session: Session,
         protected readonly config: UserConfig,
         protected readonly telemetry: Telemetry
-    ) {
-        this.updateAnnotations();
-    }
+    ) {}
 
     public register(server: McpServer): void {
         if (!this.verifyAllowed()) {
@@ -134,19 +147,6 @@ export abstract class ToolBase {
             ],
             isError: true,
         };
-    }
-
-    protected updateAnnotations() {
-        this.annotations: ToolAnnotationsSchema =  {
-            description: this.description,
-        };
-        if (this.operationType === "read") {
-            this.annotations.readOnlyHint = true;
-        }
-
-        if (this.operationType == "delete") {
-            this.annotations.destructiveHint = true;
-        }
     }
 
     protected abstract resolveTelemetryMetadata(
