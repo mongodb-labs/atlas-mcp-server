@@ -22,7 +22,7 @@ A Model Context Protocol server for interacting with MongoDB Databases and Mongo
 
 ## Prerequisites
 
-- Node.js (v20 or later)
+- Node.js (v20.10.0 or later)
 
 ```shell
 node -v
