@@ -58,12 +58,14 @@ You can pass your connection string via args, make sure to use a valid username 
         "-y",
         "mongodb-mcp-server",
         "--connectionString",
-        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+        "mongodb://localhost:27017/myDatabase"
       ]
     }
   }
 }
 ```
+
+NOTE: The connection string can be configured to connect to any MongoDB cluster, whether it's a local instance or an Atlas cluster.
 
 #### Option 2: Atlas API credentials args
 
