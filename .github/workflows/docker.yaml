@@ -8,12 +8,12 @@ permissions:
   contents: read
   issues: write
 jobs:
-  build_images:
-    name: Build and publish docker image
+  properties:
+    name: Set properties
     runs-on: ubuntu-latest
-    env:
-      IMAGE_REPOSITORY: docker.io/mongodb/apix_test
-      TAG_PREFIX: mongodb-mcp-server-
+    outputs:
+      date: ${{ steps.set-properties.outputs.DATE }}
+      version: ${{ steps.set-properties.outputs.VERSION }}
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
         with:
@@ -27,6 +27,21 @@ jobs:
           VERSION=$(npm pkg get version | tr -d '"')
           echo "DATE=${DATE}" >> "$GITHUB_OUTPUT"
           echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+  push:
+    name: Build and publish docker image
+    runs-on: ubuntu-latest
+    needs: properties
+    env:
+      IMAGE_REPOSITORY: docker.io/mongodb/apix_test
+      TAG_PREFIX: mongodb-mcp-server-
+    steps:
+      - uses: GitHubSecurityLab/actions-permissions/monitor@v1
+        with:
+          config: ${{ vars.PERMISSIONS_CONFIG }}
+      - name: Check out code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        with:
+          ref: v${{ needs.properties.outputs.version }}
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2
       - name: Login to Docker Hub
@@ -40,7 +55,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           # TODO: add latest tag
-          tags: ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}, ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+          tags: ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ needs.properties.outputs.version }}, ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ needs.properties.outputs.version }}-${{ needs.properties.outputs.date }}
           file: Dockerfile
           push: true
     #   - name: Create Issue
@@ -48,6 +63,6 @@ jobs:
     #     uses: imjohnbo/issue-bot@572eed14422c4d6ca37e870f97e7da209422f5bd
     #     with:
     #       labels: failed-release
-    #       title: Release Failure for Docker Image ${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+    #       title: Release Failure for Docker Image ${{ env.TAG_PREFIX }}${{ needs.properties.outputs.version }}-${{ needs.properties.outputs.date }}
     #       body: See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
     # TODO: enable before merging
