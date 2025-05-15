@@ -71,5 +71,4 @@ export type CommonProperties = {
     config_atlas_auth?: TelemetryBoolSet;
     config_connection_string?: TelemetryBoolSet;
     session_id?: string;
-    container_id?: string;
 } & CommonStaticProperties;
