@@ -18,7 +18,7 @@ export const CountArgs = {
 
 export class CountTool extends MongoDBToolBase {
     protected name = "count";
-    protected description = "Gets the number of documents in a MongoDB collection";
+    protected description = "Gets the number of documents in a MongoDB collection using countDocuments()";
     protected argsShape = {
         ...DbOperationArgs,
         ...CountArgs,
