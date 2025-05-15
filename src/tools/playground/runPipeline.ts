@@ -39,20 +39,21 @@ const DEFAULT_SYNONYMS: Array<Record<string, unknown>> = [];
 export const RunPipelineOperationArgs = {
     documents: z
         .array(z.record(z.string(), z.unknown()))
+        .max(500)
         .describe("Documents to run the pipeline against. 500 is maximum.")
         .default(DEFAULT_DOCUMENTS),
     aggregationPipeline: z
         .array(z.record(z.string(), z.unknown()))
-        .describe("Aggregation pipeline to run on the provided documents.")
+        .describe("MongoDB aggregation pipeline to run on the provided documents.")
         .default(DEFAULT_PIPELINE),
     searchIndexDefinition: z
         .record(z.string(), z.unknown())
-        .describe("Search index to create before running the pipeline.")
+        .describe("MongoDB search index definition to create before running the pipeline.")
         .optional()
         .default(DEFAULT_SEARCH_INDEX_DEFINITION),
     synonyms: z
         .array(z.record(z.any()))
-        .describe("Synonyms mapping to create before running the pipeline.")
+        .describe("MongoDB synonyms mapping to create before running the pipeline.")
         .optional()
         .default(DEFAULT_SYNONYMS),
 };
@@ -76,7 +77,7 @@ interface RunErrorResponse {
 export class RunPipeline extends ToolBase {
     protected name = "run-pipeline";
     protected description =
-        "Run aggregation pipeline for provided documents without needing an Atlas account, cluster, or collection.";
+        "Run MongoDB aggregation pipeline for provided documents without needing an Atlas account, cluster, or collection. The tool can be useful for running ad-hoc pipelines for testing or debugging.";
     protected category: ToolCategory = "playground";
     protected operationType: OperationType = "metadata";
     protected argsShape = RunPipelineOperationArgs;
