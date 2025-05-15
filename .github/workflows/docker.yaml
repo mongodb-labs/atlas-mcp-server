@@ -9,7 +9,6 @@ permissions:
   issues: write
 jobs:
   push:
-    name: Set properties
     runs-on: ubuntu-latest
     env:
       IMAGE_REPOSITORY: docker.io/mongodb/apix_test
