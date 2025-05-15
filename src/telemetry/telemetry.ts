@@ -7,6 +7,10 @@ import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
 import nodeMachineId from "node-machine-id";
 import { getDeviceId } from "@mongodb-js/device-id";
+import fs from "fs/promises";
+import os from "os";
+import path from "path";
+import { randomUUID } from "crypto";
 
 type EventResult = {
     success: boolean;
@@ -14,6 +18,26 @@ type EventResult = {
 };
 
 export const DEVICE_ID_TIMEOUT = 3000;
+
+async function fileExists(filepath: string): Promise<boolean> {
+    try {
+        await fs.stat(filepath);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+async function isContainerEnv(): Promise<boolean> {
+    if (await fileExists("/.dockerenv")) {
+        return true;
+    }
+    return process.env.container != "";
+}
+
+function containerIdFilePath(): string {
+    return path.join(os.homedir(), ".mongodb", "container", ".containerId");
+}
 
 export class Telemetry {
     private isBufferingEvents: boolean = true;
@@ -73,6 +97,22 @@ export class Telemetry {
             },
             abortSignal: this.deviceIdAbortController.signal,
         });
+
+        const containerEnv = await isContainerEnv();
+
+        if (containerEnv) {
+            const filePath = containerIdFilePath();
+            const exists = await fileExists(filePath);
+            let content: string;
+            if (exists) {
+                content = await fs.readFile(filePath, "utf8");
+            } else {
+                content = randomUUID().toString();
+                await fs.mkdir(path.dirname(filePath), { recursive: true });
+                await fs.writeFile(filePath, content, "utf8");
+            }
+            this.commonProperties.container_id = content;
+        }
 
         this.commonProperties.device_id = await this.deviceIdPromise;
 
