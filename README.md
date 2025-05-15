@@ -150,12 +150,7 @@ Without options:
   "mcpServers": {
     "MongoDB": {
       "command": "docker",
-      "args": [
-        "run",
-        "--rm",
-        "-i",
-        "mongodb/mongodb-mcp-server:latest"
-      ]
+      "args": ["run", "--rm", "-i", "mongodb/mongodb-mcp-server:latest"]
     }
   }
 }

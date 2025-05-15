@@ -38,17 +38,22 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          # TODO: add latest tag
-          tags: ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}, ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+          tags: ${{ env.IMAGE_REPOSITORY }}:latest, ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}, ${{ env.IMAGE_REPOSITORY }}:${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
           file: Dockerfile
           push: true
           build-args: |
             VERSION=${{ steps.set-properties.outputs.VERSION }}
-    #   - name: Create Issue
-    #     if: ${{ failure() }}
-    #     uses: imjohnbo/issue-bot@572eed14422c4d6ca37e870f97e7da209422f5bd
-    #     with:
-    #       labels: failed-release
-    #       title: Release Failure for Docker Image ${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
-    #       body: See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    # TODO: enable before merging
+      - uses: mongodb-js/devtools-shared/actions/setup-bot-token@main
+        id: app-token
+        if: ${{ failure() }}
+        with:
+          app-id: ${{ vars.DEVTOOLS_BOT_APP_ID }}
+          private-key: ${{ secrets.DEVTOOLS_BOT_PRIVATE_KEY }}
+      - name: Create Issue
+        if: ${{ failure() }}
+        uses: imjohnbo/issue-bot@572eed14422c4d6ca37e870f97e7da209422f5bd
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          title: Release Failure for Docker Image ${{ env.TAG_PREFIX }}${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+          body: See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          labels: "docker, release_failure"
