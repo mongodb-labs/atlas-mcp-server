@@ -8,21 +8,27 @@ import {
 } from "../../../helpers.js";
 
 describeWithMongoDB("count tool", (integration) => {
-    validateToolMetadata(integration, "count", "Gets the number of documents in a MongoDB collection using countDocuments()", [
-        {
-            name: "filter",
-            description: "The query filter to count documents. Matches the syntax of the filter argument of db.collection.countDocuments()",
-            type: "object",
-            required: false,
-        },
-        {
-            name: "query",
-            description: "Alternative old name for filter. Will be used in db.collection.countDocuments()",
-            type: "object",
-            required: false,
-        },
-        ...databaseCollectionParameters,
-    ]);
+    validateToolMetadata(
+        integration,
+        "count",
+        "Gets the number of documents in a MongoDB collection using countDocuments()",
+        [
+            {
+                name: "filter",
+                description:
+                    "The query filter to count documents. Matches the syntax of the filter argument of db.collection.countDocuments()",
+                type: "object",
+                required: false,
+            },
+            {
+                name: "query",
+                description: "Alternative old name for filter. Will be used in db.collection.countDocuments()",
+                type: "object",
+                required: false,
+            },
+            ...databaseCollectionParameters,
+        ]
+    );
 
     validateThrowsForInvalidArguments(integration, "count", [
         {},
