@@ -115,26 +115,51 @@ You can run the MongoDB MCP Server in a Docker container, which provides isolati
 
 #### Run with Environment Variables
 
-You need to provide either a MongoDB connection string OR Atlas API credentials:
+You may provide either a MongoDB connection string OR Atlas API credentials:
 
-##### Option A: With MongoDB connection string
+##### Option A: No configuration
 
 ```shell
-docker run -i \
+docker run --rm -i \
+  mongodb/mongodb-mcp-server:latest
+```
+
+##### Option B: With MongoDB connection string
+
+```shell
+docker run --rm -i \
   -e MDB_MCP_CONNECTION_STRING="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" \
   mongodb/mongodb-mcp-server:latest
 ```
 
-##### Option B: With Atlas API credentials
+##### Option C: With Atlas API credentials
 
 ```shell
-docker run -i \
+docker run --rm -i \
   -e MDB_MCP_API_CLIENT_ID="your-atlas-service-accounts-client-id" \
   -e MDB_MCP_API_CLIENT_SECRET="your-atlas-service-accounts-client-secret" \
   mongodb/mongodb-mcp-server:latest
 ```
 
 ##### Docker in MCP Configuration File
+
+Without options:
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "mongodb/mongodb-mcp-server:latest"
+      ]
+    }
+  }
+}
+```
 
 With connection string:
 
