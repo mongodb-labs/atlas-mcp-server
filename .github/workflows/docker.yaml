@@ -38,7 +38,7 @@ jobs:
           tags: ${{ vars.DOCKERHUB_IMAGE_REPOSITORY }}:latest, ${{ vars.DOCKERHUB_IMAGE_REPOSITORY }}:${{ steps.set-properties.outputs.VERSION }}, ${{ vars.DOCKERHUB_IMAGE_REPOSITORY }}:${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
           file: Dockerfile
           push: true
-          provenance: true
+          provenance: mode=max
           build-args: |
             VERSION=${{ steps.set-properties.outputs.VERSION }}
       - uses: mongodb-js/devtools-shared/actions/setup-bot-token@main
