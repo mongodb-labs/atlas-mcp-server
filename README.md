@@ -142,19 +142,26 @@ NOTE: atlas tools are only available when you set credentials on [configuration]
 - `insert-one` - Insert a single document into a MongoDB collection
 - `insert-many` - Insert multiple documents into a MongoDB collection
 - `create-index` - Create an index for a MongoDB collection
+- `create-search-index` - Create a search index for a MongoDB collection
+- `create-vector-index` - Create a vector search index for a MongoDB collection
 - `update-one` - Update a single document in a MongoDB collection
 - `update-many` - Update multiple documents in a MongoDB collection
+- `update-search-index` - Update a search index for a MongoDB collection
+- `update-vector-index` - Update a vector search index for a MongoDB collection
 - `rename-collection` - Rename a MongoDB collection
 - `delete-one` - Delete a single document from a MongoDB collection
 - `delete-many` - Delete multiple documents from a MongoDB collection
 - `drop-collection` - Remove a collection from a MongoDB database
 - `drop-database` - Remove a MongoDB database
+- `drop-search-index` - Remove a search or vector search index from a MongoDB collection
 - `list-databases` - List all databases for a MongoDB connection
 - `list-collections` - List all collections for a given database
 - `collection-indexes` - Describe the indexes for a collection
+- `collection-search-indexes` - Describe the search indexes for a collection
 - `collection-schema` - Describe the schema for a collection
 - `collection-storage-size` - Get the size of a collection in MB
 - `db-stats` - Return statistics about a MongoDB database
+- `run-pipeline` - Run an aggregation against JSON documents (Atlas account not required)
 
 ## Configuration
 
