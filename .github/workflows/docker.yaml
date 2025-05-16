@@ -3,7 +3,6 @@ on:
   schedule:
     - cron: "0 1 * * *" # Every day at 1:00 AM
   workflow_dispatch: # Run the action manually
-  pull_request: # TODO: remove before merging
 permissions:
   contents: read
   issues: write
