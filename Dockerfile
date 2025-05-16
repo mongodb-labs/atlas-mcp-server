@@ -1,5 +1,5 @@
 FROM node:22-alpine
-RUN addgroup -S mcp && adduser -S mcp -G mcp && chown -R mcp:mcp /usr/local/lib/node_modules
+RUN addgroup -S mcp && adduser -S mcp -G mcp
 RUN npm install -g mongodb-mcp-server@${VERSION}
 USER mcp
 WORKDIR /home/mcp
