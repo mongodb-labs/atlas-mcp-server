@@ -3,14 +3,13 @@ on:
   schedule:
     - cron: "0 1 * * *" # Every day at 1:00 AM
   workflow_dispatch: # Run the action manually
+  pull_request: # TODO: remove before merging
 permissions:
   contents: read
   issues: write
 jobs:
   push:
     runs-on: ubuntu-latest
-    env:
-      IMAGE_REPOSITORY: docker.io/mongodb/mongodb-mcp-server
     steps:
       - uses: GitHubSecurityLab/actions-permissions/monitor@v1
         with:
@@ -23,8 +22,8 @@ jobs:
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
         with:
           username: "${{ secrets.DOCKERHUB_USERNAME }}"
-          password: "${{ secrets.DOCKERHUB_SECRET }}"
-      - name: Set properties
+          password: "${{ secrets.DOCKERHUB_PASSWORD }}"
+      - name: Set date and version
         id: set-properties
         run: |
           DATE=$(date +'%Y-%m-%d')
@@ -36,7 +35,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.IMAGE_REPOSITORY }}:latest, ${{ env.IMAGE_REPOSITORY }}:${{ steps.set-properties.outputs.VERSION }}, ${{ env.IMAGE_REPOSITORY }}:${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
+          tags: ${{ vars.DOCKERHUB_IMAGE_REPOSITORY }}:latest, ${{ vars.DOCKERHUB_IMAGE_REPOSITORY }}:${{ steps.set-properties.outputs.VERSION }}, ${{ vars.DOCKERHUB_IMAGE_REPOSITORY }}:${{ steps.set-properties.outputs.VERSION }}-${{ steps.set-properties.outputs.DATE }}
           file: Dockerfile
           push: true
           build-args: |
