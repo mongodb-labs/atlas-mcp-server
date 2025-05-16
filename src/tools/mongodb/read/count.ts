@@ -4,16 +4,12 @@ import { ToolArgs, OperationType } from "../../tool.js";
 import { z } from "zod";
 
 export const CountArgs = {
-    filter: z
-        .record(z.string(), z.unknown())
-        .optional()
-        .describe(
-            "The query filter to count documents. Matches the syntax of the filter argument of db.collection.countDocuments()"
-        ),
     query: z
         .record(z.string(), z.unknown())
         .optional()
-        .describe("Alternative old name for filter. Will be used in db.collection.countDocuments()"),
+        .describe(
+            "The query filter to count documents. Matches the syntax of the filter argument of db.collection.count()"
+        ),
 };
 
 export class CountTool extends MongoDBToolBase {
@@ -26,16 +22,9 @@ export class CountTool extends MongoDBToolBase {
 
     protected operationType: OperationType = "read";
 
-    protected async execute({
-        database,
-        collection,
-        query,
-        filter,
-    }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
+    protected async execute({ database, collection, query }: ToolArgs<typeof this.argsShape>): Promise<CallToolResult> {
         const provider = await this.ensureConnected();
-        // use either filter or query, since we're using countDocuments, prefer filter
-        const queryFilter = filter || query;
-        const count = await provider.countDocuments(database, collection, queryFilter);
+        const count = await provider.count(database, collection, query);
 
         return {
             content: [
