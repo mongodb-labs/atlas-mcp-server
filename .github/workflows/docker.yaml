@@ -39,6 +39,7 @@ jobs:
           file: Dockerfile
           push: true
           provenance: mode=max
+          sbom: true
           build-args: |
             VERSION=${{ steps.set-properties.outputs.VERSION }}
       - uses: mongodb-js/devtools-shared/actions/setup-bot-token@main
