@@ -1,6 +1,5 @@
 FROM node:22-alpine
-RUN groupadd -g 1000 mcp && \
-    useradd -m -u 1000 -g mcp mcp
+RUN addgroup -S mcp && adduser -S mcp -G mcp
 USER mcp
 ARG VERSION=latest
 RUN npm install -g mongodb-mcp-server@${VERSION}
