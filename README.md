@@ -111,6 +111,28 @@ You can use environment variables in the config file or set them and run the ser
 - Connection String via environment variables in the MCP file [example](#connection-string-with-environment-variables)
 - Atlas API credentials via environment variables in the MCP file [example](#atlas-api-credentials-with-environment-variables)
 
+#### Option 5: HTTP/SSE Transport (Custom Port)
+
+You can run the MCP server using HTTP or SSE transport by specifying the `--transportType` and (optionally) `--port` arguments. The default port is `5700` if not specified.
+
+**Example (HTTP):**
+
+```shell
+npx -y mongodb-mcp-server --transportType=http --port=3000 --connectionString="mongodb://localhost:27017"
+```
+
+**Example (SSE):**
+
+```shell
+npx -y mongodb-mcp-server --transportType=sse --port=3000 --connectionString="mongodb://localhost:27017"
+```
+
+- `--transportType` can be `http` or `sse`
+- `--port` sets the port (default: 5700)
+- All other configuration options (like `--connectionString`, `--apiClientId`, etc.) are supported
+
+This allows you to expose the MCP server over HTTP/SSE for integration with clients that require a network endpoint.
+
 ## 🛠️ Supported Tools
 
 ### Tool List
