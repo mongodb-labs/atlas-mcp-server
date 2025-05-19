@@ -14,7 +14,8 @@ export const CountArgs = {
 
 export class CountTool extends MongoDBToolBase {
     protected name = "count";
-    protected description = "Gets the number of documents in a MongoDB collection using db.collection.count() and query as an optional filter parameter";
+    protected description =
+        "Gets the number of documents in a MongoDB collection using db.collection.count() and query as an optional filter parameter";
     protected argsShape = {
         ...DbOperationArgs,
         ...CountArgs,
