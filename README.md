@@ -1,3 +1,7 @@
+[![Install with npm in VS Code](https://img.shields.io/badge/VS_Code-Install_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=mongodb&inputs=%5B%7B%22id%22%3A%22connection_string%22%2C%22type%22%3A%22promptString%22%2C%22description%22%3A%22MongoDB%20connection%20string%22%2C%22default%22%3A%22mongodb%3A%2F%2Flocalhost%3A27017%22%7D%5D&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22mongodb-mcp-server%22%5D%2C%22env%22%3A%7B%22MDB_MCP_CONNECTION_STRING%22%3A%22%24%7Binput%3Aconnection_string%7D%22%7D%7D)
+[![npm downloads](https://img.shields.io/npm/dw/mongodb-mcp-server)](https://www.npmjs.com/package/mongodb-mcp-server)
+[![smithery badge](https://smithery.ai/badge/@mongodb-js/mongodb-mcp-server)](https://smithery.ai/server/@mongodb-js/mongodb-mcp-server)
+
 # MongoDB MCP Server
 
 A Model Context Protocol server for interacting with MongoDB Databases and MongoDB Atlas.
