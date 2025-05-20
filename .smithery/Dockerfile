@@ -1,4 +1,4 @@
-FROM node:23-bookworm-slim
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -8,4 +8,4 @@ RUN npm ci
 
 RUN npm run build
 
-CMD ["sh", "-c", "mongod --fork --logpath /var/log/mongodb.log --dbpath /data/db && node dist/index.js"]
+CMD ["node", "dist/index.js"]
