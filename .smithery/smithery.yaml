@@ -23,6 +23,7 @@ startCommand:
         type: boolean
         title: Read-only
         description: When set to true, only allows read and metadata operation types, disabling create/update/delete operations.
+        default: false
   exampleConfig:
     atlasClientId: YOUR_ATLAS_CLIENT_ID
     atlasClientSecret: YOUR_ATLAS_CLIENT_SECRET
