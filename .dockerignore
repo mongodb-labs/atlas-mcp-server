@@ -1,13 +1,11 @@
 dist
 node_modules
-.vscode/mcp.json
-.github/prompts/*
-
+.vscode
+.github
+.git
 # Environment variables
 .env
 
-# Sensitive
-state.json
-
-tests/tmp
+tests
 coverage
+scripts
