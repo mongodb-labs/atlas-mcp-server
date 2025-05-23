@@ -14,7 +14,6 @@ RUN npm ci && npm run build
 
 # ----- Production Stage -----
 FROM node:lts-alpine
-WORKDIR /app
 
 # Copy built artifacts
 COPY --from=builder /app/dist ./dist
