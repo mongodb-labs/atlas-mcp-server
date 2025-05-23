@@ -23,6 +23,11 @@ startCommand:
         type: boolean
         title: Read-only
         description: When set to true, only allows read and metadata operation types, disabling create/update/delete operations.
+  exampleConfig:
+    atlasClientId: YOUR_ATLAS_CLIENT_ID
+    atlasClientSecret: YOUR_ATLAS_CLIENT_SECRET
+    connectionString: mongodb+srv://USERNAME:PASSWORD@YOUR_CLUSTER.mongodb.net
+    readOnly: true
 
   commandFunction:
     # A function that produces the CLI command to start the MCP on stdio.
