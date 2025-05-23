@@ -34,23 +34,25 @@ startCommand:
     |-
     (config) => {
       const args = ['dist/index.js'];
-      if (config.atlasClientId) {
-        args.push('--apiClientId');
-        args.push(config.atlasClientId);
-      }
+      if (config) {
+        if (config.atlasClientId) {
+          args.push('--apiClientId');
+          args.push(config.atlasClientId);
+        }
 
-      if (config.atlasClientSecret) {
-        args.push('--apiClientSecret');
-        args.push(config.atlasClientSecret);
-      }
+        if (config.atlasClientSecret) {
+          args.push('--apiClientSecret');
+          args.push(config.atlasClientSecret);
+        }
 
-      if (config.readOnly) {
-        args.push('--readOnly');
-      }
+        if (config.readOnly) {
+          args.push('--readOnly');
+        }
 
-      if (config.connectionString) {
-        args.push('--connectionString');
-        args.push(config.connectionString);
+        if (config.connectionString) {
+          args.push('--connectionString');
+          args.push(config.connectionString);
+        }
       }
 
       return {
