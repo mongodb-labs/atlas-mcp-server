@@ -28,28 +28,28 @@ startCommand:
     # A function that produces the CLI command to start the MCP on stdio.
     |-
     (config) => {
-      const env = {};
+      const args = ['dist/index.js'];
       if (config.atlasClientId) {
-        env.MDB_MCP_API_CLIENT_ID = config.atlasClientId;
+        args.push('--apiClientId');
+        args.push(config.atlasClientId);
       }
 
       if (config.atlasClientSecret) {
-        env.MDB_MCP_API_CLIENT_SECRET = config.atlasClientSecret;
+        args.push('--apiClientSecret');
+        args.push(config.atlasClientSecret);
       }
 
       if (config.readOnly) {
-        env.MDB_MCP_READ_ONLY = true;
+        args.push('--readOnly');
       }
 
       if (config.connectionString) {
-        env.MDB_MCP_CONNECTION_STRING = config.connectionString;
+        args.push('--connectionString');
+        args.push(config.connectionString);
       }
 
       return {
-        "command": "node",
-        "args": [
-          "dist/index.js"
-        ],
-        env,
+        command: "node",
+        args
       };
     }
