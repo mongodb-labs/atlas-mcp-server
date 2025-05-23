@@ -5,9 +5,8 @@ import logger, { LogId } from "../logger.js";
 import { ApiClient } from "../common/atlas/apiClient.js";
 import { MACHINE_METADATA } from "./constants.js";
 import { EventCache } from "./eventCache.js";
-import { createHmac } from "crypto";
 import nodeMachineId from "node-machine-id";
-import { DeferredPromise } from "../helpers/deferred-promise.js";
+import { getDeviceId } from "@mongodb-js/device-id";
 
 type EventResult = {
     success: boolean;
@@ -19,7 +18,8 @@ export const DEVICE_ID_TIMEOUT = 3000;
 export class Telemetry {
     private isBufferingEvents: boolean = true;
     /** Resolves when the device ID is retrieved or timeout occurs */
-    public deviceIdPromise: DeferredPromise<string> | undefined;
+    public deviceIdPromise: Promise<string> | undefined;
+    private deviceIdAbortController = new AbortController();
     private eventCache: EventCache;
     private getRawMachineId: () => Promise<string>;
 
@@ -39,7 +39,6 @@ export class Telemetry {
         {
             commonProperties = { ...MACHINE_METADATA },
             eventCache = EventCache.getInstance(),
-
             getRawMachineId = () => nodeMachineId.machineId(true),
         }: {
             eventCache?: EventCache;
@@ -57,48 +56,33 @@ export class Telemetry {
         if (!this.isTelemetryEnabled()) {
             return;
         }
-        this.deviceIdPromise = DeferredPromise.fromPromise(this.getDeviceId(), {
-            timeout: DEVICE_ID_TIMEOUT,
-            onTimeout: (resolve) => {
-                resolve("unknown");
-                logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
+        this.deviceIdPromise = getDeviceId({
+            getMachineId: () => this.getRawMachineId(),
+            onError: (reason, error) => {
+                switch (reason) {
+                    case "resolutionError":
+                        logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
+                        break;
+                    case "timeout":
+                        logger.debug(LogId.telemetryDeviceIdTimeout, "telemetry", "Device ID retrieval timed out");
+                        break;
+                    case "abort":
+                        // No need to log in the case of aborts
+                        break;
+                }
             },
+            abortSignal: this.deviceIdAbortController.signal,
         });
+
         this.commonProperties.device_id = await this.deviceIdPromise;
 
         this.isBufferingEvents = false;
     }
 
     public async close(): Promise<void> {
-        this.deviceIdPromise?.resolve("unknown");
+        this.deviceIdAbortController.abort();
         this.isBufferingEvents = false;
         await this.emitEvents(this.eventCache.getEvents());
-    }
-
-    /**
-     * @returns A hashed, unique identifier for the running device or `"unknown"` if not known.
-     */
-    private async getDeviceId(): Promise<string> {
-        try {
-            if (this.commonProperties.device_id) {
-                return this.commonProperties.device_id;
-            }
-
-            const originalId: string = await this.getRawMachineId();
-
-            // Create a hashed format from the all uppercase version of the machine ID
-            // to match it exactly with the denisbrodbeck/machineid library that Atlas CLI uses.
-            const hmac = createHmac("sha256", originalId.toUpperCase());
-
-            /** This matches the message used to create the hashes in Atlas CLI */
-            const DEVICE_ID_HASH_MESSAGE = "atlascli";
-
-            hmac.update(DEVICE_ID_HASH_MESSAGE);
-            return hmac.digest("hex");
-        } catch (error) {
-            logger.debug(LogId.telemetryDeviceIdFailure, "telemetry", String(error));
-            return "unknown";
-        }
     }
 
     /**

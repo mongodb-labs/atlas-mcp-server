@@ -7,7 +7,6 @@ export class ListDatabasesTool extends MongoDBToolBase {
     protected name = "list-databases";
     protected description = "List all databases for a MongoDB connection";
     protected argsShape = {};
-
     protected operationType: OperationType = "metadata";
 
     protected async execute(): Promise<CallToolResult> {

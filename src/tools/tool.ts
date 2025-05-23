@@ -1,6 +1,6 @@
 import { z, type ZodRawShape, type ZodNever, AnyZodObject } from "zod";
 import type { McpServer, RegisteredTool, ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { CallToolResult, ToolAnnotations } from "@modelcontextprotocol/sdk/types.js";
 import { Session } from "../session.js";
 import logger, { LogId } from "../logger.js";
 import { Telemetry } from "../telemetry/telemetry.js";
@@ -26,6 +26,34 @@ export abstract class ToolBase {
     protected abstract description: string;
 
     protected abstract argsShape: ZodRawShape;
+
+    protected get annotations(): ToolAnnotations {
+        const annotations: ToolAnnotations = {
+            title: this.name,
+            description: this.description,
+        };
+
+        switch (this.operationType) {
+            case "read":
+            case "metadata":
+                annotations.readOnlyHint = true;
+                annotations.destructiveHint = false;
+                break;
+            case "delete":
+                annotations.readOnlyHint = false;
+                annotations.destructiveHint = true;
+                break;
+            case "create":
+            case "update":
+                annotations.destructiveHint = false;
+                annotations.readOnlyHint = false;
+                break;
+            default:
+                break;
+        }
+
+        return annotations;
+    }
 
     protected abstract execute(...args: Parameters<ToolCallback<typeof this.argsShape>>): Promise<CallToolResult>;
 
@@ -56,7 +84,7 @@ export abstract class ToolBase {
             }
         };
 
-        server.tool(this.name, this.description, this.argsShape, callback);
+        server.tool(this.name, this.description, this.argsShape, this.annotations, callback);
 
         // This is very similar to RegisteredTool.update, but without the bugs around the name.
         // In the upstream update method, the name is captured in the closure and not updated when
@@ -65,14 +93,17 @@ export abstract class ToolBase {
         this.update = (updates: { name?: string; description?: string; inputSchema?: AnyZodObject }) => {
             const tools = server["_registeredTools"] as { [toolName: string]: RegisteredTool };
             const existingTool = tools[this.name];
+            existingTool.annotations = this.annotations;
 
             if (updates.name && updates.name !== this.name) {
+                existingTool.annotations.title = updates.name;
                 delete tools[this.name];
                 this.name = updates.name;
                 tools[this.name] = existingTool;
             }
 
             if (updates.description) {
+                existingTool.annotations.description = updates.description;
                 existingTool.description = updates.description;
                 this.description = updates.description;
             }

@@ -22,7 +22,7 @@ A Model Context Protocol server for interacting with MongoDB Databases and Mongo
 
 ## Prerequisites
 
-- Node.js (v20 or later)
+- Node.js (v20.10.0 or later)
 
 ```shell
 node -v
@@ -58,12 +58,14 @@ You can pass your connection string via args, make sure to use a valid username 
         "-y",
         "mongodb-mcp-server",
         "--connectionString",
-        "mongodb+srv://username:password@cluster.mongodb.net/myDatabase"
+        "mongodb://localhost:27017/myDatabase"
       ]
     }
   }
 }
 ```
+
+NOTE: The connection string can be configured to connect to any MongoDB cluster, whether it's a local instance or an Atlas cluster.
 
 #### Option 2: Atlas API credentials args
 
@@ -87,7 +89,7 @@ Use your Atlas API Service Accounts credentials. Must follow all the steps in [A
 }
 ```
 
-### Option 3: Standalone Service using command arguments
+#### Option 3: Standalone Service using command arguments
 
 Start Server using npx command:
 
@@ -109,6 +111,95 @@ You can use environment variables in the config file or set them and run the ser
 - Connection String via environment variables in the MCP file [example](#connection-string-with-environment-variables)
 - Atlas API credentials via environment variables in the MCP file [example](#atlas-api-credentials-with-environment-variables)
 
+#### Option 5: Using Docker
+
+You can run the MongoDB MCP Server in a Docker container, which provides isolation and doesn't require a local Node.js installation.
+
+#### Run with Environment Variables
+
+You may provide either a MongoDB connection string OR Atlas API credentials:
+
+##### Option A: No configuration
+
+```shell
+docker run --rm -i \
+  mongodb/mongodb-mcp-server:latest
+```
+
+##### Option B: With MongoDB connection string
+
+```shell
+docker run --rm -i \
+  -e MDB_MCP_CONNECTION_STRING="mongodb+srv://username:password@cluster.mongodb.net/myDatabase" \
+  mongodb/mongodb-mcp-server:latest
+```
+
+##### Option C: With Atlas API credentials
+
+```shell
+docker run --rm -i \
+  -e MDB_MCP_API_CLIENT_ID="your-atlas-service-accounts-client-id" \
+  -e MDB_MCP_API_CLIENT_SECRET="your-atlas-service-accounts-client-secret" \
+  mongodb/mongodb-mcp-server:latest
+```
+
+##### Docker in MCP Configuration File
+
+Without options:
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "docker",
+      "args": ["run", "--rm", "-i", "mongodb/mongodb-mcp-server:latest"]
+    }
+  }
+}
+```
+
+With connection string:
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        "MDB_MCP_CONNECTION_STRING=mongodb+srv://username:password@cluster.mongodb.net/myDatabase",
+        "mongodb/mongodb-mcp-server:latest"
+      ]
+    }
+  }
+}
+```
+
+With Atlas API credentials:
+
+```json
+{
+  "mcpServers": {
+    "MongoDB": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        "MDB_MCP_API_CLIENT_ID=your-atlas-service-accounts-client-id",
+        "-e",
+        "MDB_MCP_API_CLIENT_SECRET=your-atlas-service-accounts-client-secret",
+        "mongodb/mongodb-mcp-server:latest"
+      ]
+    }
+  }
+}
+```
+
 ## 🛠️ Supported Tools
 
 ### Tool List
@@ -125,7 +216,8 @@ You can use environment variables in the config file or set them and run the ser
 - `atlas-inspect-access-list` - Inspect IP/CIDR ranges with access to MongoDB Atlas clusters
 - `atlas-create-access-list` - Configure IP/CIDR access list for MongoDB Atlas clusters
 - `atlas-list-db-users` - List MongoDB Atlas database users
-- `atlas-create-db-user` - List MongoDB Atlas database users
+- `atlas-create-db-user` - Creates a MongoDB Atlas database user
+- `atlas-list-alerts` - List MongoDB Atlas Alerts for a Project
 
 NOTE: atlas tools are only available when you set credentials on [configuration](#configuration) section.
 

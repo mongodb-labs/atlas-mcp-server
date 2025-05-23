@@ -1,7 +1,7 @@
 {
   "name": "mongodb-mcp-server",
   "description": "MongoDB Model Context Protocol Server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "author": "MongoDB <info@mongodb.com>",
   "homepage": "https://github.com/mongodb-js/mongodb-mcp-server",
@@ -60,7 +60,8 @@
     "yaml": "^2.7.1"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@modelcontextprotocol/sdk": "^1.11.2",
+    "@mongodb-js/device-id": "^0.2.1",
     "@mongodb-js/devtools-connect": "^3.7.2",
     "@mongosh/service-provider-node-driver": "^3.6.0",
     "bson": "^6.10.3",
@@ -77,6 +78,6 @@
     "zod": "^3.24.2"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.10.0"
   }
 }
